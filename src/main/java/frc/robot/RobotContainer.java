@@ -12,10 +12,6 @@ public class RobotContainer {
     private final OI oi = OI.getInstance();
 
     private RobotContainer() {
-        setupAuto();
-        configureControls();
-        neutralizeSubsystems();
-
         //real or simulated drivetrain
         if (Robot.isReal()) {
             this.drive = new SwerveDriveReal(); // Real implementation
@@ -23,6 +19,10 @@ public class RobotContainer {
         else {
             this.drive = new MapleSimSwerve(); // Simulation implementation
         }
+
+        setupAuto();
+        configureControls();
+        neutralizeSubsystems();
     }
 
     public static RobotContainer getInstance() {

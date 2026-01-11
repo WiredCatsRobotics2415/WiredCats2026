@@ -17,6 +17,7 @@ public class MapleSimSwerve implements SwerveDrive {
     private final Field2d field2d;
 
     public MapleSimSwerve() {
+        System.out.println("RUNNING MAPLE SIM");
         // For your own code, please configure your drivetrain properly according to the documentation
         final DriveTrainSimulationConfig config = DriveTrainSimulationConfig.Default();
 
