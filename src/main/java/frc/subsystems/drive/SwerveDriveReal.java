@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.utils.LimelightHelpers;
 
-public class SwerveDrive extends SubsystemBase {
+public class SwerveDriveReal implements SwerveDrive {
   public static final double kMaxSpeed = 3.0;
   public static final double kMaxAngularSpeed = Math.PI;
 
@@ -46,7 +46,7 @@ public class SwerveDrive extends SubsystemBase {
           VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30)));
 
-  public SwerveDrive() {
+  public SwerveDriveReal() {
     m_gyro.reset();
   }
 

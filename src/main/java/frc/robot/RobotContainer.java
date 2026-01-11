@@ -2,7 +2,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.subsystems.drive.MapleSimSwerve;
 import frc.subsystems.drive.SwerveDrive;
+import frc.subsystems.drive.SwerveDriveReal;
 
 public class RobotContainer {
     private static RobotContainer instance;
@@ -16,10 +18,10 @@ public class RobotContainer {
 
         //real or simulated drivetrain
         if (Robot.isReal()) {
-        this.drive = new TalonSwerve(); // Real implementation
+            this.drive = new SwerveDriveReal(); // Real implementation
             }
         else {
-            his.drive = new MapleSimSwerve(); // Simulation implementation
+            this.drive = new MapleSimSwerve(); // Simulation implementation
         }
     }
 
