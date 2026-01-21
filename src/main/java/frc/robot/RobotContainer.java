@@ -64,4 +64,9 @@ public class RobotContainer {
     public void neutralizeSubsystems() {
         //neutralize subsystems
     }
+
+    // so vision can get robot pose
+    public SwerveDrive getDrive() {
+        return drive; 
+    }
 }

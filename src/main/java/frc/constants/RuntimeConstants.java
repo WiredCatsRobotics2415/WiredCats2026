@@ -2,6 +2,6 @@ package frc.constants;
 
 public class RuntimeConstants {
 
-    public static final boolean TuningMode = false;
+    public static final boolean TuningMode = true;
     
 }

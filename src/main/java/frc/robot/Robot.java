@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.constants.RuntimeConstants;
+import frc.utils.LimelightHelpers; 
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,8 @@ public class Robot extends LoggedRobot {
         // DO NOT REMOVE THIS LINE
         // constructs the robot container, which constructs all subsystems
         RobotContainer.getInstance();
+
+        setLimelightIMUMode(1); 
     }
 
     @Override
@@ -57,22 +60,38 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
+        setLimelightIMUMode(2); 
+
         RobotContainer.getInstance().teleopEnable();
     }
 
     @Override
     public void autonomousInit() {
+        setLimelightIMUMode(2); 
         if (Robot.isSimulation()) SimulatedArena.getInstance().placeGamePiecesOnField();
         RobotContainer.getInstance().getAutonomousCommand().schedule();
     }
 
     @Override
     public void disabledInit() {
-        //pass
+        setLimelightIMUMode(1); 
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        setLimelightIMUMode(1);
     }
 
     @Override
     public void disabledExit() {
-        //pass
+        // pass
+    }
+
+    private void setLimelightIMUMode(int mode) {
+        if (Robot.isReal()) {
+            LimelightHelpers.setLimelightNTDouble("limelight", "imumode_set", mode);
+            LimelightHelpers.setLimelightNTDouble("limelight-2", "imumode_set", mode);
+            LimelightHelpers.setLimelightNTDouble("limelight-3", "imumode_set", mode);
+        }
     }
 }
