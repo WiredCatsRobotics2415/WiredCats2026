@@ -14,7 +14,7 @@ public interface SwerveDrive extends Subsystem {
     /** Called every 20ms by the scheduler */
     void periodic();
 
-    /** Command-friendly drive method (expects m/s and rad/s). */
+    /** Command-friendly drive method (expects m/s for x and y speeds and rad/s). */
     void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative);
 
     void stop();

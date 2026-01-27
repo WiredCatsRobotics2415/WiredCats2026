@@ -9,8 +9,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.utils.LimelightHelpers;
+import frc.subsystems.vision.Vision;
+import frc.utils.LimelightHelpers.PoseEstimate;
 
 public class SwerveDriveReal implements SwerveDrive {
   public static final double kMaxSpeed = 3.0;
@@ -27,6 +27,7 @@ public class SwerveDriveReal implements SwerveDrive {
   private final SwerveModule m_backRight  = new SwerveModule(7, 8, 12, 13, 14, 15);
 
   private final AnalogGyro m_gyro = new AnalogGyro(0);
+  private final Vision m_vision;
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
@@ -46,7 +47,8 @@ public class SwerveDriveReal implements SwerveDrive {
           VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30)));
 
-  public SwerveDriveReal() {
+  public SwerveDriveReal(Vision vision) {
+    this.m_vision = vision;
     m_gyro.reset();
   }
 
@@ -99,7 +101,7 @@ public class SwerveDriveReal implements SwerveDrive {
   }
 
   private void updateOdometryAndVision() {
-    // Odometry update
+    // 1. Update odometry with wheel encoders + gyro
     m_poseEstimator.update(
         m_gyro.getRotation2d(),
         new SwerveModulePosition[] {
@@ -109,33 +111,29 @@ public class SwerveDriveReal implements SwerveDrive {
           m_backRight.getPosition()
         });
 
-    // --- Your Limelight fusion, moved here ---
-    LimelightHelpers.SetRobotOrientation(
-        "limelight", getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-    var ll1 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    // 2. Send robot orientation to vision subsystem (required for MegaTag2)
+    m_vision.sendOrientation(getPose().getRotation().getDegrees(), m_gyro.getRate());
 
-    LimelightHelpers.SetRobotOrientation(
-        "limelight-2", getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-    var ll2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-2");
+    // 3. Get pose estimates from all 3 Limelights
+    PoseEstimate[] visionEstimates = m_vision.getPoseEstimates();
 
-    LimelightHelpers.SetRobotOrientation(
-        "limelight-3", getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-    var ll3 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-3");
+    // 4. Check if robot is spinning too fast (reject vision if unstable)
+    boolean rejectUpdate = Math.abs(m_gyro.getRate()) > 360; // deg/sec
 
-    boolean rejectUpdate = Math.abs(m_gyro.getRate()) > 360;
-
+    // 5. Fuse vision measurements into pose estimator
     if (!rejectUpdate) {
-      if (ll1.tagCount > 0) {
-        m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        m_poseEstimator.addVisionMeasurement(ll1.pose, ll1.timestampSeconds);
-      }
-      if (ll2.tagCount > 0) {
-        m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        m_poseEstimator.addVisionMeasurement(ll2.pose, ll2.timestampSeconds);
-      }
-      if (ll3.tagCount > 0) {
-        m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        m_poseEstimator.addVisionMeasurement(ll3.pose, ll3.timestampSeconds);
+      for (int i = 0; i < visionEstimates.length; i++) {
+        PoseEstimate estimate = visionEstimates[i];
+
+        // Only add measurement if we detected at least one AprilTag
+        if (estimate.tagCount > 0) {
+          // Set standard deviations (trust vision for position, ignore rotation)
+          // X/Y: 0.7m uncertainty, Rotation: effectively infinite (trust gyro instead)
+          m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
+
+          // Add the vision measurement with its timestamp
+          m_poseEstimator.addVisionMeasurement(estimate.pose, estimate.timestampSeconds);
+        }
       }
     }
   }
