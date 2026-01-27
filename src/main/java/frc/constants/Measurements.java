@@ -5,6 +5,8 @@ import edu.wpi.first.math.util.Units;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.units.measure.Distance;
@@ -39,4 +41,6 @@ public class Measurements {
 
         public static final double TwoPlusMaxObjectDetectionDistance = 6 * 12;
     }
+
+    public static final Pose2d HubLocation = new Pose2d(5.0, 10.0, Rotation2d.fromDegrees(45.0)); 
 }
