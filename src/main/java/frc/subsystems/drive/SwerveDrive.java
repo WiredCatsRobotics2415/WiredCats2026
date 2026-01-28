@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
  * the movement, managing swerve drive modules, tracking the robot's position and orientation, and other related tasks.
  */
 public interface SwerveDrive extends Subsystem {
-    double kMaxAngularSpeed = 0;
-    double kMaxSpeed = 0;
+    double kMaxAngularSpeed = 3;
+    double kMaxSpeed = 3;
 
     /** Called every 20ms by the scheduler */
     void periodic();
@@ -22,4 +22,14 @@ public interface SwerveDrive extends Subsystem {
     Pose2d getPose();
 
     void resetPose(Pose2d pose);
+
+    /**
+     * Returns the ground truth pose for simulation purposes.
+     * For real robot implementations, this returns the same as getPose() since ground truth is not available.
+     * For simulation implementations, this should return the actual simulated pose without any estimation.
+     * @return The ground truth pose (simulation) or fused pose (real robot)
+     */
+    default Pose2d getGroundTruthPose() {
+        return getPose();
+    }
 }

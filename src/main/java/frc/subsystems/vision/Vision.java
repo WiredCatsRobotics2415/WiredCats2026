@@ -182,6 +182,12 @@ public class Vision extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
-        // Logger.processInputs("Vision", inputs);
+        for (int i = 0; i<3; i++) {
+            String name = "nearest tag:" + i;
+            int input = getClosestApriltagTo(i);
+            if (input!=-1) {
+                Logger.recordOutput(name, input);
+            }
+        }
     }
 }

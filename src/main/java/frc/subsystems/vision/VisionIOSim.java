@@ -25,6 +25,7 @@ import frc.subsystems.drive.SwerveDrive;
 import frc.utils.LimelightHelpers.PoseEstimate;
 
 import frc.robot.RobotContainer;
+import org.littletonrobotics.junction.Logger;
 
 public class VisionIOSim implements VisionIO {
     private VisionSystemSim visionSystemSim; 
@@ -77,8 +78,12 @@ public class VisionIOSim implements VisionIO {
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        Pose2d currentRobotPose = RobotContainer.getInstance().getDrive().getPose();
-        visionSystemSim.update(currentRobotPose); 
+        // Use ground truth pose for simulation (not fused pose with vision) to avoid feedback loop
+        Pose2d currentRobotPose = RobotContainer.getInstance().getDrive().getGroundTruthPose();
+        visionSystemSim.update(currentRobotPose);
+
+        // Log the pose being used for vision simulation
+        Logger.recordOutput("/Vision/SimulatorInputPose", currentRobotPose); 
 
         // creates new pose metadata variables storing arrays w/ one element per limelight
         inputs.poseEstimates = new Pose2d[poseEstimationCameras.length];

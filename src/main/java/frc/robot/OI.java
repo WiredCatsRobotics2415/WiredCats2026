@@ -52,6 +52,8 @@ public class OI {
         double x = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickX), Controls.Deadband);
         double y = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickY), Controls.Deadband);
         double newX, newY = 0.0d;
+        // System.out.println(x);
+        // System.out.println(y);
         if (Controls.UseCurve) {
             double angle = Math.atan2(y, x);
             double magInitial = Algebra.euclideanDistance(x, y);

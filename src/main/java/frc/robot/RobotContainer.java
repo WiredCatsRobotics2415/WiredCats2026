@@ -1,6 +1,9 @@
 package frc.robot;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.subsystems.drive.MapleSimSwerve;
@@ -23,7 +26,7 @@ public class RobotContainer {
             this.drive = new SwerveDriveReal(vision); // Real implementation with vision
             }
         else {
-            this.drive = new MapleSimSwerve(); // Simulation implementation
+            this.drive = new MapleSimSwerve(vision); // Simulation implementation with vision
         }
 
         setupAuto();
@@ -44,6 +47,10 @@ public class RobotContainer {
 
     public void teleopEnable() {
         neutralizeSubsystems();
+    }
+
+    public void simulationInit() {
+        drive.resetPose(new Pose2d(2.0, 4.0, new Rotation2d()));
     }
 
     private void configureControls() {

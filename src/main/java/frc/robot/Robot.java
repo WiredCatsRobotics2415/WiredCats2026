@@ -36,8 +36,21 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
+    public void robotInit() {
+    if (Robot.isSimulation()) {
+        Logger.addDataReceiver(new NT4Publisher());
+    } else {
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.findReplayLog()));
+        Logger.addDataReceiver(new NT4Publisher());
+    }
+
+    Logger.start();
+}
+
+    @Override
     public void simulationInit() {
         SimulatedArena.getInstance().placeGamePiecesOnField();
+        RobotContainer.getInstance().simulationInit();
     }
 
     @Override
@@ -67,6 +80,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+
         setLimelightIMUMode(2); 
         if (Robot.isSimulation()) SimulatedArena.getInstance().placeGamePiecesOnField();
         RobotContainer.getInstance().getAutonomousCommand().schedule();
