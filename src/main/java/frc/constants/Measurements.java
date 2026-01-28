@@ -43,4 +43,7 @@ public class Measurements {
     }
 
     public static final Pose2d HubLocation = new Pose2d(5.0, 10.0, Rotation2d.fromDegrees(45.0)); 
+
+    public static final double ShooterRPMOne = 20; 
+    public static final double ShooterRPMTwo = 10; 
 }

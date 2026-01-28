@@ -72,9 +72,9 @@ public class Shooter {
         double speed; 
 
         if (filename.equals("speed_1_angles.csv")) {
-            speed = 20; // idk what our unit is
+            speed = Measurements.ShooterRPMOne; 
         } else {
-            speed = 10; 
+            speed = Measurements.ShooterRPMTwo; 
         }
 
         Logger.recordOutput("Shooter Speed", speed); 
