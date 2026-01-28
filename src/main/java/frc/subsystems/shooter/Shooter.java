@@ -1,6 +1,6 @@
 package frc.subsystems.shooter;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Pose2d;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,16 +21,16 @@ public class Shooter {
     
     // get which speed file to use for angle regression
     private String getCSVForPose(Pose3d robotPose) {
-        double distanceFromHub = robotPose.toPose2d().getTranslation().getDistance(Measurements.HubLocation.getTranslation());
+        double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
         
-        if (distanceFromHub <= 2) {
+        if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
             return "speed_1_angles.csv"; // closer to hub
         } else {
             return "speed_2_angles.csv"; // further from hub
         }
     }
 
-    public double getAngleForDistance(Pose3d robotPose) {
+    public double getAngleForDistance(Pose2d robotPose) {
         String filename = getCSVForPose(robotPose); 
         String filepath = "src/main/java/frc/constants/" + filename;
 
@@ -63,7 +63,7 @@ public class Shooter {
             calculateAngleForDistance.addData(distances.get(i), angles.get(i));
         }
 
-        double robotCurrentDistanceFromHub = robotPose.toPose2d().getTranslation().getDistance(Measurements.HubLocation.getTranslation()); 
+        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); 
 
         double angle = calculateAngleForDistance.predict(robotCurrentDistanceFromHub);
         Logger.recordOutput("Calculated Angle", angle); 

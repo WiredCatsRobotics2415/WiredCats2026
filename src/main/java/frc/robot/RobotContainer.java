@@ -5,10 +5,13 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.subsystems.drive.MapleSimSwerve;
 import frc.subsystems.drive.SwerveDrive;
 import frc.subsystems.drive.SwerveDriveReal;
+import frc.subsystems.shooter.Shooter;
 import frc.subsystems.vision.Vision;
 
 public class RobotContainer {
@@ -56,15 +59,17 @@ public class RobotContainer {
     private void configureControls() {
         //whenever drive is not being used, it will go back to this default
         drive.setDefaultCommand(
-        new RunCommand(() -> {
-          double x = oi.getXY()[0] * SwerveDrive.kMaxSpeed;
-          double y = oi.getXY()[1] * SwerveDrive.kMaxSpeed;
-          double rot = oi.getRotation() * SwerveDrive.kMaxAngularSpeed;
+            new RunCommand(() -> {
+            double x = oi.getXY()[0] * SwerveDrive.kMaxSpeed;
+            double y = oi.getXY()[1] * SwerveDrive.kMaxSpeed;
+            double rot = oi.getRotation() * SwerveDrive.kMaxAngularSpeed;
 
-          drive.drive(x, y, rot, true); // fieldRelative true
-        }, drive)
-    );
-    }
+            drive.drive(x, y, rot, true); // fieldRelative true
+            }, drive)
+        );
+        
+        oi.binds.get(OI.Bind.getShooterAngle).onTrue(new InstantCommand(() -> Shooter.getInstance().getAngleForDistance(this.getGeneralPose()))); 
+    }; 
 
     public void periodic() {
     }

@@ -13,12 +13,14 @@ import frc.utils.math.Trig;
 import java.util.HashMap;
 import java.util.Map;
 
+import frc.subsystems.shooter.Shooter; 
+
 public class OI {
     CommandXboxController controller;
     CommandJoystick numpad;
 
     public enum Bind {
-        
+        getShooterAngle
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -35,6 +37,8 @@ public class OI {
     private OI() {
         controller = new CommandXboxController(0);
         numpad = new CommandJoystick(1);
+
+        binds.put(Bind.getShooterAngle, controller.button(GulikitButtons.CalculateShooterAngleButton)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR
