@@ -88,7 +88,7 @@ public class Vision extends SubsystemBase {
 
         if (numCamerasUsed == 0) return null;
         pe.pose = new Pose2d(xSum / numCamerasUsed, ySum / numCamerasUsed, Rotation2d.kZero);
-        // choosing latest pose increases trust
+        // choosing latest pose makes more reliable
         pe.timestampSeconds = latestTimestamp;
         pe.avgTagDist = smallestTagDist;
 
