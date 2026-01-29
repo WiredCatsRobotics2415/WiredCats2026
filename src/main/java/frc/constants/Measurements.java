@@ -99,8 +99,10 @@ public class Measurements {
         public static final double TwoPlusMaxObjectDetectionDistance = 6 * 12;
     }
 
-    public static final Pose2d HubLocation = new Pose2d(5.0, 10.0, Rotation2d.fromDegrees(45.0)); 
+    public static final Pose2d HubLocation = new Pose2d(181.56 / 39.3701, 158.84 / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
 
     public static final double ShooterRPMOne = 20; 
     public static final double ShooterRPMTwo = 10; 
+
+    public static final double ShooterHubRegionOne = 8;
 }

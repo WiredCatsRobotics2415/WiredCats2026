@@ -32,6 +32,8 @@ public class Controls {
         public static final int RightJoystickY = XboxController.Axis.kRightY.value;
         public static final int LeftTrigger = XboxController.Axis.kLeftTrigger.value;
         public static final int RightTrigger = XboxController.Axis.kRightTrigger.value;
+
+        public static final int CalculateShooterAngleButton = 11; 
     }
 
     public class NumpadButtons {
