@@ -44,7 +44,6 @@ public class Subsystems {
         public static final int FLYWHEEL_1_ID; //TODO: Placeholder ID values, change when systems connects them
         public static final int FLYWHEEL_2_ID;  //Placeholder
         public static final int INTAKE_MOTOR_ID; //Placeholder
-        public static final float INTAKE_SPEED; //Placeholder, Intake Speed is currently in RPS pls let me (alex) know 
-                                                //if want me to change
+        public static final float INTAKE_SPEED; //Placeholder, Intake Speed is currently in RPS may want to change later
     }
 }
