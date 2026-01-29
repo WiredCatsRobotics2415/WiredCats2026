@@ -20,6 +20,9 @@ public class RobotContainer {
         setupAuto();
         configureControls();
         neutralizeSubsystems();
+
+        // Register vision subsystem with CommandScheduler so its periodic() method runs
+        edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(vision);
     }
 
     public static RobotContainer getInstance() {

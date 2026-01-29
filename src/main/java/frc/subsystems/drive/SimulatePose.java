@@ -1,5 +1,6 @@
 package frc.subsystems.drive;
 
+import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.subsystems.vision.Vision;
@@ -44,6 +45,11 @@ public class SimulatePose {
             for (int i = 0; i < visionEstimates.length; i++) {
                 PoseEstimate estimate = visionEstimates[i];
 
+                // DEBUG: Log what we're getting from vision
+                Logger.recordOutput("Drive/VisionPose" + i, estimate.pose);
+                Logger.recordOutput("Drive/VisionTagCount" + i, estimate.tagCount);
+                Logger.recordOutput("Drive/VisionTimestamp" + i, estimate.timestampSeconds);
+
                 // Only add measurement if we detected at least one AprilTag
                 if (estimate.tagCount > 0) {
                     // Set standard deviations based on distance and tag count
@@ -57,15 +63,20 @@ public class SimulatePose {
                     }
 
                     // Add the vision measurement to Phoenix 6's pose estimator
+                    // IMPORTANT: Phoenix 6 requires timestamps converted from FPGA time
+                    double ctreTimestamp = Utils.fpgaToCurrentTime(estimate.timestampSeconds);
                     drivetrain.addVisionMeasurement(
                         estimate.pose,
-                        estimate.timestampSeconds,
+                        ctreTimestamp,
                         VecBuilder.fill(xyStdDev, xyStdDev, rotStdDev)
                     );
 
-                    // Log the vision measurement
-                    Logger.recordOutput("Drive/VisionPose" + i, estimate.pose);
-                    Logger.recordOutput("Drive/VisionTagCount" + i, estimate.tagCount);
+                    Logger.recordOutput("Drive/VisionTimestampConverted" + i, ctreTimestamp);
+
+                    // Log that we actually added this measurement
+                    Logger.recordOutput("Drive/VisionMeasurementAdded" + i, true);
+                } else {
+                    Logger.recordOutput("Drive/VisionMeasurementAdded" + i, false);
                 }
             }
         }
