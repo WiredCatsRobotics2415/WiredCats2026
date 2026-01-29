@@ -41,6 +41,7 @@ public class Subsystems {
         
         public static final double ThreeGDiagonalFOV = 63.3; // degrees, for sim
 
+        //Shooter Subsystem Constants
         public static final int FLYWHEEL_1_ID; //TODO: Placeholder ID values, change when systems connects them
         public static final int FLYWHEEL_2_ID;  //Placeholder
         public static final int INTAKE_MOTOR_ID; //Placeholder
