@@ -29,9 +29,14 @@
           "decayRate": 0.0,
           "incKey": 82,
           "keyRate": 0.009999999776482582
+        },
+        {},
+        {
+          "decKey": 262,
+          "incKey": 263
         }
       ],
-      "axisCount": 3,
+      "axisCount": 5,
       "buttonCount": 11,
       "buttonKeys": [
         -1,
@@ -83,10 +88,7 @@
     },
     {
       "axisConfig": [
-        {
-          "decKey": 263,
-          "incKey": 262
-        },
+        {},
         {
           "decKey": 265,
           "incKey": 264
