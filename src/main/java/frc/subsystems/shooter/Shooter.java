@@ -20,7 +20,7 @@ public class Shooter {
     }
     
     // get which speed file to use for angle regression
-    private String getCSVForPose(Pose3d robotPose) {
+    private String getCSVForPose(Pose2d robotPose) {
         double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
         
         if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
