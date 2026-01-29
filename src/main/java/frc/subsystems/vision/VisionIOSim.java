@@ -21,7 +21,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.constants.Measurements;
 import frc.constants.Measurements.RobotMeasurements;
 import frc.constants.Measurements.LimelightSpecs;
-import frc.subsystems.drive.SwerveDrive;
+import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.utils.LimelightHelpers.PoseEstimate;
 
 import frc.robot.RobotContainer;
@@ -78,8 +78,7 @@ public class VisionIOSim implements VisionIO {
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        // Use ground truth pose for simulation (not fused pose with vision) to avoid feedback loop
-        Pose2d currentRobotPose = RobotContainer.getInstance().getDrive().getGroundTruthPose();
+        Pose2d currentRobotPose = RobotContainer.getInstance().getDrive().getPose();
         visionSystemSim.update(currentRobotPose);
 
         // Log the pose being used for vision simulation

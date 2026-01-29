@@ -14,6 +14,12 @@ import edu.wpi.first.units.measure.*;
 import frc.utils.tuning.TuneableNumber;
 
 public class Subsystems {
+    public static class DriveConstants {
+
+        public static final double HeadingKA = 0;
+
+    }
+
     public static class VisionConstants {
         public static final String[] PoseEstimationLLNames = {
             "limelight-front-left", // or whatever your names are
