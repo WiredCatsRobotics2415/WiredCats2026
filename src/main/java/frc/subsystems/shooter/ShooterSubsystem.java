@@ -37,7 +37,7 @@ public class ShooterSubsystem {
 
   public void startShooting() // Starts Intake
   {
-    IntakeMotor.setsetControl(new VelocityDutyCycle(INTAKE_SPEED)); // Currently working on RPS output, can change to
+    IntakeMotor.setControl(new VelocityDutyCycle(INTAKE_SPEED)); // Currently working on RPS output, can change to
                                                                     // RPM if needed
   }
 
