@@ -21,21 +21,26 @@ public class Shooter {
     
     // get which speed file to use for angle regression
     private String getCSVForPose(Pose2d robotPose) {
+        // for debugging
+        Logger.recordOutput("Shooter/Hub Location", Measurements.HubLocation); 
+        Logger.recordOutput("Shooter/Robot Pose", robotPose); 
+
         double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
         
         if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
-            return "speed_1_angles.csv"; // closer to hub
+            return "low_angle_speed.csv"; // closer to hub
         } else {
-            return "speed_2_angles.csv"; // further from hub
+            return "high_angle_speed.csv"; // further from hub
         }
     }
 
-    public double getAngleForDistance(Pose2d robotPose) {
+    public double getSpeedToHubForPose(Pose2d robotPose) {
+        System.out.println("Shooter called"); 
         String filename = getCSVForPose(robotPose); 
         String filepath = "src/main/java/frc/constants/" + filename;
 
-        ArrayList<Integer> angles = new ArrayList<Integer>(); 
-        ArrayList<Integer> distances = new ArrayList<Integer>(); 
+        ArrayList<Integer> speeds = new ArrayList<Integer>(); 
+        ArrayList<Integer> distances = new ArrayList<Integer>();
         
         try (Scanner scanner = new Scanner(new File(filepath))) {
             scanner.useDelimiter(",|\\n");
@@ -44,9 +49,9 @@ public class Shooter {
                 if (scanner.hasNextInt()) {
                     int distance = scanner.nextInt();
                     if (scanner.hasNextInt()) {
-                        int angle = scanner.nextInt();
-                        angles.add(angle); 
-                        distances.add(distance); 
+                        int speed = scanner.nextInt();
+                        speeds.add(speed); 
+                        distances.add(distance / 100); // converts centimeter distances to meters 
                     }
                 } else {
                     scanner.next();
@@ -56,28 +61,29 @@ public class Shooter {
             System.err.println("Error reading CSV: " + e.getMessage());
         }
 
-        SimpleRegression calculateAngleForDistance = new SimpleRegression(); 
+        SimpleRegression calculateSpeedForDistance = new SimpleRegression(); 
         
         // add all datapoints to regression
         for (int i = 0; i < distances.size(); i++) {
-            calculateAngleForDistance.addData(distances.get(i), angles.get(i));
+            calculateSpeedForDistance.addData(distances.get(i), speeds.get(i));
         }
 
-        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); 
+        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); // returns in meters
 
-        double angle = calculateAngleForDistance.predict(robotCurrentDistanceFromHub);
-        Logger.recordOutput("Calculated Angle", angle); 
-        Logger.recordOutput("Distance from Hub", robotCurrentDistanceFromHub); 
+        double speed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
+        Logger.recordOutput("Shooter/Calculated Speed", speed); 
+        Logger.recordOutput("Shooter/Distance from Hub", robotCurrentDistanceFromHub); 
 
-        double speed; 
+        double angle; 
 
-        if (filename.equals("speed_1_angles.csv")) {
-            speed = Measurements.ShooterRPMOne; 
+        if (filename.equals("low_angle_speed.csv")) {
+            angle = Measurements.ShooterAngleLow; 
         } else {
-            speed = Measurements.ShooterRPMTwo; 
+            angle = Measurements.ShooterAngleHigh; 
         }
 
-        Logger.recordOutput("Shooter Speed", speed); 
-        return angle; 
+        Logger.recordOutput("Shooter/Angle", angle); 
+        Logger.recordOutput("Shooter/CSV File Used", filename); 
+        return speed; 
     }
 }

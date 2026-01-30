@@ -3,15 +3,18 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand; 
 import frc.constants.Controls;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
+import frc.subsystems.shooter.Shooter;
 
 public class RobotContainer {
     private static RobotContainer instance;
     private CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
     private final Vision vision;
     private final OI oi = OI.getInstance();
+    private final Shooter shooter = new Shooter();
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -52,6 +55,8 @@ public class RobotContainer {
             return drive.driveOpenLoopFieldCentricRequest.withVelocityX(-x * Controls.MaxDriveMeterS)
                 .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
+        
+        oi.binds.get(OI.Bind.getShooterAngle).onTrue(new InstantCommand(() -> shooter.getSpeedToHubForPose(drive.getPose()))); 
     }
 
     public void periodic() {

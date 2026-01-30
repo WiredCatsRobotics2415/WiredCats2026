@@ -64,7 +64,7 @@ public class SimulatePose {
 
                     // Add the vision measurement to Phoenix 6's pose estimator
                     // IMPORTANT: Phoenix 6 requires timestamps converted from FPGA time
-                    double ctreTimestamp = Utils.fpgaToCurrentTime(estimate.timestampSeconds);
+                    double ctreTimestamp = Utils.fpgaToCurrentTime(estimate.timestampSeconds-estimate.latency);
                     drivetrain.addVisionMeasurement(
                         estimate.pose,
                         ctreTimestamp,

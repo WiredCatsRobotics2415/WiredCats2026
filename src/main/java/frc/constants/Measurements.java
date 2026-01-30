@@ -101,8 +101,8 @@ public class Measurements {
 
     public static final Pose2d HubLocation = new Pose2d(181.56 / 39.3701, 158.84 / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
 
-    public static final double ShooterRPMOne = 20; 
-    public static final double ShooterRPMTwo = 10; 
+    public static final double ShooterAngleLow = 15; 
+    public static final double ShooterAngleHigh = 45; 
 
     public static final double ShooterHubRegionOne = 8;
 }
