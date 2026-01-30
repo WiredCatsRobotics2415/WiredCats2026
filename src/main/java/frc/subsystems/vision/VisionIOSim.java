@@ -98,7 +98,8 @@ public class VisionIOSim implements VisionIO {
                 PhotonPipelineResult pipelineResult = pipelineResults.get(pipelineResults.size() - 1); 
                 EstimatedRobotPose estimatedPose = photonEstimators[i].update(pipelineResult).orElse(null);
                 if (estimatedPose != null) {
-                    inputs.poseEstimates[i] = estimatedPose.estimatedPose.toPose2d();
+                    Pose2d basePose = estimatedPose.estimatedPose.toPose2d();
+                    inputs.poseEstimates[i] = basePose;
                     inputs.poseLatencies[i] = pipelineResult.metadata.getLatencyMillis();
                     inputs.poseTimestampsSeconds[i] = estimatedPose.timestampSeconds;
                     inputs.poseTagCounts[i] = estimatedPose.targetsUsed.size();
