@@ -14,7 +14,7 @@ public class RobotContainer {
     private CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
     private final Vision vision;
     private final OI oi = OI.getInstance();
-    private final Shooter shooter = new Shooter();
+    private final Shooter shooter = Shooter.getInstance();
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
