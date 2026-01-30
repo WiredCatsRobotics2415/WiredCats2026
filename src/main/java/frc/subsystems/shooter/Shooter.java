@@ -28,19 +28,19 @@ public class Shooter {
         double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
         
         if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
-            return "angle_1_speed.csv"; // closer to hub
+            return "low_angle_speed.csv"; // closer to hub
         } else {
-            return "angle_2_speed.csv"; // further from hub
+            return "high_angle_speed.csv"; // further from hub
         }
     }
 
-    public double getSpeedForDistance(Pose2d robotPose) {
+    public double getSpeedToHubForPose(Pose2d robotPose) {
         System.out.println("Shooter called"); 
         String filename = getCSVForPose(robotPose); 
         String filepath = "src/main/java/frc/constants/" + filename;
 
         ArrayList<Integer> speeds = new ArrayList<Integer>(); 
-        ArrayList<Integer> distances = new ArrayList<Integer>(); 
+        ArrayList<Integer> distances = new ArrayList<Integer>();
         
         try (Scanner scanner = new Scanner(new File(filepath))) {
             scanner.useDelimiter(",|\\n");
@@ -51,7 +51,7 @@ public class Shooter {
                     if (scanner.hasNextInt()) {
                         int speed = scanner.nextInt();
                         speeds.add(speed); 
-                        distances.add(distance); 
+                        distances.add(distance / 100); // converts centimeter distances to meters 
                     }
                 } else {
                     scanner.next();
@@ -68,7 +68,7 @@ public class Shooter {
             calculateSpeedForDistance.addData(distances.get(i), speeds.get(i));
         }
 
-        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); 
+        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); // returns in meters
 
         double speed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
         Logger.recordOutput("Shooter/Calculated Speed", speed); 
@@ -76,7 +76,7 @@ public class Shooter {
 
         double angle; 
 
-        if (filename.equals("angle_1_speed.csv")) {
+        if (filename.equals("low_angle_speed.csv")) {
             angle = Measurements.ShooterAngleLow; 
         } else {
             angle = Measurements.ShooterAngleHigh; 
