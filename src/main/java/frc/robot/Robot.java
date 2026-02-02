@@ -2,12 +2,15 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootReplay;
 import com.ctre.phoenix6.SignalLogger;
+
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.constants.RuntimeConstants;
-import frc.utils.LimelightHelpers; 
+import frc.utils.LimelightHelpers;
+import frc.visualization.BallSim;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,10 +56,14 @@ public class Robot extends LoggedRobot {
         RobotContainer.getInstance().simulationInit();
     }
 
-    @Override
-    public void simulationPeriodic() {
-        SimulatedArena.getInstance().simulationPeriodic();
-    }
+@       Override
+        public void simulationPeriodic() {
+        BallSim.getInstance().update();
+
+        // Publish/log the pose so AdvantageScope can render it
+        Pose3d ballPose = BallSim.getInstance().getPose();
+        Logger.recordOutput("BallPose", ballPose);
+        }
 
     @Override
     public void robotPeriodic() {

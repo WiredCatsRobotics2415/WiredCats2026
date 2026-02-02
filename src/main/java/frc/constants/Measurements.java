@@ -191,5 +191,5 @@ public class Measurements {
 
     public static final double ShooterHubRegionOne = 6;
 
-    public static final double TurretAngleOffset = 30; 
+    public static final double TurretAngleOffset = 0; 
 }
