@@ -7,6 +7,9 @@ import frc.visualization.BallSim;
 import frc.constants.Measurements; 
 
 import lombok.Getter;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,12 +31,40 @@ public class Turret extends SubsystemBase {
     // in order to account for robot movement we would have to predict the robot's next position
     // but I didn't want to code that until we discussed it at the next meeting
 
-    // TODO: update to account for robot motion
-    public double calculateStaticTurretAngle(Pose2d robotPose) {
-        Pose2d hubPose = Measurements.HubLocation; 
+    // umm i think this is right? 
+    public double calculateTurretAngleToHub(Pose2d robotPose) {
+        double turretAngle = calculateStaticTurretAngle(robotPose); 
 
-        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getDegrees(); 
-        double turretAngle = angleToHub - robotPose.getRotation().getDegrees() + Measurements.TurretAngleOffset; 
+        Shooter shooter = Shooter.getInstance(); 
+        double needed = shooter.getSpeedToHubForPoseAndVelocities(robotPose);  
+
+        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance(); 
+        ChassisSpeeds currVelocities = drive.getVelocity(); 
+
+        // perpendicular velocity component
+        double perpendicularVector = -currVelocities.vxMetersPerSecond * Math.sin(turretAngle) + currVelocities.vyMetersPerSecond * Math.cos(turretAngle); 
+
+        double angleAdjustment = Math.toDegrees(Math.asin(perpendicularVector/needed)); 
+
+        double adjustedAngle = Math.toDegrees(turretAngle) + angleAdjustment; 
+
+        Logger.recordOutput("Turret/Robot Pose", robotPose); 
+        
+        Logger.recordOutput("Turret/Adj Turret Ang", adjustedAngle); 
+        Logger.recordOutput("Turret/Robot Rotation (deg)", robotPose.getRotation().getDegrees());
+        Logger.recordOutput("Turret/Ang Offset", angleAdjustment); 
+
+        return adjustedAngle; 
+    }
+
+    public double calculateStaticTurretAngle(Pose2d robotPose) {
+        Pose2d hubPose = Measurements.HubLocation;
+
+        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians();
+        double turretAngle = angleToHub - robotPose.getRotation().getRadians() + Math.toRadians(Measurements.TurretAngleOffset); 
+
+        Logger.recordOutput("Turret/Robot Ang to Hub", angleToHub); 
+        Logger.recordOutput("Turret/Static Turret Ang", turretAngle); 
 
         ball.throwBall(new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0,0,0)), new Rotation3d(0, 30, turretAngle), 15);
 

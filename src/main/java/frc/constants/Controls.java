@@ -35,6 +35,7 @@ public class Controls {
 
         public static final int CalculateShooterAngleButton = 1; 
         public static final int CalculateShooterAngleWithVelocitiesButton = 2; 
+        public static final int CalculateStaticTurretAngleToHub = 3; 
     }
 
     public class NumpadButtons {
