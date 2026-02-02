@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.constants.Measurements;
 import frc.constants.Measurements.RobotMeasurements;
@@ -115,6 +116,13 @@ public class VisionIOSim implements VisionIO {
                     }
                     inputs.poseTagDistances[i] = smallestDistance;
                     inputs.nearestTags[i] = closestApriltagId;
+                    
+                    String name = "Apriltags/Closest Limelight" + i + " Tag";
+                    String name2 = "Apriltags/Closest Limelight" + i + " Pose";
+                    Logger.recordOutput(name, closestApriltagId);
+                    Pose3d[] line = {new Pose3d(currentRobotPose.getX() + Measurements.AprilTagLocations.getLimelightOffsets(i).getX(), currentRobotPose.getY() + Measurements.AprilTagLocations.getLimelightOffsets(i).getY(), Measurements.AprilTagLocations.getLimelightOffsets(i).getZ(), new Rotation3d(0,0,0) ), Measurements.AprilTagLocations.AprilTagePose(closestApriltagId)};
+                    Logger.recordOutput(name2, line);
+
                 } else {
                     setInputsWhenNoTagDetected(inputs, i); 
                 }
@@ -132,5 +140,11 @@ public class VisionIOSim implements VisionIO {
         inputs.poseTagCounts[index] = estimate.tagCount;
         inputs.poseTagDistances[index] = Double.MAX_VALUE; 
         inputs.nearestTags[index] = -1; 
+
+        String name = "Apriltags/Closest Limelight" + index + " Tag";
+        String name2 = "Apriltags/Closest Limelight" + index + " Pose";
+        Logger.recordOutput(name, -1);
+        Pose3d[] no_list = {new Pose3d(0,0,0, new Rotation3d(0,0,0)), new Pose3d(0,0,0, new Rotation3d(0,0,0))};
+        Logger.recordOutput(name2, no_list);
     }
 }
