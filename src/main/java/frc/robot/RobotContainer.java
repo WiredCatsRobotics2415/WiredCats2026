@@ -8,6 +8,7 @@ import frc.constants.Controls;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
 import frc.subsystems.shooter.Shooter;
+import frc.constants.Measurements;
 
 public class RobotContainer {
     private static RobotContainer instance;
@@ -44,6 +45,7 @@ public class RobotContainer {
     }
 
     public void simulationInit() {
+        //Measurements.AprilTagLocations.addAllPoses();
         drive.resetPose(new Pose2d(2.0, 4.0, new Rotation2d()));
     }
 
