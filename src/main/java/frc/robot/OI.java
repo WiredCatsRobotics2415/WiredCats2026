@@ -21,7 +21,8 @@ public class OI {
 
     public enum Bind {
         getShooterSpeed, 
-        getShooterSpeedWithVelocities
+        getShooterSpeedWithVelocities, 
+        calculateTurretAngleToHub
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -41,6 +42,7 @@ public class OI {
 
         binds.put(Bind.getShooterSpeed, controller.button(GulikitButtons.CalculateShooterAngleButton)); 
         binds.put(Bind.getShooterSpeedWithVelocities, controller.button(GulikitButtons.CalculateShooterAngleWithVelocitiesButton)); 
+        binds.put(Bind.calculateTurretAngleToHub, controller.button(GulikitButtons.CalculateStaticTurretAngleToHub)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR

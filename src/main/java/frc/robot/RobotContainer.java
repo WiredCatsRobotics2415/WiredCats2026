@@ -8,6 +8,7 @@ import frc.constants.Controls;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
 import frc.subsystems.shooter.Shooter;
+import frc.subsystems.turret.Turret; 
 
 public class RobotContainer {
     private static RobotContainer instance;
@@ -15,6 +16,7 @@ public class RobotContainer {
     private final Vision vision;
     private final OI oi = OI.getInstance();
     private final Shooter shooter = Shooter.getInstance();
+    private final Turret turret = Turret.getInstance(); 
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -58,6 +60,7 @@ public class RobotContainer {
         
         oi.binds.get(OI.Bind.getShooterSpeed).onTrue(new InstantCommand(() -> shooter.getSpeedToHubForPose(drive.getPose()))); 
         oi.binds.get(OI.Bind.getShooterSpeedWithVelocities).onTrue(new InstantCommand(() -> shooter.getSpeedToHubForPoseAndVelocities(drive.getPose()))); 
+        oi.binds.get(OI.Bind.calculateTurretAngleToHub).onTrue(new InstantCommand(() -> turret.calculateTurretAngleToHub(drive.getPose()))); 
     }
 
     public void periodic() {

@@ -193,11 +193,6 @@ public class Shooter extends SubsystemBase {
         double speed = Math.hypot(xNeeded - xVel, yNeeded - yVel);
         Logger.recordOutput("Shooter/Speed w/ Velocity", speed); 
 
-        // this will go in turret later but for now its easier to test here
-        Turret turret = Turret.getInstance(); 
-        double turretAngle = turret.calculateStaticTurretAngle(robotPose); 
-        Logger.recordOutput("Turret/Turret Angle", turretAngle); 
-
         return speed;
     }
 
