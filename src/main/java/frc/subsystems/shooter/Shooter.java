@@ -104,33 +104,33 @@ public class Shooter extends SubsystemBase {
         double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
         
         if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
-            return "low_angle_speed.csv"; // closer to hub
+            return "high_angle_speed.csv"; // closer to hub
         } else {
-            return "high_angle_speed.csv"; // further from hub
+            return "low_angle_speed.csv"; // further from hub
         }
     }
 
     public double getSpeedToHubForPose(Pose2d robotPose) {
-        System.out.println("Shooter called"); 
         String filename = getCSVForPose(robotPose); 
         String filepath = "src/main/java/frc/constants/" + filename;
 
-        ArrayList<Integer> speeds = new ArrayList<Integer>(); 
+        ArrayList<Double> speeds = new ArrayList<Double>(); 
         ArrayList<Integer> distances = new ArrayList<Integer>();
         
         try (Scanner scanner = new Scanner(new File(filepath))) {
-            scanner.useDelimiter(",|\\n");
+            // skip header line
+            if (scanner.hasNextLine()) {
+                scanner.nextLine();
+            }
             
-            while (scanner.hasNext()) {
-                if (scanner.hasNextInt()) {
-                    int distance = scanner.nextInt();
-                    if (scanner.hasNextInt()) {
-                        int speed = scanner.nextInt();
-                        speeds.add(speed); 
-                        distances.add(distance / 100); // converts centimeter distances to meters 
-                    }
-                } else {
-                    scanner.next();
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    int distance = Integer.parseInt(parts[0]);
+                    double speed = Double.parseDouble(parts[1]);
+                    speeds.add(speed); 
+                    distances.add(distance);
                 }
             }
         } catch (IOException e) {
@@ -144,9 +144,12 @@ public class Shooter extends SubsystemBase {
             calculateSpeedForDistance.addData(distances.get(i), speeds.get(i));
         }
 
-        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); // returns in meters
+        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()) * 100; // returns meters * 100 = centimeters
 
         double speed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
+        // clamp speed to 20 + (keeps positive)
+        speed = Math.max(speed, 20); 
+        
         Logger.recordOutput("Shooter/Calculated Speed", speed); 
         Logger.recordOutput("Shooter/Distance from Hub", robotCurrentDistanceFromHub); 
 
