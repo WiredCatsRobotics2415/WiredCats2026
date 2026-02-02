@@ -17,10 +17,13 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
+import frc.subsystems.drive.CommandSwerveDrivetrain;
+import frc.subsystems.turret.Turret;
 
 // Import Subsystems Constants, TODO: currently all placeholders change once we have real values
 public class Shooter extends SubsystemBase {
@@ -104,9 +107,9 @@ public class Shooter extends SubsystemBase {
         double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
         
         if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
-            return "high_angle_speed.csv"; // closer to hub
+            return "low_angle_speed.csv"; // closer to hub
         } else {
-            return "low_angle_speed.csv"; // further from hub
+            return "high_angle_speed.csv"; // further from hub
         }
     }
 
@@ -149,7 +152,7 @@ public class Shooter extends SubsystemBase {
         double speed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
         // clamp speed to 20 + (keeps positive)
         speed = Math.max(speed, 20); 
-        
+
         Logger.recordOutput("Shooter/Calculated Speed", speed); 
         Logger.recordOutput("Shooter/Distance from Hub", robotCurrentDistanceFromHub); 
 
@@ -163,7 +166,39 @@ public class Shooter extends SubsystemBase {
 
         Logger.recordOutput("Shooter/Angle", angle); 
         Logger.recordOutput("Shooter/CSV File Used", filename); 
+        
         return speed; 
+    }
+
+    // uses given robot pose and current velocities to calculate actual needed speed
+    // limitations: assumes robot speed remains constant, doesn't account for gravity/air resistance -> would require higher speed to overcome, this just gives exact
+    public double getSpeedToHubForPoseAndVelocities(Pose2d robotPose) {
+        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance(); 
+        ChassisSpeeds currVelocities = drive.getVelocity(); 
+
+        double xVel = currVelocities.vxMetersPerSecond;
+        double yVel = currVelocities.vyMetersPerSecond;
+        
+        // we might need to change this code to take the robot's current rotation changes into account
+        Shooter shooter = Shooter.getInstance(); 
+        double needed = shooter.getSpeedToHubForPose(robotPose); 
+
+        Pose2d hubPose = Measurements.HubLocation; 
+
+        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians(); 
+        
+        double xNeeded = needed * Math.cos(angleToHub); 
+        double yNeeded = needed * Math.sin(angleToHub); 
+
+        double speed = Math.hypot(xNeeded - xVel, yNeeded - yVel);
+        Logger.recordOutput("Shooter/Speed w/ Velocity", speed); 
+
+        // this will go in turret later but for now its easier to test here
+        Turret turret = Turret.getInstance(); 
+        double turretAngle = turret.calculateStaticTurretAngle(robotPose); 
+        Logger.recordOutput("Turret/Turret Angle", turretAngle); 
+
+        return speed;
     }
 
 }

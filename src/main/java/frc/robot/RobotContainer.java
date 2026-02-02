@@ -56,7 +56,8 @@ public class RobotContainer {
                 .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
-        oi.binds.get(OI.Bind.getShooterAngle).onTrue(new InstantCommand(() -> shooter.getSpeedToHubForPose(drive.getPose()))); 
+        oi.binds.get(OI.Bind.getShooterSpeed).onTrue(new InstantCommand(() -> shooter.getSpeedToHubForPose(drive.getPose()))); 
+        oi.binds.get(OI.Bind.getShooterSpeedWithVelocities).onTrue(new InstantCommand(() -> shooter.getSpeedToHubForPoseAndVelocities(drive.getPose()))); 
     }
 
     public void periodic() {
