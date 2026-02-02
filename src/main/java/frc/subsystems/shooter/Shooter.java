@@ -17,10 +17,13 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
+import frc.subsystems.drive.CommandSwerveDrivetrain;
+import frc.subsystems.turret.Turret;
 
 // Import Subsystems Constants, TODO: currently all placeholders change once we have real values
 public class Shooter extends SubsystemBase {
@@ -111,26 +114,26 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getSpeedToHubForPose(Pose2d robotPose) {
-        System.out.println("Shooter called"); 
         String filename = getCSVForPose(robotPose); 
         String filepath = "src/main/java/frc/constants/" + filename;
 
-        ArrayList<Integer> speeds = new ArrayList<Integer>(); 
+        ArrayList<Double> speeds = new ArrayList<Double>(); 
         ArrayList<Integer> distances = new ArrayList<Integer>();
         
         try (Scanner scanner = new Scanner(new File(filepath))) {
-            scanner.useDelimiter(",|\\n");
+            // skip header line
+            if (scanner.hasNextLine()) {
+                scanner.nextLine();
+            }
             
-            while (scanner.hasNext()) {
-                if (scanner.hasNextInt()) {
-                    int distance = scanner.nextInt();
-                    if (scanner.hasNextInt()) {
-                        int speed = scanner.nextInt();
-                        speeds.add(speed); 
-                        distances.add(distance / 100); // converts centimeter distances to meters 
-                    }
-                } else {
-                    scanner.next();
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    int distance = Integer.parseInt(parts[0]);
+                    double speed = Double.parseDouble(parts[1]);
+                    speeds.add(speed); 
+                    distances.add(distance);
                 }
             }
         } catch (IOException e) {
@@ -144,9 +147,12 @@ public class Shooter extends SubsystemBase {
             calculateSpeedForDistance.addData(distances.get(i), speeds.get(i));
         }
 
-        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()); // returns in meters
+        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()) * 100; // returns meters * 100 = centimeters
 
         double speed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
+        // clamp speed to 20 + (keeps positive)
+        speed = Math.max(speed, 20); 
+
         Logger.recordOutput("Shooter/Calculated Speed", speed); 
         Logger.recordOutput("Shooter/Distance from Hub", robotCurrentDistanceFromHub); 
 
@@ -160,7 +166,39 @@ public class Shooter extends SubsystemBase {
 
         Logger.recordOutput("Shooter/Angle", angle); 
         Logger.recordOutput("Shooter/CSV File Used", filename); 
+        
         return speed; 
+    }
+
+    // uses given robot pose and current velocities to calculate actual needed speed
+    // limitations: assumes robot speed remains constant, doesn't account for gravity/air resistance -> would require higher speed to overcome, this just gives exact
+    public double getSpeedToHubForPoseAndVelocities(Pose2d robotPose) {
+        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance(); 
+        ChassisSpeeds currVelocities = drive.getVelocity(); 
+
+        double xVel = currVelocities.vxMetersPerSecond;
+        double yVel = currVelocities.vyMetersPerSecond;
+        
+        // we might need to change this code to take the robot's current rotation changes into account
+        Shooter shooter = Shooter.getInstance(); 
+        double needed = shooter.getSpeedToHubForPose(robotPose); 
+
+        Pose2d hubPose = Measurements.HubLocation; 
+
+        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians(); 
+        
+        double xNeeded = needed * Math.cos(angleToHub); 
+        double yNeeded = needed * Math.sin(angleToHub); 
+
+        double speed = Math.hypot(xNeeded - xVel, yNeeded - yVel);
+        Logger.recordOutput("Shooter/Speed w/ Velocity", speed); 
+
+        // this will go in turret later but for now its easier to test here
+        Turret turret = Turret.getInstance(); 
+        double turretAngle = turret.calculateStaticTurretAngle(robotPose); 
+        Logger.recordOutput("Turret/Turret Angle", turretAngle); 
+
+        return speed;
     }
 
 }

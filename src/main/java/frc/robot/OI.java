@@ -20,7 +20,8 @@ public class OI {
     CommandJoystick numpad;
 
     public enum Bind {
-        getShooterAngle
+        getShooterSpeed, 
+        getShooterSpeedWithVelocities
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -38,7 +39,8 @@ public class OI {
         controller = new CommandXboxController(0);
         numpad = new CommandJoystick(1);
 
-        binds.put(Bind.getShooterAngle, controller.button(GulikitButtons.CalculateShooterAngleButton)); 
+        binds.put(Bind.getShooterSpeed, controller.button(GulikitButtons.CalculateShooterAngleButton)); 
+        binds.put(Bind.getShooterSpeedWithVelocities, controller.button(GulikitButtons.CalculateShooterAngleWithVelocitiesButton)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR
