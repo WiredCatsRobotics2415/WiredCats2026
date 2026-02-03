@@ -44,29 +44,32 @@ public class Turret extends SubsystemBase {
         // perpendicular velocity component
         double perpendicularVector = -currVelocities.vxMetersPerSecond * Math.sin(turretAngle) + currVelocities.vyMetersPerSecond * Math.cos(turretAngle); 
 
-        double angleAdjustment = Math.toDegrees(Math.asin(perpendicularVector/needed)); 
+        double angleAdjustment = Math.asin(perpendicularVector/needed); 
 
-        double adjustedAngle = Math.toDegrees(turretAngle) + angleAdjustment; 
+        double adjustedAngle = turretAngle + angleAdjustment; 
+
+        ball.throwBall(new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0,0,0)), new Rotation3d(0, 30, adjustedAngle), needed);
 
         Logger.recordOutput("Turret/Robot Pose", robotPose); 
+
+        adjustedAngle = Math.toDegrees(adjustedAngle); 
+        angleAdjustment = Math.toDegrees(angleAdjustment);
         
         Logger.recordOutput("Turret/Adj Turret Ang", adjustedAngle); 
         Logger.recordOutput("Turret/Robot Rotation (deg)", robotPose.getRotation().getDegrees());
         Logger.recordOutput("Turret/Ang Offset", angleAdjustment); 
 
-        return adjustedAngle; 
+        return Math.toDegrees(adjustedAngle); 
     }
 
     public double calculateStaticTurretAngle(Pose2d robotPose) {
         Pose2d hubPose = Measurements.HubLocation;
 
         double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians();
-        double turretAngle = angleToHub - robotPose.getRotation().getRadians() + Math.toRadians(Measurements.TurretAngleOffset); 
+        double turretAngle = angleToHub - robotPose.getRotation().getRadians() + Math.toRadians(Measurements.TurretAngleOffset); // 0 right now
 
         Logger.recordOutput("Turret/Robot Ang to Hub", angleToHub); 
         Logger.recordOutput("Turret/Static Turret Ang", turretAngle); 
-
-        ball.throwBall(new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0,0,0)), new Rotation3d(0, 30, turretAngle), 15);
 
         return turretAngle; 
     }
