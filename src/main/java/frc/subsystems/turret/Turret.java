@@ -75,12 +75,24 @@ public class Turret extends SubsystemBase {
 
         double adjustedAngle = turretAngle + angleAdjustment;
 
+        double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
+
+        double angle = 90-15;
+
+        if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
+            angle = 90-15;
+        } else {
+            angle = 90-45;
+        }
+
         // Throw ball for visualization with the adjusted angle
         ball.throwBall(
-            new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0, 0, 0)),
-            new Rotation3d(0, 30, robotPose.getRotation().getRadians() + adjustedAngle),
+            new Pose3d(robotPose.getX(), robotPose.getY(), 0.457, new Rotation3d(0, 0, 0)),
+            new Rotation3d(0, Math.PI - Math.toRadians(180+angle), robotPose.getRotation().getRadians() + adjustedAngle),
             needed
         );
+
+        Logger.recordOutput("ACTUAL ANGLE IN RADIANS (# of pis)", Math.toRadians(180+angle));
 
         Logger.recordOutput("Turret/Robot Pose", robotPose);
         Logger.recordOutput("Turret/Static Turret Ang (rad)", turretAngle);
