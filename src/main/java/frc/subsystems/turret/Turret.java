@@ -33,21 +33,63 @@ public class Turret extends SubsystemBase {
 
     public double calculateTurretAngleToHub(Pose2d robotPose) {
         Shooter shooter = Shooter.getInstance();
+        // Get velocity-compensated shooter speed
+        double needed = shooter.getSpeedToHubForPoseAndVelocities(robotPose);
 
-        double[] result = shooter.getShooterSpeedAndAngleToHub(robotPose); 
-        double speedMagnitude = result[0]; 
-        double angleInFieldFrame = result[1]; 
+        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+        ChassisSpeeds currVelocities = drive.getVelocity();
 
-        double turretAngleInRadians = angleInFieldFrame - robotPose.getRotation().getRadians();
+        ChassisSpeeds fieldRelativeVelocities = ChassisSpeeds.fromRobotRelativeSpeeds(
+            currVelocities,
+            robotPose.getRotation()
+        );
 
-        turretAngleInRadians += Math.toRadians(Measurements.TurretAngleOffset); 
+        // Calculate the absolute angle to hub in field frame
+        Pose2d hubPose = Measurements.HubLocation;
+        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians();
+
+        // Calculate perpendicular velocity component (perpendicular to shot direction in field frame)
+        double perpendicularVector = -fieldRelativeVelocities.vxMetersPerSecond * Math.sin(angleToHub)
+                                    + fieldRelativeVelocities.vyMetersPerSecond * Math.cos(angleToHub);
+
+        Logger.recordOutput("Turret/Perpendicular Vel", perpendicularVector);
+        Logger.recordOutput("Turret/Needed Speed", needed);
+
+        // Calculate angle adjustment with safety check for Math.asin domain
+        double angleAdjustment = 0.0;
+        if (needed > 0.001) { // Avoid division by zero
+            // Clamp the ratio to [-1, 1] to prevent NaN from Math.asin
+            double sinValue = perpendicularVector / needed;
+            sinValue = Math.max(-1.0, Math.min(1.0, sinValue));
+
+            angleAdjustment = Math.asin(sinValue);
+
+            // Log if we hit the clamp (indicates robot moving too fast for shooter speed)
+            if (Math.abs(perpendicularVector / needed) > 1.0) {
+                Logger.recordOutput("Turret/Warning", "Perpendicular velocity exceeds shooter speed!");
+            }
+        }
+
+        double adjustedAngle = turretAngle + angleAdjustment;
+
+        double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
+
+        double angle = 90-15;
+
+        if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
+            angle = 90-15;
+        } else {
+            angle = 90-45;
+        }
 
         // Throw ball for visualization with the adjusted angle
         ball.throwBall(
-            new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0, 0, 0)),
-            new Rotation3d(0, 30, angleInFieldFrame),  // Use field frame angle for visualization
-            speedMagnitude
+            new Pose3d(robotPose.getX(), robotPose.getY(), 0.457, new Rotation3d(0, 0, 0)),
+            new Rotation3d(0, Math.PI - Math.toRadians(180+angle), robotPose.getRotation().getRadians() + adjustedAngle),
+            needed
         );
+
+        Logger.recordOutput("ACTUAL ANGLE IN RADIANS (# of pis)", Math.toRadians(180+angle));
 
         Logger.recordOutput("Turret/Robot Pose", robotPose);
         Logger.recordOutput("Turret/Angle In Field Frame (rad)", angleInFieldFrame);

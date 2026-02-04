@@ -189,7 +189,7 @@ public class Measurements {
     public static final double ShooterAngleLow = 15; 
     public static final double ShooterAngleHigh = 45; 
 
-    public static final double ShooterHubRegionOne = 2.2;
+    public static final double ShooterHubRegionOne = 6;
 
     public static final double TurretAngleOffset = 0; 
 }
