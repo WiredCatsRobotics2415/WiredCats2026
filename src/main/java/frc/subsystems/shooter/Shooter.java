@@ -181,6 +181,7 @@ public class Shooter extends SubsystemBase {
 
     public double[] getShooterSpeedAndAngleToHub(Pose2d robotPose) {
       double staticSpeed = getSpeedToHubForPose(robotPose); 
+      System.out.println("IT'S WORKING");
 
       Pose2d hubPose = Measurements.HubLocation; 
       double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians(); 
@@ -189,24 +190,23 @@ public class Shooter extends SubsystemBase {
       double yNeeded = staticSpeed * Math.sin(angleToHub); 
 
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
-      ChassisSpeeds currVelocities = drive.getVelocity();
       ChassisSpeeds fieldVel = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getVelocity(), robotPose.getRotation());
-      
-      double xVelocity = xNeeded - fieldVel.vxMetersPerSecond;
-      double yVelocity = yNeeded - fieldVel.vyMetersPerSecond;
+
+      // Scale down the compensation to reduce over-correction
+      double xCompensationFactor = 0.25; // Adjust this value between 0-1 to tune
+      double yCompensationFactor = 0.3; // Adjust this value between 0-1 to tune
+      double xVelocity = xNeeded - (fieldVel.vxMetersPerSecond * xCompensationFactor);
+      double yVelocity = yNeeded - (fieldVel.vyMetersPerSecond * yCompensationFactor);
 
       double speedMagnitude = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
 
       double angleInFieldFrame = Math.atan2(yVelocity, xVelocity);
 
-      Logger.recordOutput("Shooter/Robot Relative Vel X", currVelocities.vxMetersPerSecond);
-      Logger.recordOutput("Shooter/Robot Relative Vel Y", currVelocities.vyMetersPerSecond);
-      Logger.recordOutput("Shooter/Field Relative Vel X", fieldVel.vxMetersPerSecond);
-      Logger.recordOutput("Shooter/Field Relative Vel Y", fieldVel.vyMetersPerSecond);
       Logger.recordOutput("Shooter/Shooter Vel X", xVelocity);
       Logger.recordOutput("Shooter/Shooter Vel Y", yVelocity);
       Logger.recordOutput("Shooter/Speed w/ Velocity", speedMagnitude);
-      Logger.recordOutput("Shooter/Angle In Field Frame", angleInFieldFrame);
+      Logger.recordOutput("Static angle", angleToHub);
+      Logger.recordOutput("Angle In Field Frame", angleInFieldFrame);
 
       return new double[]{speedMagnitude, angleInFieldFrame}; 
     }
