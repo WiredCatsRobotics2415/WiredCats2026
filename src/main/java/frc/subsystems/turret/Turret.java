@@ -32,70 +32,31 @@ public class Turret extends SubsystemBase {
     // but I didn't want to code that until we discussed it at the next meeting
 
     public double calculateTurretAngleToHub(Pose2d robotPose) {
-        // Start with static turret angle (robot-relative angle to hub)
-        double turretAngle = calculateStaticTurretAngle(robotPose);
-
         Shooter shooter = Shooter.getInstance();
-        // Get velocity-compensated shooter speed
-        double needed = shooter.getSpeedToHubForPoseAndVelocities(robotPose);
 
-        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
-        ChassisSpeeds currVelocities = drive.getVelocity();
+        double[] result = shooter.getShooterSpeedAndAngleToHub(robotPose); 
+        double speedMagnitude = result[0]; 
+        double angleInFieldFrame = result[1]; 
 
-        ChassisSpeeds fieldRelativeVelocities = ChassisSpeeds.fromRobotRelativeSpeeds(
-            currVelocities,
-            robotPose.getRotation()
-        );
+        double turretAngleInRadians = angleInFieldFrame - robotPose.getRotation().getRadians();
 
-        // Calculate the absolute angle to hub in field frame
-        Pose2d hubPose = Measurements.HubLocation;
-        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians();
-
-        // Calculate perpendicular velocity component (perpendicular to shot direction in field frame)
-        double perpendicularVector = -fieldRelativeVelocities.vxMetersPerSecond * Math.sin(angleToHub)
-                                    + fieldRelativeVelocities.vyMetersPerSecond * Math.cos(angleToHub);
-
-        Logger.recordOutput("Turret/Perpendicular Vel", perpendicularVector);
-        Logger.recordOutput("Turret/Needed Speed", needed);
-
-        // Calculate angle adjustment with safety check for Math.asin domain
-        double angleAdjustment = 0.0;
-        if (needed > 0.001) { // Avoid division by zero
-            // Clamp the ratio to [-1, 1] to prevent NaN from Math.asin
-            double sinValue = perpendicularVector / needed;
-            sinValue = Math.max(-1.0, Math.min(1.0, sinValue));
-
-            angleAdjustment = Math.asin(sinValue);
-
-            // Log if we hit the clamp (indicates robot moving too fast for shooter speed)
-            if (Math.abs(perpendicularVector / needed) > 1.0) {
-                Logger.recordOutput("Turret/Warning", "Perpendicular velocity exceeds shooter speed!");
-            }
-        }
-
-        double adjustedAngle = turretAngle + angleAdjustment;
+        turretAngleInRadians += Math.toRadians(Measurements.TurretAngleOffset); 
 
         // Throw ball for visualization with the adjusted angle
         ball.throwBall(
             new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0, 0, 0)),
-            new Rotation3d(0, 30, robotPose.getRotation().getRadians() + adjustedAngle),
-            needed
+            new Rotation3d(0, 30, angleInFieldFrame),  // Use field frame angle for visualization
+            speedMagnitude
         );
 
         Logger.recordOutput("Turret/Robot Pose", robotPose);
-        Logger.recordOutput("Turret/Static Turret Ang (rad)", turretAngle);
-        Logger.recordOutput("Turret/Ang Adjustment (rad)", angleAdjustment);
-        Logger.recordOutput("Turret/Adj Turret Ang (rad)", adjustedAngle);
-
-        // Convert to degrees for logging
-        double adjustedAngleDeg = Math.toDegrees(adjustedAngle);
-        double angleAdjustmentDeg = Math.toDegrees(angleAdjustment);
-
-        Logger.recordOutput("Turret/Adj Turret Ang", adjustedAngleDeg);
+        Logger.recordOutput("Turret/Angle In Field Frame (rad)", angleInFieldFrame);
+        Logger.recordOutput("Turret/Turret Angle (rad)", turretAngleInRadians);
+        Logger.recordOutput("Turret/Turret Angle (deg)", Math.toDegrees(turretAngleInRadians));
         Logger.recordOutput("Turret/Robot Rotation (deg)", robotPose.getRotation().getDegrees());
-        Logger.recordOutput("Turret/Ang Offset", angleAdjustmentDeg);
+        Logger.recordOutput("Turret/Shooter Speed", speedMagnitude);
 
-        return adjustedAngleDeg;
+        return Math.toDegrees(turretAngleInRadians);
     }
 
     public double calculateStaticTurretAngle(Pose2d robotPose) {
