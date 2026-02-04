@@ -105,7 +105,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/Robot Pose", robotPose); 
 
         double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
-        
+
         if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
             return "low_angle_speed.csv"; // closer to hub
         } else {
@@ -149,9 +149,11 @@ public class Shooter extends SubsystemBase {
 
         double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()) * 100; // returns meters * 100 = centimeters
 
-        double speed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
+        double motorSpeed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
         // clamp speed to 20 + (keeps positive)
-        speed = Math.max(speed, 20); 
+        motorSpeed = Math.max(motorSpeed, 20); 
+
+        double speed = motorSpeed * 0.37;
 
         Logger.recordOutput("Shooter/Calculated Speed", speed); 
         Logger.recordOutput("Shooter/Distance from Hub", robotCurrentDistanceFromHub); 
@@ -173,25 +175,53 @@ public class Shooter extends SubsystemBase {
     // uses given robot pose and current velocities to calculate actual needed speed
     // limitations: assumes robot speed remains constant, doesn't account for gravity/air resistance -> would require higher speed to overcome, this just gives exact
     public double getSpeedToHubForPoseAndVelocities(Pose2d robotPose) {
-        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance(); 
-        ChassisSpeeds currVelocities = drive.getVelocity(); 
-
-        double xVel = currVelocities.vxMetersPerSecond;
-        double yVel = currVelocities.vyMetersPerSecond;
+        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+        ChassisSpeeds currVelocities = drive.getVelocity();
         
-        // we might need to change this code to take the robot's current rotation changes into account
-        Shooter shooter = Shooter.getInstance(); 
-        double needed = shooter.getSpeedToHubForPose(robotPose); 
+        //field relative yay
+        ChassisSpeeds fieldRelativeVelocities = ChassisSpeeds.fromRobotRelativeSpeeds(
+            currVelocities,
+            robotPose.getRotation()
+        );
 
-        Pose2d hubPose = Measurements.HubLocation; 
+        double xVel = fieldRelativeVelocities.vxMetersPerSecond;
+        double yVel = fieldRelativeVelocities.vyMetersPerSecond;
 
-        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians(); 
-        
-        double xNeeded = needed * Math.cos(angleToHub); 
-        double yNeeded = needed * Math.sin(angleToHub); 
+        // Log robot-relative and field-relative velocities for debugging
+        Logger.recordOutput("Shooter/Robot Relative Vel X", currVelocities.vxMetersPerSecond);
+        Logger.recordOutput("Shooter/Robot Relative Vel Y", currVelocities.vyMetersPerSecond);
+        Logger.recordOutput("Shooter/Field Relative Vel X", xVel);
+        Logger.recordOutput("Shooter/Field Relative Vel Y", yVel);
 
-        double speed = Math.hypot(xNeeded - xVel, yNeeded - yVel);
-        Logger.recordOutput("Shooter/Speed w/ Velocity", speed); 
+        Shooter shooter = Shooter.getInstance();
+        double needed = shooter.getSpeedToHubForPose(robotPose);
+
+        Pose2d hubPose = Measurements.HubLocation;
+
+        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians();
+
+        // Calculate required velocity components in field frame
+        double xNeeded = needed * Math.cos(angleToHub);
+        double yNeeded = needed * Math.sin(angleToHub);
+
+        Logger.recordOutput("Shooter/Target Vel X", xNeeded);
+        Logger.recordOutput("Shooter/Target Vel Y", yNeeded);
+
+        // Subtract robot velocity from target velocity to get required shooter velocity
+        double xShooter = xNeeded - xVel;
+        double yShooter = yNeeded - yVel;
+
+        double speed = Math.hypot(xShooter, yShooter);
+
+        // Add safety check to ensure speed is positive and reasonable
+        if (speed < 0) {
+            Logger.recordOutput("Shooter/Speed Warning", "Negative speed calculated!");
+            speed = Math.abs(speed);
+        }
+
+        Logger.recordOutput("Shooter/Shooter Vel X", xShooter);
+        Logger.recordOutput("Shooter/Shooter Vel Y", yShooter);
+        Logger.recordOutput("Shooter/Speed w/ Velocity", speed);
 
         return speed;
     }

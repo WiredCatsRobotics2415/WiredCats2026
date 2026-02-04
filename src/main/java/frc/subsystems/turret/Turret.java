@@ -31,35 +31,71 @@ public class Turret extends SubsystemBase {
     // in order to account for robot movement we would have to predict the robot's next position
     // but I didn't want to code that until we discussed it at the next meeting
 
-    // umm i think this is right? 
     public double calculateTurretAngleToHub(Pose2d robotPose) {
-        double turretAngle = calculateStaticTurretAngle(robotPose); 
+        // Start with static turret angle (robot-relative angle to hub)
+        double turretAngle = calculateStaticTurretAngle(robotPose);
 
-        Shooter shooter = Shooter.getInstance(); 
-        double needed = shooter.getSpeedToHubForPoseAndVelocities(robotPose);  
+        Shooter shooter = Shooter.getInstance();
+        // Get velocity-compensated shooter speed
+        double needed = shooter.getSpeedToHubForPoseAndVelocities(robotPose);
 
-        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance(); 
-        ChassisSpeeds currVelocities = drive.getVelocity(); 
+        CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+        ChassisSpeeds currVelocities = drive.getVelocity();
 
-        // perpendicular velocity component
-        double perpendicularVector = -currVelocities.vxMetersPerSecond * Math.sin(turretAngle) + currVelocities.vyMetersPerSecond * Math.cos(turretAngle); 
+        ChassisSpeeds fieldRelativeVelocities = ChassisSpeeds.fromRobotRelativeSpeeds(
+            currVelocities,
+            robotPose.getRotation()
+        );
 
-        double angleAdjustment = Math.asin(perpendicularVector/needed); 
+        // Calculate the absolute angle to hub in field frame
+        Pose2d hubPose = Measurements.HubLocation;
+        double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians();
 
-        double adjustedAngle = turretAngle + angleAdjustment; 
+        // Calculate perpendicular velocity component (perpendicular to shot direction in field frame)
+        double perpendicularVector = -fieldRelativeVelocities.vxMetersPerSecond * Math.sin(angleToHub)
+                                    + fieldRelativeVelocities.vyMetersPerSecond * Math.cos(angleToHub);
 
-        ball.throwBall(new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0,0,0)), new Rotation3d(0, 30, adjustedAngle), needed);
+        Logger.recordOutput("Turret/Perpendicular Vel", perpendicularVector);
+        Logger.recordOutput("Turret/Needed Speed", needed);
 
-        Logger.recordOutput("Turret/Robot Pose", robotPose); 
+        // Calculate angle adjustment with safety check for Math.asin domain
+        double angleAdjustment = 0.0;
+        if (needed > 0.001) { // Avoid division by zero
+            // Clamp the ratio to [-1, 1] to prevent NaN from Math.asin
+            double sinValue = perpendicularVector / needed;
+            sinValue = Math.max(-1.0, Math.min(1.0, sinValue));
 
-        adjustedAngle = Math.toDegrees(adjustedAngle); 
-        angleAdjustment = Math.toDegrees(angleAdjustment);
-        
-        Logger.recordOutput("Turret/Adj Turret Ang", adjustedAngle); 
+            angleAdjustment = Math.asin(sinValue);
+
+            // Log if we hit the clamp (indicates robot moving too fast for shooter speed)
+            if (Math.abs(perpendicularVector / needed) > 1.0) {
+                Logger.recordOutput("Turret/Warning", "Perpendicular velocity exceeds shooter speed!");
+            }
+        }
+
+        double adjustedAngle = turretAngle + angleAdjustment;
+
+        // Throw ball for visualization with the adjusted angle
+        ball.throwBall(
+            new Pose3d(robotPose.getX(), robotPose.getY(), 0, new Rotation3d(0, 0, 0)),
+            new Rotation3d(0, 30, robotPose.getRotation().getRadians() + adjustedAngle),
+            needed
+        );
+
+        Logger.recordOutput("Turret/Robot Pose", robotPose);
+        Logger.recordOutput("Turret/Static Turret Ang (rad)", turretAngle);
+        Logger.recordOutput("Turret/Ang Adjustment (rad)", angleAdjustment);
+        Logger.recordOutput("Turret/Adj Turret Ang (rad)", adjustedAngle);
+
+        // Convert to degrees for logging
+        double adjustedAngleDeg = Math.toDegrees(adjustedAngle);
+        double angleAdjustmentDeg = Math.toDegrees(angleAdjustment);
+
+        Logger.recordOutput("Turret/Adj Turret Ang", adjustedAngleDeg);
         Logger.recordOutput("Turret/Robot Rotation (deg)", robotPose.getRotation().getDegrees());
-        Logger.recordOutput("Turret/Ang Offset", angleAdjustment); 
+        Logger.recordOutput("Turret/Ang Offset", angleAdjustmentDeg);
 
-        return Math.toDegrees(adjustedAngle); 
+        return adjustedAngleDeg;
     }
 
     public double calculateStaticTurretAngle(Pose2d robotPose) {
