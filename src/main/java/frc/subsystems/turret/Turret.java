@@ -32,9 +32,6 @@ public class Turret extends SubsystemBase {
     // but I didn't want to code that until we discussed it at the next meeting
 
     public double calculateTurretAngleToHub(Pose2d robotPose) {
-        // Start with static turret angle (robot-relative angle to hub)
-        double turretAngle = calculateStaticTurretAngle(robotPose);
-
         Shooter shooter = Shooter.getInstance();
         // Get velocity-compensated shooter speed
         double needed = shooter.getSpeedToHubForPoseAndVelocities(robotPose);
@@ -95,19 +92,13 @@ public class Turret extends SubsystemBase {
         Logger.recordOutput("ACTUAL ANGLE IN RADIANS (# of pis)", Math.toRadians(180+angle));
 
         Logger.recordOutput("Turret/Robot Pose", robotPose);
-        Logger.recordOutput("Turret/Static Turret Ang (rad)", turretAngle);
-        Logger.recordOutput("Turret/Ang Adjustment (rad)", angleAdjustment);
-        Logger.recordOutput("Turret/Adj Turret Ang (rad)", adjustedAngle);
-
-        // Convert to degrees for logging
-        double adjustedAngleDeg = Math.toDegrees(adjustedAngle);
-        double angleAdjustmentDeg = Math.toDegrees(angleAdjustment);
-
-        Logger.recordOutput("Turret/Adj Turret Ang", adjustedAngleDeg);
+        Logger.recordOutput("Turret/Angle In Field Frame (rad)", angleInFieldFrame);
+        Logger.recordOutput("Turret/Turret Angle (rad)", turretAngleInRadians);
+        Logger.recordOutput("Turret/Turret Angle (deg)", Math.toDegrees(turretAngleInRadians));
         Logger.recordOutput("Turret/Robot Rotation (deg)", robotPose.getRotation().getDegrees());
-        Logger.recordOutput("Turret/Ang Offset", angleAdjustmentDeg);
+        Logger.recordOutput("Turret/Shooter Speed", speedMagnitude);
 
-        return adjustedAngleDeg;
+        return Math.toDegrees(turretAngleInRadians);
     }
 
     public double calculateStaticTurretAngle(Pose2d robotPose) {
