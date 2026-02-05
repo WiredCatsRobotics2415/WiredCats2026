@@ -194,7 +194,7 @@ public class Shooter extends SubsystemBase {
 
       // Scale down the compensation to reduce over-correction
       double xCompensationFactor = 0.25; // Adjust this value between 0-1 to tune
-      double yCompensationFactor = 0.3; // Adjust this value between 0-1 to tune
+      double yCompensationFactor = 0.25; // Adjust this value between 0-1 to tune
       double xVelocity = xNeeded - (fieldVel.vxMetersPerSecond * xCompensationFactor);
       double yVelocity = yNeeded - (fieldVel.vyMetersPerSecond * yCompensationFactor);
 
