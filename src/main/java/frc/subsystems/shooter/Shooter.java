@@ -18,12 +18,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
-import frc.subsystems.turret.Turret;
 
 // Import Subsystems Constants, TODO: currently all placeholders change once we have real values
 public class Shooter extends SubsystemBase {
@@ -31,7 +28,7 @@ public class Shooter extends SubsystemBase {
   private static Shooter instance = null;
   private static TalonFX flywheel1;
   private static TalonFX flywheel2;
-  private static TalonFX intakeMotor;
+  private static TalonFX indexerMotor;
   private static Integer FLYWHEEL_1_ID = 1;
   private static Integer FLYWHEEL_2_ID = 2;
   private static Integer INTAKE_MOTOR_ID = 3;
@@ -59,7 +56,7 @@ public class Shooter extends SubsystemBase {
 
     request = new VelocityVoltage(0).withSlot(0);
 
-    intakeMotor = new TalonFX(INTAKE_MOTOR_ID);
+    indexerMotor = new TalonFX(INTAKE_MOTOR_ID);
   }
 
   public static Shooter getInstance() {
@@ -76,7 +73,7 @@ public class Shooter extends SubsystemBase {
 
   public void stopShooting() // Stops Intake
   {
-    intakeMotor.set(0.0);
+    indexerMotor.set(0.0);
   }
 
   // Flywheel Functions Below
@@ -104,13 +101,24 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/Hub Location", Measurements.HubLocation); 
         Logger.recordOutput("Shooter/Robot Pose", robotPose); 
 
-        double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
-
-        if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
+        if (getDegreesAngleForPose(robotPose) == 45) {
             return "low_angle_speed.csv"; // closer to hub
         } else {
             return "high_angle_speed.csv"; // further from hub
         }
+    }
+
+    public int getDegreesAngleForPose(Pose2d robotPose) {
+      double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
+      int angle; 
+
+      if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
+          angle =  45; // closer to hub
+      } else {
+          angle = 15; // further from hub
+      }
+
+      return angle; 
     }
 
     public double getSpeedToHubForPose(Pose2d robotPose) {
@@ -204,7 +212,7 @@ public class Shooter extends SubsystemBase {
 
       Logger.recordOutput("Shooter/Shooter Vel X", xVelocity);
       Logger.recordOutput("Shooter/Shooter Vel Y", yVelocity);
-      Logger.recordOutput("Shooter/Speed w/ Velocity", speedMagnitude);
+      Logger.recordOutput("Shooter/Speed with Velocity", speedMagnitude);
       Logger.recordOutput("Static angle", angleToHub);
       Logger.recordOutput("Angle In Field Frame", angleInFieldFrame);
 

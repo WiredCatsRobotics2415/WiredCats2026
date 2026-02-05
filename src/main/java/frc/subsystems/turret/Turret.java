@@ -1,23 +1,17 @@
 package frc.subsystems.turret;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.shooter.Shooter;
 import frc.visualization.BallSim;
 import frc.constants.Measurements; 
-
-import lombok.Getter;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class Turret extends SubsystemBase {
-    // @Getter private TurretIO io; 
     private static Turret instance; 
     private static Shooter shooter = Shooter.getInstance();
     private static BallSim ball = BallSim.getInstance();
@@ -32,7 +26,6 @@ public class Turret extends SubsystemBase {
     // but I didn't want to code that until we discussed it at the next meeting
 
     public double calculateTurretAngleToHub(Pose2d robotPose) {
-        Shooter shooter = Shooter.getInstance();
         // Get velocity-compensated shooter speed and angle
         double[] speedAndAngle = shooter.getShooterSpeedAndAngleToHub(robotPose);
         double speedMagnitude = speedAndAngle[0];
@@ -41,15 +34,7 @@ public class Turret extends SubsystemBase {
         // Calculate turret angle in robot frame
         double turretAngleInRadians = angleInFieldFrame - robotPose.getRotation().getRadians() + Math.toRadians(Measurements.TurretAngleOffset);
 
-        double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
-
-        double angle = 90-15;
-
-        if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
-            angle = 90-15;
-        } else {
-            angle = 90-45;
-        }
+        double angle = 90-shooter.getDegreesAngleForPose(robotPose);
 
         // Throw ball for visualization with the adjusted angle
         ball.throwBall(
