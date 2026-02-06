@@ -16,14 +16,20 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
+import frc.constants.Subsystems.ShooterConstants;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.turret.Turret;
+import lombok.Setter;
 
 // Import Subsystems Constants, TODO: currently all placeholders change once we have real values
 public class Shooter extends SubsystemBase {
@@ -36,28 +42,26 @@ public class Shooter extends SubsystemBase {
   private static Integer FLYWHEEL_2_ID = 2;
   private static Integer INTAKE_MOTOR_ID = 3;
 
-  //feedforward
-  private static Slot0Configs slot0Configs;
-  private static VelocityVoltage request;
+    private final Encoder shooterEncoder =
+      new Encoder(
+          ShooterConstants.kEncoderPorts[0],
+          ShooterConstants.kEncoderPorts[1],
+          ShooterConstants.kEncoderReversed);
+
+  private final SimpleMotorFeedforward shooterFeedforward =
+      new SimpleMotorFeedforward(
+          ShooterConstants.kSVolts, ShooterConstants.kVVoltSecondsPerRotation);
+  private final PIDController shooterFeedback = new PIDController(ShooterConstants.kP, 0.0, 0.0);
+
+  private double goalSpeed = 0.0;
 
   // Intake Functions Below
   private Shooter() {
+    shooterFeedback.setTolerance(ShooterConstants.kShooterToleranceRPS);
+    shooterEncoder.setDistancePerPulse(ShooterConstants.kEncoderDistancePerPulse);
     // Constructor, idk what to put here rn
     flywheel1 = new TalonFX(FLYWHEEL_1_ID);
     flywheel2 = new TalonFX(FLYWHEEL_2_ID);
-
-    // Configure feedforward for flywheels
-    slot0Configs = new Slot0Configs();
-    slot0Configs.kS = 0.05; // Add 0.05 V output to overcome static friction
-    slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kP = 0.11; // An error of 1 rps results in 0.11 V output
-    slot0Configs.kI = 0.5; // An error of 1 rps increases output by 0.5 V each second
-    slot0Configs.kD = 0.01; // An acceleration of 1 rps/s results in 0.01 V output
-
-    flywheel1.getConfigurator().apply(slot0Configs);
-    flywheel2.getConfigurator().apply(slot0Configs);
-
-    request = new VelocityVoltage(0).withSlot(0);
 
     intakeMotor = new TalonFX(INTAKE_MOTOR_ID);
   }
@@ -85,16 +89,12 @@ public class Shooter extends SubsystemBase {
     return (float) ((flywheel1.getVelocity().getValueAsDouble() + flywheel2.getVelocity().getValueAsDouble()) / 2);
   }
 
-  public void speedUp(float speed) // Sets Flywheel speed, ask if Override with set SpeedUp paramater is needed
-  {
-    flywheel1.setControl(request.withVelocity(speed).withFeedForward(0.5));
-    flywheel1.setControl(request.withVelocity(speed).withFeedForward(0.5));
+  public double getGoalSpeed() {
+    return goalSpeed;
   }
 
-  public void speedDown() // Stops Flywheel
-  {
-    flywheel1.set(0.0);
-    flywheel2.set(0.0);
+  public void setGoalSpeed(double goalSpeed) {
+    this.goalSpeed = goalSpeed;
   }
 
   //Charlotte positioning/regression
@@ -211,4 +211,15 @@ public class Shooter extends SubsystemBase {
       return new double[]{speedMagnitude, angleInFieldFrame}; 
     }
 
+    @Override
+    public void periodic() {
+            flywheel1.set(
+                      shooterFeedforward.calculate(goalSpeed)
+                          + shooterFeedback.calculate(
+                              shooterEncoder.getRate(), goalSpeed));
+            flywheel2.set(
+                      shooterFeedforward.calculate(goalSpeed)
+                          + shooterFeedback.calculate(
+                              shooterEncoder.getRate(), goalSpeed));
+    }
 }
