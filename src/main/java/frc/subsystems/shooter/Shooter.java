@@ -62,21 +62,6 @@ public class Shooter extends SubsystemBase {
     // Constructor, idk what to put here rn
     flywheel1 = new TalonFX(FLYWHEEL_1_ID);
     flywheel2 = new TalonFX(FLYWHEEL_2_ID);
-
-    // Configure feedforward for flywheels
-    slot0Configs = new Slot0Configs();
-    slot0Configs.kS = 0.05; // Add 0.05 V output to overcome static friction
-    slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kP = 0.11; // An error of 1 rps results in 0.11 V output
-    slot0Configs.kI = 0.5; // An error of 1 rps increases output by 0.5 V each second
-    slot0Configs.kD = 0.01; // An acceleration of 1 rps/s results in 0.01 V output
-
-    flywheel1.getConfigurator().apply(slot0Configs);
-    flywheel2.getConfigurator().apply(slot0Configs);
-
-    request = new VelocityVoltage(0).withSlot(0);
-
-    intakeMotor = new TalonFX(INTAKE_MOTOR_ID);
   }
 
   public static Shooter getInstance() {
