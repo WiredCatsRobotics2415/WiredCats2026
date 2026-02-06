@@ -26,8 +26,10 @@ public class RobotContainer {
         configureControls();
         neutralizeSubsystems();
 
-        // Register vision subsystem with CommandScheduler so its periodic() method runs
+        // Register subsystems with CommandScheduler so their periodic() methods run
         edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(vision);
+        edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(shooter);
+        edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(turret);
     }
 
     public static RobotContainer getInstance() {

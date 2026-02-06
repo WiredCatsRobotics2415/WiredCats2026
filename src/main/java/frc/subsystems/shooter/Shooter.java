@@ -224,12 +224,17 @@ public class Shooter extends SubsystemBase {
         
         logShootingData(robotPose, target, speedMagnitude, angleInFieldFrame, 
                         turretAngleRadians, shooterAngleDegrees, pitchRadians);
-        
-        ball.throwBall(
+
+        if (Robot.isReal()) {
+            //TODO: set turret angle
+        } else {
+            ball.throwBall(
             new Pose3d(robotPose.getX(), robotPose.getY(), 0.457, new Rotation3d()),
             new Rotation3d(0, pitchRadians, angleInFieldFrame),
             speedMagnitude
         );
+        }
+        setGoalSpeed(speedMagnitude);
     }
 
     private Pose2d getTargetForAngle(Pose2d robotPose, int shooterAngle) {
