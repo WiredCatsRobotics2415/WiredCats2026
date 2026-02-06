@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -185,11 +186,16 @@ public class Measurements {
     }
 
     public static final Pose2d HubLocation = new Pose2d(181.56 / 39.3701, 158.84 / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
+    public static final Pose2d LeftMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, 49.84 / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
+    public static final Pose2d RightMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, (317.69 - 49.84) / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
 
-    public static final double ShooterAngleLow = 15; 
-    public static final double ShooterAngleHigh = 45; 
+    public static final int ShooterAngleLow = 15; 
+    public static final int ShooterAngleHigh = 45; 
 
-    public static final double ShooterHubRegionOne = 30;
+    public static final Rectangle2d ShootIntoHubRegion = new Rectangle2d(
+        new Translation2d(0, 0),
+        new Translation2d(HubLocation.getTranslation().getX(), 317.69 / 39.3701)
+    );
 
     public static final double TurretAngleOffset = 0; 
 }
