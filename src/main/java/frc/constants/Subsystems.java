@@ -11,6 +11,7 @@ import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.DigitalSource;
 import frc.utils.tuning.TuneableNumber;
 
 public class Subsystems {
@@ -47,5 +48,19 @@ public class Subsystems {
         public static final int FLYWHEEL_2_ID = 2;  //Placeholder
         public static final int INTAKE_MOTOR_ID = 1; //Placeholder
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
+        public static double kSVolts;
+        public static double kVVoltSecondsPerRotation;
+        public static double kP;
+        public static DigitalSource[] kEncoderPorts;
+        public static DigitalSource kEncoderReversed;
+        public static double kShooterToleranceRPS;
+        public static double kEncoderDistancePerPulse;
+    }
+
+    public static class ClimberConstants {
+        public static final double GoalDeadband = 0;
+        public static double kSVolts;
+        public static double kVVoltSecondsPerRotation;
+        public static double kP;
     }
 }
