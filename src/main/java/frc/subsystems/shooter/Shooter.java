@@ -17,10 +17,13 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
+import frc.visualization.BallSim;
 
 // Import Subsystems Constants, TODO: currently all placeholders change once we have real values
 public class Shooter extends SubsystemBase {
@@ -32,6 +35,8 @@ public class Shooter extends SubsystemBase {
   private static Integer FLYWHEEL_1_ID = 1;
   private static Integer FLYWHEEL_2_ID = 2;
   private static Integer INTAKE_MOTOR_ID = 3;
+
+  private static BallSim ball = BallSim.getInstance();
 
   //feedforward
   private static Slot0Configs slot0Configs;
@@ -97,10 +102,6 @@ public class Shooter extends SubsystemBase {
   //Charlotte positioning/regression
   // get which speed file to use for angle regression
     private String getCSVForPose(Pose2d robotPose) {
-        // for debugging
-        Logger.recordOutput("Shooter/Hub Location", Measurements.HubLocation); 
-        Logger.recordOutput("Shooter/Robot Pose", robotPose); 
-
         if (getDegreesAngleForPose(robotPose) == 45) {
             return "low_angle_speed.csv"; // closer to hub
         } else {
@@ -109,19 +110,18 @@ public class Shooter extends SubsystemBase {
     }
 
     public int getDegreesAngleForPose(Pose2d robotPose) {
-      double distanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation());
       int angle; 
 
-      if (distanceFromHub <= Measurements.ShooterHubRegionOne) {
-          angle =  45; // closer to hub
+      if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
+          angle = Measurements.ShooterAngleLow; // closer to hub (inside region)
       } else {
-          angle = 15; // further from hub
+          angle = Measurements.ShooterAngleHigh; // further from hub (outside region)
       }
 
       return angle; 
     }
 
-    public double getSpeedToHubForPose(Pose2d robotPose) {
+    public double getSpeedToTargetForPose(Pose2d robotPose, Pose2d target) {
         String filename = getCSVForPose(robotPose); 
         String filepath = "src/main/java/frc/constants/" + filename;
 
@@ -155,7 +155,7 @@ public class Shooter extends SubsystemBase {
             calculateSpeedForDistance.addData(distances.get(i), speeds.get(i));
         }
 
-        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(Measurements.HubLocation.getTranslation()) * 100; // returns meters * 100 = centimeters
+        double robotCurrentDistanceFromHub = robotPose.getTranslation().getDistance(target.getTranslation()) * 100; // returns meters * 100 = centimeters
 
         double motorSpeed = calculateSpeedForDistance.predict(robotCurrentDistanceFromHub);
         // clamp speed to 20 + (keeps positive)
@@ -180,27 +180,20 @@ public class Shooter extends SubsystemBase {
         return speed; 
     }
 
-    // uses given robot pose and current velocities to calculate actual needed speed
-    // limitations: assumes robot speed remains constant, doesn't account for gravity/air resistance -> would require higher speed to overcome, this just gives exact
-    public double getSpeedToHubForPoseAndVelocities(Pose2d robotPose) {
-        double[] speed = getShooterSpeedAndAngleToHub(robotPose); 
-        return speed[0]; 
-    }
 
-    public double[] getShooterSpeedAndAngleToHub(Pose2d robotPose) {
-      double staticSpeed = getSpeedToHubForPose(robotPose); 
-      System.out.println("IT'S WORKING");
+    public double[] getShooterSpeedAndAngleToTarget(Pose2d robotPose, Pose2d target, int shooterAngle) {
+      double staticSpeed = getSpeedToTargetForPose(robotPose, target); 
 
-      Pose2d hubPose = Measurements.HubLocation; 
-      double angleToHub = hubPose.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians(); 
+      double angleToTarget = target.getTranslation().minus(robotPose.getTranslation()).getAngle().getRadians(); 
 
-      double xNeeded = staticSpeed * Math.cos(angleToHub); 
-      double yNeeded = staticSpeed * Math.sin(angleToHub); 
+      double xNeeded = staticSpeed * Math.cos(angleToTarget); 
+      double yNeeded = staticSpeed * Math.sin(angleToTarget); 
 
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
       ChassisSpeeds fieldVel = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getVelocity(), robotPose.getRotation());
 
       // Scale down the compensation to reduce over-correction
+      // CHARLOTTE NOTE: I think we may need a more agressive x compensation on 45 degrees
       double xCompensationFactor = 0.25; // Adjust this value between 0-1 to tune
       double yCompensationFactor = 0.25; // Adjust this value between 0-1 to tune
       double xVelocity = xNeeded - (fieldVel.vxMetersPerSecond * xCompensationFactor);
@@ -213,10 +206,64 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/Shooter Vel X", xVelocity);
       Logger.recordOutput("Shooter/Shooter Vel Y", yVelocity);
       Logger.recordOutput("Shooter/Speed with Velocity", speedMagnitude);
-      Logger.recordOutput("Static angle", angleToHub);
+      Logger.recordOutput("Static angle to target", angleToTarget);
       Logger.recordOutput("Angle In Field Frame", angleInFieldFrame);
 
       return new double[]{speedMagnitude, angleInFieldFrame}; 
     }
 
+    public void setTurretAndShooterForPose(Pose2d robotPose) {
+        int shooterAngleDegrees = getDegreesAngleForPose(robotPose);
+        
+        // Determine target
+        Pose2d target = getTargetForAngle(robotPose, shooterAngleDegrees);
+        
+        // Get shooting parameters
+        double[] speedAndAngle = getShooterSpeedAndAngleToTarget(robotPose, target, shooterAngleDegrees);
+        double speedMagnitude = speedAndAngle[0];
+        double angleInFieldFrame = speedAndAngle[1];
+        
+        double turretAngleRadians = angleInFieldFrame - robotPose.getRotation().getRadians() + Math.toRadians(Measurements.TurretAngleOffset);
+        
+        double pitchRadians = Math.toRadians(shooterAngleDegrees - 90); 
+        
+        logShootingData(robotPose, target, speedMagnitude, angleInFieldFrame, 
+                        turretAngleRadians, shooterAngleDegrees, pitchRadians);
+        
+        ball.throwBall(
+            new Pose3d(robotPose.getX(), robotPose.getY(), 0.457, new Rotation3d()),
+            new Rotation3d(0, pitchRadians, angleInFieldFrame),
+            speedMagnitude
+        );
+    }
+
+    private Pose2d getTargetForAngle(Pose2d robotPose, int shooterAngle) {
+        if (shooterAngle != 45) {
+            return Measurements.HubLocation;
+        }
+        // low angle, selects closest target for left or right
+        return (robotPose.getTranslation().getDistance(Measurements.LeftMidAllianceRegion.getTranslation()) < 
+                robotPose.getTranslation().getDistance(Measurements.RightMidAllianceRegion.getTranslation())) 
+                ? Measurements.LeftMidAllianceRegion : Measurements.RightMidAllianceRegion;
+    }
+
+    private void logShootingData(Pose2d robotPose, Pose2d target, double speed, double angleInFieldFrame, double turretAngle, int shooterAngle, double pitchRadians) {
+        Logger.recordOutput("Shooter/Target", target);
+        Logger.recordOutput("Shooter/Shooter Speed", speed);
+        Logger.recordOutput("Shooter/Angle (deg)", shooterAngle);
+        Logger.recordOutput("Shooter/Pitch (rad)", pitchRadians);
+
+        Logger.recordOutput("Turret/Robot Pose", robotPose);
+        Logger.recordOutput("Turret/Angle In Field Frame (rad)", angleInFieldFrame);
+        Logger.recordOutput("Turret/Turret Angle (rad)", turretAngle);
+        Logger.recordOutput("Turret/Turret Angle (deg)", Math.toDegrees(turretAngle));
+        Logger.recordOutput("Turret/Robot Rotation (deg)", robotPose.getRotation().getDegrees());
+
+        Logger.recordOutput("Turret/Robot Pose", robotPose);
+        Logger.recordOutput("Shooter/Hub Location", Measurements.HubLocation); 
+        Logger.recordOutput("Shooter/Robot Pose", robotPose); 
+        Logger.recordOutput("Shooter/ShootIntoHubRegion", Measurements.ShootIntoHubRegion); 
+        Logger.recordOutput("Shooter/LeftMidAllianceRegion", Measurements.LeftMidAllianceRegion); 
+        Logger.recordOutput("Shooter/RightMidAllianceRegion", Measurements.RightMidAllianceRegion); 
+    }
 }
