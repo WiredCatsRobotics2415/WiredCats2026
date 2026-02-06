@@ -8,12 +8,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import frc.subsystems.shooter.ShooterSim;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.littletonrobotics.junction.Logger;
-
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -21,15 +19,11 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.robot.Robot;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
-import frc.subsystems.turret.Turret;
-import lombok.Setter;
 
 // Import Subsystems Constants, TODO: currently all placeholders change once we have real values
 public class Shooter extends SubsystemBase {
@@ -41,27 +35,19 @@ public class Shooter extends SubsystemBase {
   private static Integer FLYWHEEL_1_ID = 1;
   private static Integer FLYWHEEL_2_ID = 2;
   private static Integer INTAKE_MOTOR_ID = 3;
+  private final PIDController pid = new PIDController(ShooterConstants.kP, 0.0, 0.0);
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
 
-    private final Encoder shooterEncoder =
-      new Encoder(
-          ShooterConstants.kEncoderPorts[0],
-          ShooterConstants.kEncoderPorts[1],
-          ShooterConstants.kEncoderReversed);
-
-  private final SimpleMotorFeedforward shooterFeedforward =
-      new SimpleMotorFeedforward(
-          ShooterConstants.kSVolts, ShooterConstants.kVVoltSecondsPerRotation);
-  private final PIDController shooterFeedback = new PIDController(ShooterConstants.kP, 0.0, 0.0);
+  private static ShooterSim sim = new ShooterSim();
 
   private double goalSpeed = 0.0;
 
   // Intake Functions Below
   private Shooter() {
-    shooterFeedback.setTolerance(ShooterConstants.kShooterToleranceRPS);
-    shooterEncoder.setDistancePerPulse(ShooterConstants.kEncoderDistancePerPulse);
     // Constructor, idk what to put here rn
     flywheel1 = new TalonFX(FLYWHEEL_1_ID);
     flywheel2 = new TalonFX(FLYWHEEL_2_ID);
+    indexerMotor = new TalonFX(INTAKE_MOTOR_ID);
   }
 
   public static Shooter getInstance() {
@@ -73,7 +59,7 @@ public class Shooter extends SubsystemBase {
   public void startShooting() // Starts Intake
   {
     //starting it at 50%
-    flywheel1.set(0.5);
+    indexerMotor.set(0.5);
   }
 
   public void stopShooting() // Stops Intake
@@ -84,7 +70,13 @@ public class Shooter extends SubsystemBase {
   // Flywheel Functions Below
   public float getSpeed() // Returns average speed of both flywheels
   {
+    if (Robot.isReal()) {
     return (float) ((flywheel1.getVelocity().getValueAsDouble() + flywheel2.getVelocity().getValueAsDouble()) / 2);
+    } else {
+      // In simulation, return the actual velocity converted to voltage-like units for PID
+      // This matches the units expected by the PID controller
+      return (float) ((sim.getFlywheel1VelocityRPS() + sim.getFlywheel2VelocityRPS()) / 2);
+    }
   }
 
   public double getGoalSpeed() {
@@ -222,13 +214,26 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-            flywheel1.set(
-                      shooterFeedforward.calculate(goalSpeed)
-                          + shooterFeedback.calculate(
-                              shooterEncoder.getRate(), goalSpeed));
-            flywheel2.set(
-                      shooterFeedforward.calculate(goalSpeed)
-                          + shooterFeedback.calculate(
-                              shooterEncoder.getRate(), goalSpeed));
+      Logger.recordOutput("Shooter/goalSpeed", goalSpeed);
+      Logger.recordOutput("Shooter/actualSpeed", getSpeed());
+
+      // Combine feedforward (estimates needed voltage) with feedback (corrects for errors)
+      double feedforwardVolts = feedforward.calculate(goalSpeed);
+      double feedbackVolts = pid.calculate(getSpeed(), goalSpeed);
+      double voltage = feedforwardVolts + feedbackVolts;
+
+      Logger.recordOutput("Shooter/feedforwardVolts", feedforwardVolts);
+      Logger.recordOutput("Shooter/feedbackVolts", feedbackVolts);
+      Logger.recordOutput("Shooter/totalVoltage", voltage);
+
+      if (Robot.isReal()) {
+            flywheel1.setVoltage(voltage);
+            flywheel2.setVoltage(voltage);
+    } else {
+        sim.setFlywheel1Voltage(voltage);
+        sim.setFlywheel2Voltage(voltage);
+        sim.update(0.02);
     }
+  }
+
 }

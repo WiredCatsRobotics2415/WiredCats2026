@@ -48,13 +48,15 @@ public class Subsystems {
         public static final int FLYWHEEL_2_ID = 2;  //Placeholder
         public static final int INTAKE_MOTOR_ID = 1; //Placeholder
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
-        public static double kSVolts;
-        public static double kVVoltSecondsPerRotation;
-        public static double kP;
-        public static DigitalSource[] kEncoderPorts;
-        public static DigitalSource kEncoderReversed;
-        public static double kShooterToleranceRPS;
-        public static double kEncoderDistancePerPulse;
+        public static double kSVolts = 0.0;
+        public static double kVVoltSecondsPerRotation = 0.0;
+        public static double kP = 0.5; // PID proportional gain for feedback control
+        public static double kShooterToleranceRPS = 0.0;
+        public static double kEncoderDistancePerPulse = 0.0;
+        // Feedforward gains - these provide a model-based estimate of voltage needed
+        public static double kS = 0.1; // Voltage to overcome static friction (volts)
+        public static double kV = 0.12; // Voltage per unit velocity (volts per RPS) - tune this!
+        public static double kA = 0.01; // Voltage per unit acceleration (volts per RPS/s)
     }
 
     public static class ClimberConstants {

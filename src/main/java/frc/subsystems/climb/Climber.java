@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Subsystems.ClimberConstants;
+import frc.constants.Subsystems.ShooterConstants;
 
 public class Climber extends SubsystemBase {
 
@@ -18,13 +19,11 @@ public class Climber extends SubsystemBase {
     private AnalogInput wirePotentiometer;
     private TalonFX climbMotor;
 
+
     private double goalPos = 0.0;
 
-    private final SimpleMotorFeedforward climberFeedForward =
-      new SimpleMotorFeedforward(
-          ClimberConstants.kSVolts, ClimberConstants.kVVoltSecondsPerRotation);
-  private final PIDController climberFeedback = new PIDController(ClimberConstants.kP, 0.0, 0.0);
-
+    private final PIDController pid = new PIDController(ClimberConstants.kP, 0.0, 0.0);
+    
     public static Climber getInstance() {
     if (instance == null)
       instance = new Climber();
@@ -65,10 +64,7 @@ public class Climber extends SubsystemBase {
     public Command updatePos() {
         return runOnce(
                 () -> {
-                  climbMotor.set(
-                      climberFeedForward.calculate(getGoalPos())
-                          + climberFeedback.calculate(
-                              wirePotentiometer.getVoltage(), getGoalPos()));
+                  climbMotor.setVoltage(pid.calculate(wirePotentiometer.getVoltage(), goalPos));
                 });
     }
 
