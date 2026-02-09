@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.constants.Subsystems.ShooterConstants;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.turret.Turret;
 import lombok.Setter;
@@ -47,6 +48,13 @@ public class Shooter extends SubsystemBase {
 
   private static ShooterSim sim = new ShooterSim();
 
+  // for both sim and real, to store the pitch angle (in radians), turret angle, and needed speed (all from most recent calculation)
+  // also store angle in field frame for sim specifically
+  private double lastCalculationPitchRadians = 0.0; 
+  private double lastCalculationTurretAngleRadians = 0.0; // real only
+  private double lastCalculatedNeededSpeed = 0.0; 
+  private double lastCalculatedAngleInFieldFrame = 0.0; // sim only
+
   private double goalSpeed = 0.0;
 
   // Intake Functions Below
@@ -65,8 +73,19 @@ public class Shooter extends SubsystemBase {
 
   public void startShooting() // Starts Intake
   {
-    //starting it at 50%
-    indexerMotor.set(0.5);
+    if (Robot.isReal()) {
+      //starting it at 50%
+      indexerMotor.set(0.5);
+      // shoot in real? can use lastCalculationPitchRadians, lastCalculationTurretAngleRadians, lastCalculatedNeededSpeed
+    } else {
+      CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+      Pose2d robotPose = drive.getPose(); 
+      ball.throwBall(
+          new Pose3d(robotPose.getX(), robotPose.getY(), 0.457, new Rotation3d()),
+          new Rotation3d(0, lastCalculationPitchRadians, lastCalculatedAngleInFieldFrame),
+          lastCalculatedNeededSpeed
+      );
+    }
   }
 
   public void stopShooting() // Stops Intake
@@ -225,15 +244,12 @@ public class Shooter extends SubsystemBase {
         logShootingData(robotPose, target, speedMagnitude, angleInFieldFrame, 
                         turretAngleRadians, shooterAngleDegrees, pitchRadians);
 
-        if (Robot.isReal()) {
-            //TODO: set turret angle
-        } else {
-            ball.throwBall(
-            new Pose3d(robotPose.getX(), robotPose.getY(), 0.457, new Rotation3d()),
-            new Rotation3d(0, pitchRadians, angleInFieldFrame),
-            speedMagnitude
-        );
-        }
+        lastCalculationPitchRadians = pitchRadians; 
+        lastCalculationTurretAngleRadians = turretAngleRadians; 
+        lastCalculatedNeededSpeed = speedMagnitude; 
+
+        lastCalculatedAngleInFieldFrame = angleInFieldFrame; // this one is just for sim
+        
         setGoalSpeed(speedMagnitude);
     }
 
@@ -266,6 +282,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/LeftMidAllianceRegion", Measurements.LeftMidAllianceRegion); 
         Logger.recordOutput("Shooter/RightMidAllianceRegion", Measurements.RightMidAllianceRegion); 
     }
+
     @Override
     public void periodic() {
       Logger.recordOutput("Shooter/goalSpeed", goalSpeed);
@@ -280,14 +297,21 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/feedbackVolts", feedbackVolts);
       Logger.recordOutput("Shooter/totalVoltage", voltage);
 
+      Logger.recordOutput("Shooter/isInShootingMode", RobotContainer.getInstance().isInShootingMode()); 
+
       if (Robot.isReal()) {
             flywheel1.setVoltage(voltage);
             flywheel2.setVoltage(voltage);
-    } else {
-        sim.setFlywheel1Voltage(voltage);
-        sim.setFlywheel2Voltage(voltage);
-        sim.update(0.02);
-    }
-  }
+      } else {
+          sim.setFlywheel1Voltage(voltage);
+          sim.setFlywheel2Voltage(voltage);
+          sim.update(0.02);
 
+          if (RobotContainer.getInstance().isInShootingMode()) {
+            CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+            Pose2d robotPose = drive.getPose(); 
+            setTurretAndShooterForPose(robotPose); 
+          }
+      }
+  }
 }

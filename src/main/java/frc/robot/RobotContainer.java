@@ -17,6 +17,7 @@ public class RobotContainer {
     private final OI oi = OI.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final Turret turret = Turret.getInstance(); 
+    private boolean inShootingMode = false; 
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -61,7 +62,8 @@ public class RobotContainer {
                 .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
-        oi.binds.get(OI.Bind.getShooterSpeed).onTrue(new InstantCommand(() -> shooter.setTurretAndShooterForPose(drive.getPose()))); 
+        oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
+        oi.binds.get(OI.Bind.shoot).onTrue(new InstantCommand(() -> shooter.startShooting())); 
     }
 
     public void periodic() {
@@ -74,6 +76,10 @@ public class RobotContainer {
 
     public void neutralizeSubsystems() {
         //neutralize subsystems
+    }
+    
+    public boolean isInShootingMode() {
+        return inShootingMode;
     }
 
     // so vision can get robot pose
