@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand; 
 import frc.constants.Controls;
+import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
 import frc.subsystems.shooter.Shooter;
@@ -16,6 +17,7 @@ public class RobotContainer {
     private final Vision vision;
     private final OI oi = OI.getInstance();
     private final Shooter shooter = Shooter.getInstance();
+    private final Climber climber = Climber.getInstance();
     private final Turret turret = Turret.getInstance(); 
 
     private RobotContainer() {
@@ -62,6 +64,8 @@ public class RobotContainer {
         }).withName("Teleop Default"));
         
         oi.binds.get(OI.Bind.getShooterSpeed).onTrue(new InstantCommand(() -> shooter.setTurretAndShooterForPose(drive.getPose()))); 
+        oi.binds.get(OI.Bind.setHighGoal).onTrue(climber.SetVolt(3.0)); 
+        oi.binds.get(OI.Bind.setLowGoal).onTrue(climber.SetVolt(0.0)); 
     }
 
     public void periodic() {

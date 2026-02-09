@@ -42,6 +42,8 @@ public class Shooter extends SubsystemBase {
   private static Integer INTAKE_MOTOR_ID = 3;
 
   private static BallSim ball = BallSim.getInstance();
+
+  //WE ARE USING SIMPLE FEEDFORWARD AND PID BECAUSE WE ARE SETTING FLYWHEEL VELOCITIES AND DON'T NEED POSITION ACCURACY
   private final PIDController pid = new PIDController(ShooterConstants.kP, 0.0, 0.0);
   private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
 

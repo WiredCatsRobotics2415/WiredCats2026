@@ -4,24 +4,31 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Subsystems.ClimberConstants;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.robot.Robot;
 
 public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
     private AnalogInput wirePotentiometer;
     private TalonFX climbMotor;
+    private ClimberSim sim = new ClimberSim();
 
-
-    private double goalPos = 0.0;
-
+      // Create a PID controller whose setpoint's change is subject to maximum
+  // velocity and acceleration constraints.
     private final PIDController pid = new PIDController(ClimberConstants.kP, 0.0, 0.0);
     
     public static Climber getInstance() {
@@ -32,15 +39,7 @@ public class Climber extends SubsystemBase {
 
   private Climber() {
     wirePotentiometer = new AnalogInput(0);
-  }
-
-
-  public double getGoalPos() {
-    return goalPos;
-  }
-
-  public void setGoalPos(double goalPos) {
-    this.goalPos = goalPos;
+    pid.setTolerance(0.05); 
   }
 
     public Command Lock() {
@@ -52,6 +51,14 @@ public class Climber extends SubsystemBase {
         });
   }
 
+    public Command SetVolt(double voltage) {
+    return runOnce(
+        () -> {
+          pid.setSetpoint(voltage);
+          System.out.println("Set climber setpoint to " + voltage);
+        });
+    }
+
     
     public boolean getForwardLimit() {
         return false;
@@ -61,17 +68,18 @@ public class Climber extends SubsystemBase {
         return false;
     }
 
-    public Command updatePos() {
-        return runOnce(
-                () -> {
-                  climbMotor.setVoltage(pid.calculate(wirePotentiometer.getVoltage(), goalPos));
-                });
-    }
-
     @Override 
     public void periodic() {
-        if (Math.abs(getGoalPos()) < ClimberConstants.GoalDeadband) {
-            updatePos().schedule();
-        }
+      if (Robot.isReal()) {
+        Logger.recordOutput("Climber/PotentiometerVoltage", wirePotentiometer.getVoltage());
+        Logger.recordOutput("Climber/Voltage", climbMotor.getMotorVoltage().getValueAsDouble());
+        climbMotor.setVoltage(pid.calculate(wirePotentiometer.getVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
+      } else {
+        sim.update(0.02);
+        Logger.recordOutput("Climber/PotentiometerVoltage", sim.getPotentiometerVoltage());
+        double voltage = (pid.calculate(sim.getPotentiometerVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
+        Logger.recordOutput("Climber/Voltage", voltage);
+        sim.setMotorVoltage(voltage);
+      }
     }
 }

@@ -63,6 +63,10 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static double kP;
+        public static double kP = 1;
+        public static double kG = 0.3;
+        public static double kClimbArmMassKg = 1;
+        public static double kClimbArmLengthM = 1;
+        public static double kClimbArmMOIkgm2 = 1;
     }
 }
