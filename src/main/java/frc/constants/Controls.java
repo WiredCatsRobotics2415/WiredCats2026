@@ -33,9 +33,8 @@ public class Controls {
         public static final int LeftTrigger = XboxController.Axis.kLeftTrigger.value;
         public static final int RightTrigger = XboxController.Axis.kRightTrigger.value;
 
-        public static final int CalculateShooterAngleButton = 1; 
-        public static final int CalculateShooterAngleWithVelocitiesButton = 2; 
-        public static final int CalculateStaticTurretAngleToHub = 3; 
+        public static final int EnterShootingModeButton = 1; 
+        public static final int ShootButtons = 2; 
         public static final int setHighGoal = 4;
         public static final int setLowGoal = 5;
     }
