@@ -1,15 +1,23 @@
 package frc.robot;
 
+import java.util.Optional;
+
+import com.google.flatbuffers.Constants;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand; 
 import frc.constants.Controls;
+import frc.constants.Measurements;
 import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
 import frc.subsystems.shooter.Shooter;
 import frc.subsystems.turret.Turret; 
+
 
 public class RobotContainer {
     private static RobotContainer instance;
@@ -93,5 +101,15 @@ public class RobotContainer {
 
     public Vision getVision() {
         return vision;
+    }
+
+    public Pose2d getHubPosition() //If no alliance returns blue hub location
+    {
+        Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+        return alliance == Alliance.Blue ? Measurements.HubLocation : flipPose(Measurements.HubLocation);
+    }
+    static Pose2d flipPose(Pose2d pose) //Helper method
+    {
+        return new Pose2d(Measurements.ApriltagFieldLayout.getFieldLength() - pose.getX(), pose.getY(), pose.getRotation().plus(Rotation2d.fromDegrees(180)));
     }
 }
