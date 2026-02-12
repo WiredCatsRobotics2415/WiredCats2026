@@ -69,4 +69,16 @@ public class Subsystems {
         public static double kClimbArmLengthM = 1;
         public static double kClimbArmMOIkgm2 = 1;
     }
+
+    public static class TurretConstants {
+        public static final double GoalDeadband = 0;
+        public static double kSVolts;
+        public static double kVVoltSecondsPerRotation;
+        public static double kP = 10;
+        public static double kMaxVelocity = 5;
+        public static double kMaxAcceleration = 5;
+        public static double kI = 0.1;
+        public static double kD = 0.1;
+        public static double kDt = 0.1;
+    }
 }

@@ -56,6 +56,11 @@ public class Shooter extends SubsystemBase {
   private double lastCalculationTurretAngleRadians = 0.0; // real only
   private double lastCalculatedNeededSpeed = 0.0; 
   private double lastCalculatedAngleInFieldFrame = 0.0; // sim only
+  private double lastCalculationTurretAngleDegrees = 0.0;
+
+  public double getLastAngle() {
+    return lastCalculationTurretAngleDegrees;
+  }
 
   private double goalSpeed = 0.0;
 
@@ -240,6 +245,7 @@ public class Shooter extends SubsystemBase {
         double angleInFieldFrame = speedAndAngle[1];
         
         double turretAngleRadians = angleInFieldFrame - robotPose.getRotation().getRadians() + Math.toRadians(Measurements.TurretAngleOffset);
+        double turretAngleDegrees = Math.toDegrees(turretAngleRadians);
         
         double pitchRadians = Math.toRadians(shooterAngleDegrees - 90); 
         
@@ -247,7 +253,7 @@ public class Shooter extends SubsystemBase {
                         turretAngleRadians, shooterAngleDegrees, pitchRadians);
 
         lastCalculationPitchRadians = pitchRadians; 
-        lastCalculationTurretAngleRadians = turretAngleRadians; 
+        lastCalculationTurretAngleDegrees = turretAngleDegrees; 
         lastCalculatedNeededSpeed = speedMagnitude; 
 
         lastCalculatedAngleInFieldFrame = angleInFieldFrame; // this one is just for sim
