@@ -21,6 +21,13 @@ public class Subsystems {
 
     }
 
+    public static class IntakeConstants {
+
+        public static final double HeadingKA = 0;
+        public static double kSwitchThreshold;
+
+    }
+
     public static class VisionConstants {
         public static final String[] PoseEstimationLLNames = {
             "limelight-front-left", // or whatever your names are
@@ -61,6 +68,7 @@ public class Subsystems {
 
     public static class ClimberConstants {
         public static final double GoalDeadband = 0;
+        public static final double MaxHeight = 0.5;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
         public static double kP = 1;
