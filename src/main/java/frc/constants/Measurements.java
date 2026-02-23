@@ -185,9 +185,13 @@ public class Measurements {
 
     }
 
-    public static final Pose2d HubLocation = new Pose2d(181.56 / 39.3701, 158.84 / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
-    public static final Pose2d LeftMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, 49.84 / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
-    public static final Pose2d RightMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, (317.69 - 49.84) / 39.3701, Rotation2d.fromDegrees(0.0)); // inches to meters
+    public static final Pose2d HubLocation = new Pose2d(181.56 / 39.3701, 158.84 / 39.3701, new Rotation2d()); // inches to meters, this points to the spot at the top of the hub
+    public static final Pose2d LeftMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, 49.84 / 39.3701, new Rotation2d()); // inches to meters
+    public static final Pose2d RightMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, (317.69 - 49.84) / 39.3701, new Rotation2d()); // inches to meters
+
+    public static final double HubGoalHeight = 72 / 39.3701; 
+
+    public static final double ShooterHeightFromGround = 0.25; // arbitrary, in meters
 
     public static final int ShooterAngleLow = 15; 
     public static final int ShooterAngleHigh = 45; 

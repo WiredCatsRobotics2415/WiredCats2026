@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 import frc.constants.Subsystems.TurretConstants;
+import frc.subsystems.turret.TurretSim; 
 
 public class Turret extends SubsystemBase {
     private static Turret instance; 

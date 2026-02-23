@@ -21,7 +21,9 @@ public class OI {
 
     public enum Bind {
         enterShootingMode, 
-        shoot,
+        startShooting,
+        setHighGoal,
+        setLowGoal
         climbHighGoal,
         climbLowGoal,
         climbZero,
@@ -43,7 +45,9 @@ public class OI {
         numpad = new CommandJoystick(1);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
-        binds.put(Bind.shoot, controller.button(GulikitButtons.ShootButtons)); 
+        binds.put(Bind.startShooting, controller.button(GulikitButtons.ShootButtons)); 
+        binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
+        binds.put(Bind.setLowGoal, controller.button(GulikitButtons.setLowGoal)); 
         binds.put(Bind.climbHighGoal, controller.button(GulikitButtons.setHighGoal)); 
         binds.put(Bind.climbLowGoal, controller.button(GulikitButtons.setLowGoal)); 
         binds.put(Bind.climbZero, controller.button(GulikitButtons.setZeroGoal)); 
