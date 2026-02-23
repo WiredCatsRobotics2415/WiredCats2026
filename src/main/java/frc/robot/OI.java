@@ -22,8 +22,9 @@ public class OI {
     public enum Bind {
         enterShootingMode, 
         shoot,
-        setHighGoal,
-        setLowGoal
+        climbHighGoal,
+        climbLowGoal,
+        climbZero,
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -43,8 +44,9 @@ public class OI {
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
         binds.put(Bind.shoot, controller.button(GulikitButtons.ShootButtons)); 
-        binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
-        binds.put(Bind.setLowGoal, controller.button(GulikitButtons.setLowGoal)); 
+        binds.put(Bind.climbHighGoal, controller.button(GulikitButtons.setHighGoal)); 
+        binds.put(Bind.climbLowGoal, controller.button(GulikitButtons.setLowGoal)); 
+        binds.put(Bind.climbZero, controller.button(GulikitButtons.setZeroGoal)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR

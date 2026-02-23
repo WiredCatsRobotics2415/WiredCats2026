@@ -61,6 +61,7 @@ public class Subsystems {
 
     public static class ClimberConstants {
         public static final double GoalDeadband = 0;
+        public static final double MaxHeight = 0.5;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
         public static double kP = 1;

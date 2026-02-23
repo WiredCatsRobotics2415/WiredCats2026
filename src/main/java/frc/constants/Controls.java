@@ -33,10 +33,12 @@ public class Controls {
         public static final int LeftTrigger = XboxController.Axis.kLeftTrigger.value;
         public static final int RightTrigger = XboxController.Axis.kRightTrigger.value;
 
+        //define buttons!!!
         public static final int EnterShootingModeButton = 1; 
         public static final int ShootButtons = 2; 
         public static final int setHighGoal = 4;
         public static final int setLowGoal = 5;
+        public static final int setZeroGoal = 3;
     }
 
     public class NumpadButtons {
