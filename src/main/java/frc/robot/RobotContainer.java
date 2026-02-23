@@ -65,7 +65,7 @@ public class RobotContainer {
         }).withName("Teleop Default"));
         
         oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
-        oi.binds.get(OI.Bind.shoot).onTrue(new InstantCommand(() -> shooter.startShooting())); 
+        oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())); 
         oi.binds.get(OI.Bind.setHighGoal).onTrue(climber.SetVolt(3.0)); 
         oi.binds.get(OI.Bind.setLowGoal).onTrue(climber.SetVolt(0.0)); 
     }
