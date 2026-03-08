@@ -23,7 +23,10 @@ public class OI {
         enterShootingMode, 
         startShooting,
         setHighGoal,
-        setLowGoal
+        setLowGoal, 
+        climbHighGoal,
+        climbLowGoal,
+        climbZero,
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();

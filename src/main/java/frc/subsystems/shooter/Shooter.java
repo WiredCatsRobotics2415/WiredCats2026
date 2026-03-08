@@ -125,16 +125,6 @@ public class Shooter extends SubsystemBase {
     this.goalSpeed = goalSpeed;
   }
 
-  //Charlotte positioning/regression
-  // get which speed file to use for angle regression
-    private String getCSVForPose(Pose2d robotPose) {
-        if (getAngleForPose(robotPose) == 45) {
-            return "low_angle_speed.csv"; // closer to hub
-        } else {
-            return "high_angle_speed.csv"; // further from hub
-        }
-    }
-
     public int getAngleForPose(Pose2d robotPose) {
       System.out.println("get angle for pose"); 
       int angle; 
@@ -160,56 +150,12 @@ public class Shooter extends SubsystemBase {
                 ? Measurements.LeftMidAllianceRegion : Measurements.RightMidAllianceRegion;
     }
 
-    private double calculateShooterSpeedRequired(Pose2d robotPose, Translation3d robotToHubVector) {
-      System.out.println("calculate shooter speed required"); 
-      double distance = Math.sqrt(
-          robotToHubVector.getX() * robotToHubVector.getX() + 
-          robotToHubVector.getY() * robotToHubVector.getY()
-      ); // need horizontal component only
-      double angle = Math.toRadians((double) getAngleForPose(robotPose)); 
-      double initialSpeed = Math.sqrt((distance*4.9)/(Math.sin(angle) * Math.cos(angle))); 
-      return initialSpeed; 
-    }
+    private double calculateShooterSpeedRequired(Pose2d robotPose, Translation3d shooterSpeedVector) {
+      double pitch = Math.toRadians((double) getAngleForPose(robotPose));
+      double[] ts = calculateInitialSpeedAndImpactTime(pitch, shooterSpeedVector); 
+      double t = ts[0]; 
+      double speed = ts[1]; 
 
-    private double calculateShooterSpeedRequiredWithRegression(Pose2d robotPose, Translation3d shooterSpeedVector) {
-      double distanceToHub = shooterSpeedVector.getNorm();  
-      String filename = getCSVForPose(robotPose); 
-      String filepath = "src/main/java/frc/constants/" + filename;
-
-      ArrayList<Double> speeds = new ArrayList<Double>(); 
-      ArrayList<Integer> distances = new ArrayList<Integer>();
-      
-      try (Scanner scanner = new Scanner(new File(filepath))) {
-          // skip header line
-          if (scanner.hasNextLine()) {
-              scanner.nextLine();
-          }
-          
-          while (scanner.hasNextLine()) {
-              String line = scanner.nextLine();
-              String[] parts = line.split(",");
-              if (parts.length == 2) {
-                  int distance = Integer.parseInt(parts[0]);
-                  double speed = Double.parseDouble(parts[1]);
-                  speeds.add(speed); 
-                  distances.add(distance);
-              }
-          }
-      } catch (IOException e) {
-          System.err.println("Error reading CSV: " + e.getMessage());
-      }
-
-      SimpleRegression calculateSpeedForDistance = new SimpleRegression(); 
-      
-      // add all datapoints to regression
-      for (int i = 0; i < distances.size(); i++) {
-          calculateSpeedForDistance.addData(distances.get(i), speeds.get(i));
-      }
-
-      double motorSpeed = calculateSpeedForDistance.predict(distanceToHub);
-      // clamp speed to 20 + (keeps positive)
-      motorSpeed = Math.max(motorSpeed, 20); 
-      double speed = motorSpeed;
       return speed; 
     }
 
@@ -242,29 +188,29 @@ public class Shooter extends SubsystemBase {
 
     private Translation3d getShooterSpeedVector(Pose2d robotPose, Pose2d target) {
       Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
-      Translation3d vectorFromRobotToHub = getVectorFromRobotToTarget(robotPose, target); // meters
+      Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
 
-      double angle = Math.toRadians((double) getAngleForPose(robotPose));
+      Translation3d shooterSpeedVector = vectorFromRobotToTarget.minus(robotVelocity3d); 
 
-      // convert robotVelocity3d to comparable units to vectorFromRobotToHub (needs to be just meters)
-      // calculate flight time (estimate)
-      Translation3d compensatedVector = vectorFromRobotToHub;
-      for (int i = 0; i < 10; i++) {
-          double horizontalDistance = Math.sqrt(
-              compensatedVector.getX() * compensatedVector.getX() +
-              compensatedVector.getY() * compensatedVector.getY()
-          );
-          double speed = calculateShooterSpeedRequired(robotPose, compensatedVector);
-          double flightTime = horizontalDistance / (speed * Math.cos(angle));
-          compensatedVector = vectorFromRobotToHub.plus(new Translation3d(
-              robotVelocity3d.getX() * flightTime,
-              robotVelocity3d.getY() * flightTime,
-              0.0
-          ));
-      }
+      return shooterSpeedVector; 
+    }
 
-      return compensatedVector;
+    private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector) {
+      // horizontal = t * s * cos(pitch)
+      // vertical = t * s * sin(pitch) - 4.8t^2
+      
+      double x = shooterCompensationVector.getX(); 
+      double y = shooterCompensationVector.getY(); 
+      
+      double horizontal = Math.sqrt(x*x + y*y); 
+      double vertical = shooterCompensationVector.getZ(); 
+      
+      double ts = horizontal / Math.cos(pitch); 
 
+      double t = Math.sqrt((ts * Math.sin(pitch) - vertical) / 4.8); 
+      double s = ts / t; 
+      double[] result = new double[]{t, s}; 
+      return result; 
     }
 
     private double getDistBallFromTarget(Pose2d target) {
@@ -285,13 +231,15 @@ public class Shooter extends SubsystemBase {
       Translation3d shooterSpeedVector = getShooterSpeedVector(robotPose, target); 
       Translation3d robotToTargetVector = getVectorFromRobotToTarget(robotPose, target); 
 
-      double speed = calculateShooterSpeedRequired(robotPose, robotToTargetVector); 
+      double speed = calculateShooterSpeedRequired(robotPose, shooterSpeedVector); 
       double turretAngle = calculateTurretAngle(robotPose, shooterSpeedVector); 
       
       lastCalculationPitchRadians = Math.toRadians((double) pitchAngle) - Math.PI/2; 
       lastCalculatedNeededSpeed = speed; 
       lastCalculatedAngleInFieldFrame = getAngleInFieldFrame(shooterSpeedVector); 
       lastCalculationTurretAngleDegrees = turretAngle; 
+
+      Logger.recordOutput("Shooter/balltotarget", getDistBallFromTarget(target));
     }
 
     @Override
