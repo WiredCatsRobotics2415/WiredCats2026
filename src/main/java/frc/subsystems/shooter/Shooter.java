@@ -168,6 +168,7 @@ public class Shooter extends SubsystemBase {
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
       ChassisSpeeds fieldVel = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getVelocity(), robotPose.getRotation());
       Translation3d robotVelocity3d = new Translation3d(fieldVel.vxMetersPerSecond, fieldVel.vyMetersPerSecond, 0.0);
+      Logger.recordOutput("Shooter/robotVelocityVector", makeAdvantageScopeLine(robotVelocity3d, robotPose)); 
       return robotVelocity3d; 
     }
 
@@ -204,6 +205,34 @@ public class Shooter extends SubsystemBase {
       return direction.minus(robotVelocity3d);
     }
 
+    public Pose3d[] mapTrajectory(double initialSpeed, double pitchAngle, Rotation3d direction, Pose2d robotPose) {
+      Pose3d[] trajectory = new Pose3d[99];
+      double robotX = robotPose.getX();
+      double robotY = robotPose.getY();
+      double yaw = direction.getZ(); // field-frame angle
+
+      double dt = 0.05; // seconds per step
+
+      for (int i = 0; i < 99; i++) {
+          double t = i * dt;
+
+          // horizontal distance traveled at this time step
+          double horizontalDist = initialSpeed * Math.cos(pitchAngle) * t;
+
+          // vertical: s*sin(pitch)*t - 4.8t^2 (matching your existing equations)
+          double z = Measurements.ShooterHeightFromGround 
+                  + (initialSpeed * Math.sin(pitchAngle) * t) 
+                  - (4.8 * t * t);
+
+          double x = robotX + horizontalDist * Math.cos(yaw);
+          double y = robotY + horizontalDist * Math.sin(yaw);
+
+          trajectory[i] = new Pose3d(x, y, z, direction);
+      }
+
+      return trajectory;
+  }
+
     private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector, double horizontalDist) {
       // horizontal = t * s * cos(pitch)
       // vertical = t * s * sin(pitch) - 4.8t^2
@@ -223,7 +252,7 @@ public class Shooter extends SubsystemBase {
       // double t = Math.sqrt(((ts * Math.sin(pitch)) - vertical) / 4.8); 
       double s = ts / t; 
       double[] result = new double[]{t, s}; 
-      Logger.recordOutput("Shooter/t + s", result); 
+      Logger.recordOutput("Shooter/t & s", result); 
 
       return result; 
     }
@@ -285,6 +314,10 @@ public class Shooter extends SubsystemBase {
       lastCalculationTurretAngleDegrees = turretAngle; 
 
       setGoalSpeed(speed); 
+
+      Logger.recordOutput("Shooter/ballTrajectory", 
+        mapTrajectory(speed, Math.toRadians(pitchAngle), 
+        new Rotation3d(0, 0, lastCalculatedAngleInFieldFrame), robotPose));
 
       Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target)); // updates when landed
     }
