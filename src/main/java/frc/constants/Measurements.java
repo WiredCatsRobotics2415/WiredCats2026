@@ -189,7 +189,7 @@ public class Measurements {
     public static final Pose2d LeftMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, 49.84 / 39.3701, new Rotation2d()); // inches to meters
     public static final Pose2d RightMidAllianceRegion = new Pose2d(181.56 / 2 / 39.3701, (317.69 - 49.84) / 39.3701, new Rotation2d()); // inches to meters
 
-    public static final double HubGoalHeight = 72 / 39.3701; 
+    public static final double HubGoalHeight = 72 / 39.3701; // inches to meters
 
     public static final double ShooterHeightFromGround = 0.25; // arbitrary, in meters
 

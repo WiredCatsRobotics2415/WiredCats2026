@@ -88,6 +88,7 @@ public class Shooter extends SubsystemBase {
       indexerMotor.set(0.5);
       // shoot in real? can use lastCalculationPitchRadians, lastCalculationTurretAngleRadians, lastCalculatedNeededSpeed
     } else {
+      ballWasInAir = false; // reset to false in case it landed before
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
       Pose2d robotPose = drive.getPose(); 
       setTurretAndShooterForPose(robotPose); // ensures up-to-date
@@ -126,7 +127,6 @@ public class Shooter extends SubsystemBase {
   }
 
     public int getAngleForPose(Pose2d robotPose) {
-      System.out.println("get angle for pose"); 
       int angle; 
 
       if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
@@ -139,7 +139,6 @@ public class Shooter extends SubsystemBase {
     }
 
     public Pose2d getTarget(Pose2d robotPose) {
-      System.out.println("get target"); 
       int shooterAngle = getAngleForPose(robotPose); 
       if (shooterAngle != 45) {
             return Measurements.HubLocation;
@@ -181,7 +180,7 @@ public class Shooter extends SubsystemBase {
 
     private Translation3d getVectorFromRobotToTarget(Pose2d robotPose, Pose2d target) {
       Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround);
-      Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), getTargetHeight(target)); 
+      Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), -getTargetHeight(target)); 
       Translation3d vectorFromRobotToTarget = targetGoalPositionVector.minus(ballPositionVector); 
       return vectorFromRobotToTarget; 
     }
@@ -202,19 +201,30 @@ public class Shooter extends SubsystemBase {
       double x = shooterCompensationVector.getX(); 
       double y = shooterCompensationVector.getY(); 
       
-      double horizontal = Math.sqrt(x*x + y*y); 
-      double vertical = shooterCompensationVector.getZ(); 
+      double horizontal = Math.sqrt(x*x + y*y); // literally has to be positive
+      double vertical = shooterCompensationVector.getZ(); // also literally has to be positive
       
       double ts = horizontal / Math.cos(pitch); 
+      double radicand = ((ts * Math.sin(pitch)) - vertical) / 4.8;
 
-      double t = Math.sqrt((ts * Math.sin(pitch) - vertical) / 4.8); 
+      if (radicand < 0) {
+          Logger.recordOutput("Shooter/ERR_neg_radicand", radicand);
+          return new double[]{Double.NaN, Double.NaN};
+      }
+
+      double t = Math.sqrt(radicand);
+
+      // double t = Math.sqrt(((ts * Math.sin(pitch)) - vertical) / 4.8); 
       double s = ts / t; 
       double[] result = new double[]{t, s}; 
+      Logger.recordOutput("Shooter/t + s", result); 
+
+
       return result; 
     }
 
     private double getDistBallFromTarget(Pose2d target) {
-      Pose3d Target3D = new Pose3d(target.getX(), target.getY(), getTargetHeight(target), new Rotation3d(0, 0,0)); 
+      Pose3d Target3D = new Pose3d(target.getX(), target.getY(), -getTargetHeight(target), new Rotation3d(0, 0,0)); // negative because positive was upside down for some reason
       Pose3d landedBallPose = ball.getLandedPose3d(); 
       return landedBallPose.getTranslation().getDistance(Target3D.getTranslation()); 
     }
@@ -225,21 +235,25 @@ public class Shooter extends SubsystemBase {
 
     private void setTurretAndShooterForPose(Pose2d robotPose) {
       double pitchAngle = getAngleForPose(robotPose); 
-
       Pose2d target = getTarget(robotPose); 
 
+      Logger.recordOutput("Shooter/pitchAngle", pitchAngle); 
+      Logger.recordOutput("Shooter/trget", target); 
+
       Translation3d shooterSpeedVector = getShooterSpeedVector(robotPose, target); 
-      Translation3d robotToTargetVector = getVectorFromRobotToTarget(robotPose, target); 
 
       double speed = calculateShooterSpeedRequired(robotPose, shooterSpeedVector); 
+      Logger.recordOutput("Shooter/speed", speed); 
+
       double turretAngle = calculateTurretAngle(robotPose, shooterSpeedVector); 
+      Logger.recordOutput("Shooter/turretAngle", turretAngle); 
       
       lastCalculationPitchRadians = Math.toRadians((double) pitchAngle) - Math.PI/2; 
       lastCalculatedNeededSpeed = speed; 
       lastCalculatedAngleInFieldFrame = getAngleInFieldFrame(shooterSpeedVector); 
       lastCalculationTurretAngleDegrees = turretAngle; 
 
-      Logger.recordOutput("Shooter/balltotarget", getDistBallFromTarget(target));
+      Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target)); // updates when landed
     }
 
     @Override
@@ -257,10 +271,10 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/totalVoltage", voltage);
 
       Logger.recordOutput("Shooter/isInShootingMode", RobotContainer.getInstance().isInShootingMode()); 
-
+      
       if (Robot.isReal()) {
-            flywheel1.setVoltage(voltage);
-            flywheel2.setVoltage(voltage);
+          flywheel1.setVoltage(voltage);
+          flywheel2.setVoltage(voltage);
       } else {
           sim.setFlywheel1Voltage(voltage);
           sim.setFlywheel2Voltage(voltage);
@@ -272,16 +286,14 @@ public class Shooter extends SubsystemBase {
       Pose2d robotPose = drive.getPose(); 
 
       if (RobotContainer.getInstance().isInShootingMode()) {
-          setTurretAndShooterForPose(robotPose); 
+          setTurretAndShooterForPose(robotPose); // in periodic so updates
       }
       
       boolean isInAir = ball.isActive();
-      if (ballWasInAir && !isInAir) {
+      if (ballWasInAir && !isInAir) { // if the ball was previously in the air and was no longer
           Pose2d target = getTarget(robotPose);
           Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target));
+          ballWasInAir = isInAir; // update was in air to false so it doesn't run again
       }
-      ballWasInAir = isInAir;
-
-
   }
 }
