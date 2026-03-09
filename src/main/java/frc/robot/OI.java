@@ -23,7 +23,7 @@ public class OI {
         enterShootingMode, 
         startShooting,
         setHighGoal,
-        setLowGoal
+        setLowGoal, 
         climbHighGoal,
         climbLowGoal,
         climbZero,
