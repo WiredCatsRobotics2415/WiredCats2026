@@ -149,9 +149,9 @@ public class Shooter extends SubsystemBase {
                 ? Measurements.LeftMidAllianceRegion : Measurements.RightMidAllianceRegion;
     }
 
-    private double calculateShooterSpeedRequired(Pose2d robotPose, Translation3d shooterSpeedVector) {
+    private double calculateShooterSpeedRequired(Pose2d robotPose, Translation3d shooterSpeedVector, double horizontalDistance) {
       double pitch = Math.toRadians((double) getAngleForPose(robotPose));
-      double[] ts = calculateInitialSpeedAndImpactTime(pitch, shooterSpeedVector); 
+      double[] ts = calculateInitialSpeedAndImpactTime(pitch, shooterSpeedVector, horizontalDistance); 
       double t = ts[0]; 
       double speed = ts[1]; 
 
@@ -180,7 +180,9 @@ public class Shooter extends SubsystemBase {
 
     private Translation3d getVectorFromRobotToTarget(Pose2d robotPose, Pose2d target) {
       Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround);
-      Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), -getTargetHeight(target)); 
+      Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), getTargetHeight(target)); 
+      Logger.recordOutput("Shooter/targetPose", targetGoalPositionVector); // this is correct/what I want
+
       Translation3d vectorFromRobotToTarget = targetGoalPositionVector.minus(ballPositionVector); 
       return vectorFromRobotToTarget; 
     }
@@ -189,22 +191,26 @@ public class Shooter extends SubsystemBase {
       Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
       Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
 
-      Translation3d shooterSpeedVector = vectorFromRobotToTarget.minus(robotVelocity3d); 
+      double dx = vectorFromRobotToTarget.getX();
+      double dy = vectorFromRobotToTarget.getY();
+      double horizontalDist = Math.sqrt(dx*dx + dy*dy);
 
-      return shooterSpeedVector; 
+      Translation3d direction = new Translation3d(
+          dx / horizontalDist,
+          dy / horizontalDist,
+          vectorFromRobotToTarget.getZ()
+      );
+
+      return direction.minus(robotVelocity3d);
     }
 
-    private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector) {
+    private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector, double horizontalDist) {
       // horizontal = t * s * cos(pitch)
       // vertical = t * s * sin(pitch) - 4.8t^2
       
-      double x = shooterCompensationVector.getX(); 
-      double y = shooterCompensationVector.getY(); 
+      double vertical = shooterCompensationVector.getZ();
       
-      double horizontal = Math.sqrt(x*x + y*y); // literally has to be positive
-      double vertical = shooterCompensationVector.getZ(); // also literally has to be positive
-      
-      double ts = horizontal / Math.cos(pitch); 
+      double ts = horizontalDist / Math.cos(pitch); 
       double radicand = ((ts * Math.sin(pitch)) - vertical) / 4.8;
 
       if (radicand < 0) {
@@ -219,14 +225,28 @@ public class Shooter extends SubsystemBase {
       double[] result = new double[]{t, s}; 
       Logger.recordOutput("Shooter/t + s", result); 
 
-
       return result; 
     }
 
+    // TODO: figure out why the hub having a goal height is causing the radicant to be negative
     private double getDistBallFromTarget(Pose2d target) {
-      Pose3d Target3D = new Pose3d(target.getX(), target.getY(), -getTargetHeight(target), new Rotation3d(0, 0,0)); // negative because positive was upside down for some reason
+      Pose3d Target3D = new Pose3d(target.getX(), target.getY(), getTargetHeight(target), new Rotation3d(0, 0,0)); 
       Pose3d landedBallPose = ball.getLandedPose3d(); 
+      if (landedBallPose == null) {
+        return Double.NaN; 
+      }
       return landedBallPose.getTranslation().getDistance(Target3D.getTranslation()); 
+    }
+
+    public Pose3d[] makeAdvantageScopeLine(Translation3d vector, Pose2d robotPose) {
+      Pose3d[] final_array = new Pose3d[9]; 
+      double robotX = robotPose.getX(); 
+      double robotY = robotPose.getY(); 
+      for (int i = 0; i < 9; i++) {
+        Pose3d to_add = new Pose3d(vector.getX()/(i+1) + robotX, vector.getY()/(i+1) + robotY, vector.getZ()/(i+1), new Rotation3d(0,0,0)); 
+        final_array[i] = to_add; 
+      }
+      return final_array; 
     }
 
     private double getAngleInFieldFrame(Translation3d shooterSpeedVector) {
@@ -238,20 +258,33 @@ public class Shooter extends SubsystemBase {
       Pose2d target = getTarget(robotPose); 
 
       Logger.recordOutput("Shooter/pitchAngle", pitchAngle); 
-      Logger.recordOutput("Shooter/trget", target); 
+      Logger.recordOutput("Shooter/target", target); 
 
       Translation3d shooterSpeedVector = getShooterSpeedVector(robotPose, target); 
+      Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose)); 
 
-      double speed = calculateShooterSpeedRequired(robotPose, shooterSpeedVector); 
+      Translation3d robotToTarget = getVectorFromRobotToTarget(robotPose, target); 
+      Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(robotToTarget, robotPose)); 
+      double dx = robotToTarget.getX();
+      double dy = robotToTarget.getY();
+
+      double horizontalDist = Math.sqrt(dx*dx + dy*dy);
+      Logger.recordOutput("Shooter/horizontalDist", horizontalDist); 
+
+      double speed = calculateShooterSpeedRequired(robotPose, shooterSpeedVector, horizontalDist); 
       Logger.recordOutput("Shooter/speed", speed); 
 
       double turretAngle = calculateTurretAngle(robotPose, shooterSpeedVector); 
       Logger.recordOutput("Shooter/turretAngle", turretAngle); 
+
+      Logger.recordOutput("Shooter/origin", new Translation3d(0.0, 0.0, 0.0)); 
       
-      lastCalculationPitchRadians = Math.toRadians((double) pitchAngle) - Math.PI/2; 
+      lastCalculationPitchRadians = Math.toRadians((double) pitchAngle) - Math.PI/2; // related to how the ball shooting is configured
       lastCalculatedNeededSpeed = speed; 
       lastCalculatedAngleInFieldFrame = getAngleInFieldFrame(shooterSpeedVector); 
       lastCalculationTurretAngleDegrees = turretAngle; 
+
+      setGoalSpeed(speed); 
 
       Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target)); // updates when landed
     }
