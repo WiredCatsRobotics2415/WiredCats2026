@@ -16,7 +16,7 @@ import java.util.Map;
 import frc.subsystems.shooter.Shooter; 
 
 public class OI {
-    CommandXboxController controller;
+    CommandJoystick controller;
     CommandJoystick numpad;
 
     public enum Bind {
@@ -41,7 +41,7 @@ public class OI {
     }
 
     private OI() {
-        controller = new CommandXboxController(0);
+        controller = new CommandJoystick(4);
         numpad = new CommandJoystick(1);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
@@ -91,7 +91,7 @@ public class OI {
 
     public double getRotation() {
         double deadbanded = deadbandCompensation(
-            MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.RightJoystickX), Controls.Deadband));
+            MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband));
         if (Controls.UseCurve) {
             deadbanded = Math.pow(minimumPowerCompensation(deadbanded), Controls.CurveExponent);
         } else {
@@ -99,6 +99,4 @@ public class OI {
         }
         return deadbanded;
     }
-
-    public XboxController getHIDOfController() { return controller.getHID(); }
 }
