@@ -55,7 +55,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private static CommandSwerveDrivetrain instance;
 
-    private CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants,
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants,
         SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules));
         if (Utils.isSimulation()) {
