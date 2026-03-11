@@ -74,6 +74,7 @@ public class RobotContainer {
     }
 
     public void periodic() {
+        drive.getDefaultCommand().schedule();
     }
 
     public Command getAutonomousCommand() {
