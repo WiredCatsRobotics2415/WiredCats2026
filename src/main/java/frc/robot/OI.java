@@ -1,9 +1,9 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.constants.Controls;
 import frc.constants.Controls.GulikitButtons;
@@ -16,7 +16,7 @@ import java.util.Map;
 import frc.subsystems.shooter.Shooter; 
 
 public class OI {
-    CommandXboxController controller;
+    CommandJoystick controller;
     CommandJoystick numpad;
 
     public enum Bind {
@@ -41,7 +41,7 @@ public class OI {
     }
 
     private OI() {
-        controller = new CommandXboxController(0);
+        controller = new CommandJoystick(0);
         numpad = new CommandJoystick(1);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
@@ -97,5 +97,5 @@ public class OI {
         return deadbanded;
     }
 
-    public XboxController getHIDOfController() { return controller.getHID(); }
+    public CommandJoystick getHIDOfController() { return controller.getHID(); }
 }
