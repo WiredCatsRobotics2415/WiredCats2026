@@ -51,9 +51,9 @@ public class Subsystems {
     }
 
     public static class ShooterConstants {
-        public static final int FLYWHEEL_1_ID = 1; //TODO: Placeholder ID values, change when systems connects them
-        public static final int FLYWHEEL_2_ID = 2;  //Placeholder
-        public static final int INTAKE_MOTOR_ID = 1; //Placeholder
+        public static final int FLYWHEEL_1_ID = 53; //TODO: Placeholder ID values, change when systems connects them
+        public static final int FLYWHEEL_2_ID = 54;  //Placeholder
+        public static final int INTAKE_MOTOR_ID = 55; //Placeholder
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
         public static double kSVolts = 0.0;
         public static double kVVoltSecondsPerRotation = 0.0;
