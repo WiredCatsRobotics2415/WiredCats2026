@@ -39,7 +39,7 @@ public class Turret extends SubsystemBase {
       new ProfiledPIDController(TurretConstants.kP, TurretConstants.kI, TurretConstants.kD, constraints, TurretConstants.kDt);
     
     public static Turret getInstance() {
-        motor = new TalonFX(0);
+        motor = new TalonFX(55);
 
         if (instance == null) instance = new Turret(); 
         return instance; 

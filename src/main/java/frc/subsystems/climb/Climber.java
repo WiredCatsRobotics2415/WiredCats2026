@@ -24,7 +24,7 @@ public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
     private AnalogInput wirePotentiometer;
-    private TalonFX climbMotor = new TalonFX(3);
+    private TalonFX climbMotor = new TalonFX(50);
     private ClimberSim sim = new ClimberSim();
 
       // Create a PID controller whose setpoint's change is subject to maximum
