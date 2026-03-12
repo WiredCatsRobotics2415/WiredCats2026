@@ -21,6 +21,13 @@ public class Subsystems {
 
     }
 
+    public static class IntakeConstants {
+
+        public static final double HeadingKA = 0;
+        public static double kSwitchThreshold;
+
+    }
+
     public static class VisionConstants {
         public static final String[] PoseEstimationLLNames = {
             "limelight-front-left", // or whatever your names are
@@ -44,9 +51,9 @@ public class Subsystems {
     }
 
     public static class ShooterConstants {
-        public static final int FLYWHEEL_1_ID = 1; //TODO: Placeholder ID values, change when systems connects them
-        public static final int FLYWHEEL_2_ID = 2;  //Placeholder
-        public static final int INTAKE_MOTOR_ID = 1; //Placeholder
+        public static final int FLYWHEEL_1_ID = 53; //TODO: Placeholder ID values, change when systems connects them
+        public static final int FLYWHEEL_2_ID = 54;  //Placeholder
+        public static final int INTAKE_MOTOR_ID = 55; //Placeholder
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
         public static double kSVolts = 0.0;
         public static double kVVoltSecondsPerRotation = 0.0;
@@ -61,6 +68,7 @@ public class Subsystems {
 
     public static class ClimberConstants {
         public static final double GoalDeadband = 0;
+        public static final double MaxHeight = 0.5;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
         public static double kP = 1;

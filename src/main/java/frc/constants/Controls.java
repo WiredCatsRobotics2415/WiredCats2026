@@ -30,10 +30,12 @@ public class Controls {
         public static final int LeftJoystickY = 2;
         public static final int RightJoystickX = 5;
 
+        //define buttons!!!
         public static final int EnterShootingModeButton = 1; 
         public static final int ShootButtons = 2; 
         public static final int setHighGoal = 4;
         public static final int setLowGoal = 5;
+        public static final int setZeroGoal = 3;
     }
 
     public class NumpadButtons {

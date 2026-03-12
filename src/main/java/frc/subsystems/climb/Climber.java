@@ -26,6 +26,7 @@ public class Climber extends SubsystemBase {
     private AnalogInput wirePotentiometer;
     private TalonFX climbMotor = new TalonFX(50);
     private ClimberSim sim = new ClimberSim();
+    private double currentHeight = 0.0;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -42,13 +43,8 @@ public class Climber extends SubsystemBase {
     pid.setTolerance(0.05); 
   }
 
-    public Command Lock() {
-    return runOnce(
-        () -> {
-          //drive left
-          //move arm down
-          //move arm up
-        });
+  public double getHeight() {
+    return currentHeight / 3 * ClimberConstants.MaxHeight;
   }
 
     public Command SetVolt(double voltage) {
@@ -73,12 +69,14 @@ public class Climber extends SubsystemBase {
       if (Robot.isReal()) {
         Logger.recordOutput("Climber/PotentiometerVoltage", wirePotentiometer.getVoltage());
         Logger.recordOutput("Climber/Voltage", climbMotor.getMotorVoltage().getValueAsDouble());
+        currentHeight = wirePotentiometer.getVoltage();
         climbMotor.setVoltage(pid.calculate(wirePotentiometer.getVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
       } else {
         sim.update(0.02);
         Logger.recordOutput("Climber/PotentiometerVoltage", sim.getPotentiometerVoltage());
         double voltage = (pid.calculate(sim.getPotentiometerVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
         Logger.recordOutput("Climber/Voltage", voltage);
+        currentHeight = sim.getPotentiometerVoltage();
         sim.setMotorVoltage(voltage);
       }
     }

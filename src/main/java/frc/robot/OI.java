@@ -41,13 +41,16 @@ public class OI {
     }
 
     private OI() {
-        controller = new CommandJoystick(0);
+        controller = new CommandJoystick(4);
         numpad = new CommandJoystick(1);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
         binds.put(Bind.startShooting, controller.button(GulikitButtons.ShootButtons)); 
         binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
         binds.put(Bind.setLowGoal, controller.button(GulikitButtons.setLowGoal)); 
+        binds.put(Bind.climbHighGoal, controller.button(GulikitButtons.setHighGoal)); 
+        binds.put(Bind.climbLowGoal, controller.button(GulikitButtons.setLowGoal)); 
+        binds.put(Bind.climbZero, controller.button(GulikitButtons.setZeroGoal)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR
@@ -90,7 +93,7 @@ public class OI {
 
     public double getRotation() {
         double deadbanded = deadbandCompensation(
-            MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.RightJoystickX), Controls.Deadband));
+            MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband));
         if (Controls.UseCurve) {
             deadbanded = Math.pow(minimumPowerCompensation(deadbanded), Controls.CurveExponent);
         } else {

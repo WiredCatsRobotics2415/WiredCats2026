@@ -315,9 +315,9 @@ public class Shooter extends SubsystemBase {
 
       setGoalSpeed(speed); 
 
-      Logger.recordOutput("Shooter/ballTrajectory", 
-        mapTrajectory(speed, Math.toRadians(pitchAngle), 
-        new Rotation3d(0, 0, lastCalculatedAngleInFieldFrame), robotPose));
+      //Logger.recordOutput("Shooter/ballTrajectory", 
+        //mapTrajectory(speed, Math.toRadians(pitchAngle), 
+        //new Rotation3d(0, 0, lastCalculatedAngleInFieldFrame), robotPose));
 
       Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target)); // updates when landed
     }
