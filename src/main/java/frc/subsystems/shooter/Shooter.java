@@ -217,7 +217,8 @@ public class Shooter extends SubsystemBase {
 
       if (radicand < 0) {
           Logger.recordOutput("Shooter/ERR_neg_radicand", radicand);
-          return new double[]{Double.NaN, Double.NaN};
+          // return new double[]{Double.NaN, Double.NaN};
+          radicand *= -1; 
       }
 
       double t = Math.sqrt(radicand);
