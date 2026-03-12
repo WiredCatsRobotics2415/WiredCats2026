@@ -41,9 +41,9 @@ public class Shooter extends SubsystemBase {
   private static TalonFX flywheel1;
   private static TalonFX flywheel2;
   private static TalonFX indexerMotor;
-  private static Integer FLYWHEEL_1_ID = 1;
-  private static Integer FLYWHEEL_2_ID = 2;
-  private static Integer INTAKE_MOTOR_ID = 3;
+  private static Integer FLYWHEEL_1_ID = 52;
+  private static Integer FLYWHEEL_2_ID = 53;
+  private static Integer INTAKE_MOTOR_ID = 54;
 
   private static BallSim ball = BallSim.getInstance();
   private boolean ballWasInAir = false; // used for getting distance ball lands from target

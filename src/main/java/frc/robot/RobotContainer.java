@@ -60,8 +60,10 @@ public class RobotContainer {
             double[] linearInput = oi.getXY();
             double x = linearInput[1], y = linearInput[0];
             double rotation = oi.getRotation();
-            return drive.driveOpenLoopFieldCentricRequest.withVelocityX(-x * Controls.MaxDriveMeterS)
-                .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
+            System.out.println(x);
+            System.out.println(y);
+            return drive.driveOpenLoopFieldCentricRequest.withVelocityX(x*30)
+                .withVelocityY(y*30).withRotationalRate(0);
         }).withName("Teleop Default"));
         
         oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 

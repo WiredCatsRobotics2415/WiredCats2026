@@ -1,9 +1,9 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.constants.Controls;
 import frc.constants.Controls.GulikitButtons;
@@ -68,8 +68,10 @@ public class OI {
         double x = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickX), Controls.Deadband);
         double y = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickY), Controls.Deadband);
         double newX, newY = 0.0d;
-        // System.out.println(x);
-        // System.out.println(y);
+        System.out.println("getxy-x");
+        System.out.println(x);
+        System.out.println("getxy-y");
+        System.out.println(y);
         if (Controls.UseCurve) {
             double angle = Math.atan2(y, x);
             double magInitial = Algebra.euclideanDistance(x, y);
