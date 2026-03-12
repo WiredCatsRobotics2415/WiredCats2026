@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.XboxController;
 
 public class Controls {
     //public static final double MaxDriveMeterS = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    public static final double MaxDriveMeterS=5;
+    public static final double MaxDriveMeterS=1;
     public static final double MaxAngularRadS = 1.2 * Math.PI;
     public static final double Deadband = 0.05d;
     public static final double MinimumDrivePower = 0.05d;

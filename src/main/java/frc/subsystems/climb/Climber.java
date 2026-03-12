@@ -24,11 +24,7 @@ public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
     private AnalogInput wirePotentiometer;
-<<<<<<< Updated upstream
-    private TalonFX climbMotor;
-=======
-    private TalonFX climbMotor = new TalonFX(50);
->>>>>>> Stashed changes
+    private TalonFX climbMotor = new TalonFX(51);
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
 

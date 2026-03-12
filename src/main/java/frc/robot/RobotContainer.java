@@ -60,6 +60,9 @@ public class RobotContainer {
             double[] linearInput = oi.getXY();
             double x = linearInput[1], y = linearInput[0];
             double rotation = oi.getRotation();
+            // System.out.println(x);
+            // System.out.println(y);
+            // System.out.println(rotation);
             return drive.driveOpenLoopFieldCentricRequest.withVelocityX(-x * Controls.MaxDriveMeterS)
                 .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));

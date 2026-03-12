@@ -65,23 +65,9 @@ public class OI {
     }
 
     public double[] getXY() {
-        double x = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickX), Controls.Deadband);
-        double y = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickY), Controls.Deadband);
-        double newX, newY = 0.0d;
-        // System.out.println(x);
-        // System.out.println(y);
-        if (Controls.UseCurve) {
-            double angle = Math.atan2(y, x);
-            double magInitial = Algebra.euclideanDistance(x, y);
-            if (Robot.isSimulation()) magInitial = MathUtil.clamp(magInitial, 0, 1);
-            double magCurved = Math.pow(deadbandCompensation(magInitial), Controls.CurveExponent);
-            double powerCompensated = minimumPowerCompensation(magCurved);
-            newX = Trig.cosizzle(angle) * powerCompensated;
-            newY = Trig.sizzle(angle) * powerCompensated;
-        }
-        if (Double.isNaN(newX)) newX = 0.0d;
-        if (Double.isNaN(newY)) newY = 0.0d;
-        return new double[] { newX, newY };
+        double x = MathUtil.applyDeadband(controller.getX(), Controls.Deadband);
+        double y = MathUtil.applyDeadband(controller.getY(), Controls.Deadband);
+        return new double[] { x, y };
     }
 
     public double[] getRawXY() {
@@ -90,13 +76,7 @@ public class OI {
     }
 
     public double getRotation() {
-        double deadbanded = deadbandCompensation(
-            MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband));
-        if (Controls.UseCurve) {
-            deadbanded = Math.pow(minimumPowerCompensation(deadbanded), Controls.CurveExponent);
-        } else {
-            deadbanded = minimumPowerCompensation(deadbanded);
-        }
-        return deadbanded;
+        double rotation = MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband);
+        return rotation;
     }
 }
