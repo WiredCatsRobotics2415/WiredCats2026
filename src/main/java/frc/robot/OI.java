@@ -65,8 +65,10 @@ public class OI {
         double x = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickX), Controls.Deadband);
         double y = MathUtil.applyDeadband(controller.getRawAxis(GulikitButtons.LeftJoystickY), Controls.Deadband);
         double newX, newY = 0.0d;
-        // System.out.println(x);
-        // System.out.println(y);
+        System.out.println("getxy-x");
+        System.out.println(x);
+        System.out.println("getxy-y");
+        System.out.println(y);
         if (Controls.UseCurve) {
             double angle = Math.atan2(y, x);
             double magInitial = Algebra.euclideanDistance(x, y);
@@ -96,6 +98,4 @@ public class OI {
         }
         return deadbanded;
     }
-
-    public CommandJoystick getHIDOfController() { return controller.getHID(); }
 }

@@ -26,12 +26,9 @@ public class Controls {
         public static final int LeftPaddle = 9;
         public static final int RightPaddle = 10;
 
-        public static final int LeftJoystickX = Joystick.getX();
-        public static final int LeftJoystickY = Joystick.getY();
-        public static final int RightJoystickX = Joystick.Axis.kRightX.value;
-        public static final int RightJoystickY = Joystick.Axis.kRightY.value;
-        public static final int LeftTrigger = Joystick.Axis.kLeftTrigger.value;
-        public static final int RightTrigger = Joystick.Axis.kRightTrigger.value;
+        public static final int LeftJoystickX = 1;
+        public static final int LeftJoystickY = 2;
+        public static final int RightJoystickX = 5;
 
         public static final int EnterShootingModeButton = 1; 
         public static final int ShootButtons = 2; 
