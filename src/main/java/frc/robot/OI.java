@@ -13,8 +13,6 @@ import frc.utils.math.Trig;
 import java.util.HashMap;
 import java.util.Map;
 
-import frc.subsystems.shooter.Shooter; 
-
 public class OI {
     CommandJoystick controller;
     CommandJoystick numpad;
@@ -45,8 +43,8 @@ public class OI {
         controller = new CommandJoystick(4);
         numpad = new CommandJoystick(1);
 
-        binds.put(Bind.enterShootingMode, controller.button(2)); 
-        binds.put(Bind.startShooting, controller.button(1));
+        binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
+        binds.put(Bind.startShooting, controller.button(GulikitButtons.StartShootingButton));
         binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
         binds.put(Bind.setLowGoal, controller.button(GulikitButtons.setLowGoal)); 
         binds.put(Bind.climbHighGoal, controller.button(GulikitButtons.setHighGoal)); 

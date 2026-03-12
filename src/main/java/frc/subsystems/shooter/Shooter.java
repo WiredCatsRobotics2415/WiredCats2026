@@ -11,7 +11,6 @@ import java.util.Scanner;
 import frc.subsystems.shooter.ShooterSim;
 
 import org.apache.commons.math3.analysis.function.Sqrt;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -132,9 +131,9 @@ public class Shooter extends SubsystemBase {
       int angle; 
 
       if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
-          angle = Measurements.ShooterAngleLow; // closer to hub (inside region)
+          angle = (int) (Math.toRadians((double) Measurements.ShooterAngleLow) - Math.PI/2); // closer to hub (inside region)
       } else {
-          angle = Measurements.ShooterAngleHigh; // further from hub (outside region)
+          angle = (int) (Math.toRadians((double) Measurements.ShooterAngleHigh) - Math.PI/2); // further from hub (outside region)
       }
 
       return angle; 
@@ -142,7 +141,7 @@ public class Shooter extends SubsystemBase {
 
     public Pose2d getTarget(Pose2d robotPose) {
       int shooterAngle = getAngleForPose(robotPose); 
-      if (shooterAngle != 45) {
+      if (shooterAngle != (int) (Math.toRadians((double) 45) - Math.PI/2)) {
             return Measurements.HubLocation;
         }
         // low angle, selects closest target for left or right
@@ -152,7 +151,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private double calculateShooterSpeedRequired(Pose2d robotPose, Translation3d shooterSpeedVector, double horizontalDistance) {
-      double pitch = Math.toRadians((double) getAngleForPose(robotPose));
+      double pitch = getAngleForPose(robotPose);
       double[] ts = calculateInitialSpeedAndImpactTime(pitch, shooterSpeedVector, horizontalDistance); 
       double t = ts[0]; 
       double speed = ts[1]; 
@@ -182,7 +181,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private Translation3d getVectorFromRobotToTarget(Pose2d robotPose, Pose2d target) {
-      Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround);
+      Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), 0); // temporarily assuming ball is in ground
       Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), getTargetHeight(target)); 
       Logger.recordOutput("Shooter/targetPose", targetGoalPositionVector); // this is correct/what I want
 
@@ -206,34 +205,6 @@ public class Shooter extends SubsystemBase {
 
       return direction.minus(robotVelocity3d);
     }
-
-    public Pose3d[] mapTrajectory(double initialSpeed, double pitchAngle, Rotation3d direction, Pose2d robotPose) {
-      Pose3d[] trajectory = new Pose3d[99];
-      double robotX = robotPose.getX();
-      double robotY = robotPose.getY();
-      double yaw = direction.getZ(); // field-frame angle
-
-      double dt = 0.05; // seconds per step
-
-      for (int i = 0; i < 99; i++) {
-          double t = i * dt;
-
-          // horizontal distance traveled at this time step
-          double horizontalDist = initialSpeed * Math.cos(pitchAngle) * t;
-
-          // vertical: s*sin(pitch)*t - 4.8t^2 (matching your existing equations)
-          double z = Measurements.ShooterHeightFromGround 
-                  + (initialSpeed * Math.sin(pitchAngle) * t) 
-                  - (4.8 * t * t);
-
-          double x = robotX + horizontalDist * Math.cos(yaw);
-          double y = robotY + horizontalDist * Math.sin(yaw);
-
-          trajectory[i] = new Pose3d(x, y, z, direction);
-      }
-
-      return trajectory;
-  }
 
     private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector, double horizontalDist) {
       // horizontal = t * s * cos(pitch)
@@ -310,7 +281,7 @@ public class Shooter extends SubsystemBase {
 
       Logger.recordOutput("Shooter/origin", new Translation3d(0.0, 0.0, 0.0)); 
       
-      lastCalculationPitchRadians = Math.toRadians((double) pitchAngle) - Math.PI/2; // related to how the ball shooting is configured
+      lastCalculationPitchRadians = pitchAngle; // related to how the ball shooting is configured
       lastCalculatedNeededSpeed = speed; 
       lastCalculatedAngleInFieldFrame = getAngleInFieldFrame(shooterSpeedVector); 
       lastCalculationTurretAngleDegrees = turretAngle; 
