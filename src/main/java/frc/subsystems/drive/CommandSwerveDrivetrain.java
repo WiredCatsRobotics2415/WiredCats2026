@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.constants.Controls;
 import frc.constants.Measurements.RobotMeasurements;
 import frc.constants.RuntimeConstants;
-import frc.constants.TunerConstants;
-import frc.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.generated.TunerConstants;
+import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
 import java.util.function.Supplier;
 import lombok.Getter;
@@ -55,7 +55,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private static CommandSwerveDrivetrain instance;
 
-    private CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants,
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants,
         SwerveModuleConstants<?, ?, ?>... modules) {
         super(drivetrainConstants, MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules));
         if (Utils.isSimulation()) {

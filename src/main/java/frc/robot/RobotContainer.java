@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand; 
 import frc.constants.Controls;
+import frc.robot.generated.TunerConstants;
 import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.vision.Vision;
@@ -60,15 +61,15 @@ public class RobotContainer {
             double[] linearInput = oi.getXY();
             double x = linearInput[1], y = linearInput[0];
             double rotation = oi.getRotation();
-            // System.out.println(x);
-            // System.out.println(y);
-            // System.out.println(rotation);
-            return drive.driveOpenLoopFieldCentricRequest.withVelocityX(-x * Controls.MaxDriveMeterS)
-                .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
+            System.out.println(x);
+            System.out.println(y);
+            System.out.println(rotation);
+            return drive.driveOpenLoopFieldCentricRequest.withVelocityX(x * Controls.MaxDriveMeterS)
+                .withVelocityY(y * Controls.MaxDriveMeterS).withRotationalRate(rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
         oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
-        oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())); 
+        oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting())); 
         oi.binds.get(OI.Bind.setHighGoal).onTrue(climber.SetVolt(3.0)); 
         oi.binds.get(OI.Bind.setLowGoal).onTrue(climber.SetVolt(0.0)); 
         oi.binds.get(OI.Bind.climbHighGoal).onTrue(climber.SetVolt(6)); 
@@ -77,7 +78,6 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        drive.getDefaultCommand().schedule();
     }
 
     public Command getAutonomousCommand() {

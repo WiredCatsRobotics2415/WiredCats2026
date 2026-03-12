@@ -83,6 +83,7 @@ public class Shooter extends SubsystemBase {
 
   public void startShooting() // Starts Intake
   {
+    System.out.println("START SHOOTING!!");
     if (Robot.isReal()) {
       //starting it at 50%
       indexerMotor.set(0.5);
@@ -103,6 +104,7 @@ public class Shooter extends SubsystemBase {
 
   public void stopShooting() // Stops Intake
   {
+    System.out.println("STOP SHOOTING!!!");
     indexerMotor.set(0.0);
   }
 

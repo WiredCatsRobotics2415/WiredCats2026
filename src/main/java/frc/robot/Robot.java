@@ -43,7 +43,6 @@ public class Robot extends LoggedRobot {
     if (Robot.isSimulation()) {
         Logger.addDataReceiver(new NT4Publisher());
     } else {
-        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.findReplayLog()));
         Logger.addDataReceiver(new NT4Publisher());
     }
 
