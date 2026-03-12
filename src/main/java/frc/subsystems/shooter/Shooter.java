@@ -193,17 +193,7 @@ public class Shooter extends SubsystemBase {
       Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
       Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
 
-      double dx = vectorFromRobotToTarget.getX();
-      double dy = vectorFromRobotToTarget.getY();
-      double horizontalDist = Math.sqrt(dx*dx + dy*dy);
-
-      Translation3d direction = new Translation3d(
-          dx / horizontalDist,
-          dy / horizontalDist,
-          vectorFromRobotToTarget.getZ()
-      );
-
-      return direction.minus(robotVelocity3d);
+      return vectorFromRobotToTarget.minus(robotVelocity3d);
     }
 
     private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector, double horizontalDist) {
@@ -213,7 +203,7 @@ public class Shooter extends SubsystemBase {
       double vertical = shooterCompensationVector.getZ();
       
       double ts = horizontalDist / Math.cos(pitch); 
-      double radicand = ((ts * Math.sin(pitch)) - vertical) / 4.8;
+      double radicand = ((ts * Math.sin(pitch)) - vertical) / 4.8; 
 
       if (radicand < 0) {
           Logger.recordOutput("Shooter/ERR_neg_radicand", radicand);
@@ -268,8 +258,8 @@ public class Shooter extends SubsystemBase {
 
       Translation3d robotToTarget = getVectorFromRobotToTarget(robotPose, target); 
       Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(robotToTarget, robotPose)); 
-      double dx = robotToTarget.getX();
-      double dy = robotToTarget.getY();
+      double dx = shooterSpeedVector.getX();
+      double dy = shooterSpeedVector.getY();
 
       double horizontalDist = Math.sqrt(dx*dx + dy*dy);
       Logger.recordOutput("Shooter/horizontalDist", horizontalDist); 
