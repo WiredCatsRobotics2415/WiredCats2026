@@ -30,9 +30,9 @@ public class Turret extends SubsystemBase {
     private static Shooter shooter = Shooter.getInstance();
     private final Encoder encoder = new Encoder(1, 2);
     public double currentAngle = 0.0;
-     public double currentPitch = 0.0;
+    public double currentPitch = 0.0;
     private static Servo turret1 = new Servo(0);
-    private static Servo turret2 = new Servo(0);
+    private static Servo turret2 = new Servo(1);
     private boolean currentlyUp = false;
 
     public TurretSim sim = new TurretSim();
@@ -52,7 +52,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void setAngle(double angle) {
-      System.out.println("Setting turret angle to " + angle);
       if (angle < Measurements.MaxTurretAngle && angle > Measurements.MinTurretAngle) {
             currentAngle = angle;
             double position = angle / 360.0; // Convert from degrees to rotations

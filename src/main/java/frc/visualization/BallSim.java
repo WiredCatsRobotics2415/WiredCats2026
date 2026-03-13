@@ -68,7 +68,7 @@ public class BallSim {
       arc.add(new Pose3d(pos, new Rotation3d()));
       Pose3d[] send_arc = arc.toArray(new Pose3d[0]);
 
-      Logger.recordOutput("Shooter/ball_vector", send_arc);
+      Logger.recordOutput("Shooter/ball_vector", new Pose3d[] {new Pose3d(pos, new Rotation3d())});
 
       // Stop when it hits the floor (z <= 0). Adjust if your “ground” is different.
       if (pos.getZ() <= 0.0) {
