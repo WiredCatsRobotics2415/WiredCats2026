@@ -39,6 +39,11 @@ public class Controls {
         public static final int setHighGoal = 4;
         public static final int setLowGoal = 5;
         public static final int setZeroGoal = 3;
+        public static final int ManualTurretLeft = 6;
+        public static final int ManualTurretRight = 7;
+        public static final int ManualTurretUp = 8;
+        public static final int ManualTurretDown = 9;
+        public static int manualTurretSwitch = 10;
     }
 
     public class NumpadButtons {
