@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.constants.Controls;
 import frc.constants.Controls.GulikitButtons;
 import frc.constants.Controls.NumpadButtons;
+import frc.constants.Subsystems.PortNumbers;
 import frc.utils.math.Algebra;
 import frc.utils.math.Trig;
 import java.util.HashMap;
@@ -40,8 +41,8 @@ public class OI {
     }
 
     private OI() {
-        controller = new CommandJoystick(4);
-        numpad = new CommandJoystick(1);
+        controller = new CommandJoystick(PortNumbers.ControllerPort);
+        numpad = new CommandJoystick(PortNumbers.NumpadPort);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
         binds.put(Bind.startShooting, controller.button(GulikitButtons.StartShootingButton));

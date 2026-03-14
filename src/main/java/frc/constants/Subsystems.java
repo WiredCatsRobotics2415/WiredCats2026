@@ -23,7 +23,6 @@ public class Subsystems {
         public static PIDConstants RotationPID = new PIDConstants(RotationP, 0, 0);
         public static PathFollowingController PathFollowingController = new PPHolonomicDriveController(PPTranslationPID,
             RotationPID);
-
     }
 
     public static class IntakeConstants {
@@ -53,6 +52,19 @@ public class Subsystems {
         }
         
         public static final double ThreeGDiagonalFOV = 63.3; // degrees, for sim
+    }
+
+    public static class PortNumbers {
+        public static final int NumpadPort = 1; 
+        public static final int ControllerPort = 4; 
+        public static final int Flywheel_1_ID = 1; 
+        public static final int Flywheel_2_ID = 2; 
+        public static final int Intake_Motor_ID = 3; 
+        public static final int Handoff_Motor_ID = 4; 
+        public static final int Turret_Motor = 5; 
+        public static final int Climb_Motor = 6; 
+        public static final int Intake_Front_Limit_ID = 0; 
+        public static final int Intake_Back_Limit_ID = 1; 
     }
 
     public static class ShooterConstants {

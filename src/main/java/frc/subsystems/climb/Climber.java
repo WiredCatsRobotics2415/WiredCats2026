@@ -18,13 +18,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Subsystems.ClimberConstants;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.constants.Subsystems.PortNumbers;
 import frc.robot.Robot;
 
 public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
     private AnalogInput wirePotentiometer;
-    private TalonFX climbMotor = new TalonFX(51);
+    private TalonFX climbMotor = new TalonFX(PortNumbers.Climb_Motor);
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
 

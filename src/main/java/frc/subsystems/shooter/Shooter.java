@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.constants.Subsystems.PortNumbers;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
@@ -41,10 +42,10 @@ public class Shooter extends SubsystemBase {
   private static TalonFX flywheel2;
   private static TalonFX indexerMotor;
   private static TalonFX handoffMotor;
-  private static Integer FLYWHEEL_1_ID = 1;
-  private static Integer FLYWHEEL_2_ID = 2;
-  private static Integer INTAKE_MOTOR_ID = 3;
-  private static Integer HANDOFF_MOTOR_ID = 4;
+  private static Integer FLYWHEEL_1_ID = PortNumbers.Flywheel_1_ID;
+  private static Integer FLYWHEEL_2_ID = PortNumbers.Flywheel_1_ID;
+  private static Integer INTAKE_MOTOR_ID = PortNumbers.Intake_Motor_ID;
+  private static Integer HANDOFF_MOTOR_ID = PortNumbers.Handoff_Motor_ID;
 
   private static BallSim ball = BallSim.getInstance();
   private boolean ballWasInAir = false; // used for getting distance ball lands from target
