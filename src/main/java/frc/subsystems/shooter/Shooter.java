@@ -40,9 +40,11 @@ public class Shooter extends SubsystemBase {
   private static TalonFX flywheel1;
   private static TalonFX flywheel2;
   private static TalonFX indexerMotor;
+  private static TalonFX handoffMotor;
   private static Integer FLYWHEEL_1_ID = 1;
   private static Integer FLYWHEEL_2_ID = 2;
   private static Integer INTAKE_MOTOR_ID = 3;
+  private static Integer HANDOFF_MOTOR_ID = 4;
 
   private static BallSim ball = BallSim.getInstance();
   private boolean ballWasInAir = false; // used for getting distance ball lands from target
@@ -72,6 +74,7 @@ public class Shooter extends SubsystemBase {
     flywheel1 = new TalonFX(FLYWHEEL_1_ID);
     flywheel2 = new TalonFX(FLYWHEEL_2_ID);
     indexerMotor = new TalonFX(INTAKE_MOTOR_ID);
+    handoffMotor = new TalonFX(HANDOFF_MOTOR_ID);
   }
 
   public static Shooter getInstance() {
@@ -85,6 +88,7 @@ public class Shooter extends SubsystemBase {
     System.out.println("START SHOOTING!!");
     if (Robot.isReal()) {
       //starting it at 50%
+      handoffMotor.set(0.5);
       indexerMotor.set(0.5);
       // shoot in real? can use lastCalculationPitchRadians, lastCalculationTurretAngleRadians, lastCalculatedNeededSpeed
     } else {
@@ -107,6 +111,7 @@ public class Shooter extends SubsystemBase {
   public void stopShooting() // Stops Intake
   {
     System.out.println("STOP SHOOTING!!!");
+    handoffMotor.set(0);
     indexerMotor.set(0.0);
   }
 

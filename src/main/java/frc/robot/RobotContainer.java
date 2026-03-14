@@ -94,6 +94,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
+        System.out.println("Selected auto: " + autoChooser.getSelected());
         return autoChooser.getSelected();
     }
 
