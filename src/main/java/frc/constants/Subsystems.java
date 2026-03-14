@@ -87,11 +87,12 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static double kP = 10;
-        public static double kMaxVelocity = 5;
-        public static double kMaxAcceleration = 5;
-        public static double kI = 0.1;
-        public static double kD = 0.1;
+        public static double kP = 0.01;
+        public static double kMaxVelocity = 1;
+        public static double kMaxAcceleration = 1;
+        public static double kI = 0;
+        public static double kD = 8;
+        //do not set this to 0!!!
         public static double kDt = 0.1;
     }
 }

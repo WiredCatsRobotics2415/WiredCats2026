@@ -43,8 +43,8 @@ public class Shooter extends SubsystemBase {
   private static TalonFX handoffMotor;
   private static Integer FLYWHEEL_1_ID = 1;
   private static Integer FLYWHEEL_2_ID = 2;
-  private static Integer INTAKE_MOTOR_ID = 3;
-  private static Integer HANDOFF_MOTOR_ID = 4;
+  private static Integer INTAKE_MOTOR_ID = 7;
+  private static Integer HANDOFF_MOTOR_ID = 16;
 
   private static BallSim ball = BallSim.getInstance();
   private boolean ballWasInAir = false; // used for getting distance ball lands from target
@@ -88,7 +88,7 @@ public class Shooter extends SubsystemBase {
     System.out.println("START SHOOTING!!");
     if (Robot.isReal()) {
       //starting it at 50%
-      handoffMotor.set(0.5);
+      handoffMotor.set(-0.5);
       indexerMotor.set(0.5);
       // shoot in real? can use lastCalculationPitchRadians, lastCalculationTurretAngleRadians, lastCalculatedNeededSpeed
     } else {

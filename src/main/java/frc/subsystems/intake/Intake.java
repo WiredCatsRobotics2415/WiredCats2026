@@ -1,6 +1,7 @@
 package frc.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
@@ -29,8 +30,10 @@ public class Intake extends SubsystemBase {
     private static Intake instance = null;
     private TalonFX intakePush;
     private TalonFX intakeSpin;
-    private DigitalInput frontLimit = new DigitalInput(0); 
-    private DigitalInput backLimit = new DigitalInput(0); 
+    public boolean isOut = false;
+    private DigitalInput frontLimit = new DigitalInput(5); 
+    private DigitalInput backLimit = new DigitalInput(4); 
+    final PositionVoltage m_request = new PositionVoltage(0);
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -43,6 +46,16 @@ public class Intake extends SubsystemBase {
   }
 
   private Intake() {
+  }
+
+  public void switchSpinForComp() {
+    if (isOut) {
+      intakePush.setControl(m_request.withPosition(1));
+      isOut = false;
+    } else {
+      intakePush.setControl(m_request.withPosition(0));
+      isOut = true;
+    }
   }
 
   public Command setSpin(double speed) {
