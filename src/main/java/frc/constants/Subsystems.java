@@ -57,12 +57,14 @@ public class Subsystems {
     public static class PortNumbers {
         public static final int NumpadPort = 1; 
         public static final int ControllerPort = 4; 
-        public static final int Flywheel_1_ID = 1; 
-        public static final int Flywheel_2_ID = 2; 
-        public static final int Intake_Motor_ID = 3; 
+        public static final int Flywheel_1_ID = 30; 
+        public static final int Flywheel_2_ID = 0; 
+        public static final int Intake_Motor_ID = 18; 
+        public static final int Intake_Drive_ID = 55; 
         public static final int Handoff_Motor_ID = 4; 
-        public static final int Turret_Motor = 5; 
+        public static final int Turret_Motor = 22; 
         public static final int Climb_Motor = 6; 
+
         public static final int Intake_Front_Limit_ID = 0; 
         public static final int Intake_Back_Limit_ID = 1; 
     }
@@ -74,7 +76,7 @@ public class Subsystems {
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
         public static double kSVolts = 0.0;
         public static double kVVoltSecondsPerRotation = 0.0;
-        public static double kP = 0.5; // PID proportional gain for feedback control
+        public static double kP = 0.3; // PID proportional gain for feedback control
         public static double kShooterToleranceRPS = 0.0;
         public static double kEncoderDistancePerPulse = 0.0;
         // Feedforward gains - these provide a model-based estimate of voltage needed
@@ -99,11 +101,11 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static double kP = 0.01;
-        public static double kMaxVelocity = 1;
-        public static double kMaxAcceleration = 1;
+        public static double kP = 0.7;
+        public static double kMaxVelocity = 3;
+        public static double kMaxAcceleration = 3;
         public static double kI = 0;
-        public static double kD = 8;
+        public static double kD = 0.1;
         //do not set this to 0!!!
         public static double kDt = 0.1;
     }

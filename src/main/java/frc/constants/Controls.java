@@ -43,6 +43,8 @@ public class Controls {
         public static final int ManualTurretRight = 7;
         public static final int ManualTurretUp = 8;
         public static final int ManualTurretDown = 6;
+        public static final int ManualSpeedUp = 11;
+        public static final int ManualSpeedDown = 13;
         public static int manualTurretSwitch = 10;
         public static int intake = 3;
     }

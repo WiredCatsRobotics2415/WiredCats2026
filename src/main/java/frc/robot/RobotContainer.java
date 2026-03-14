@@ -81,8 +81,10 @@ public class RobotContainer {
         
         // oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
         oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
-        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(0.5)));  
-        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(-0.5))); 
+        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
+        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
+        oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
+        oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
         // oi.binds.get(OI.Bind.manualTurretLeft).whileTrue(Commands.run(() -> turret.movePosChange(0.3)));  
         // oi.binds.get(OI.Bind.manualTurretRight).whileTrue(Commands.run(() -> turret.movePosChange(-0.3))); 
         oi.binds.get(OI.Bind.manualTurretUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() - 1)));  
@@ -97,7 +99,8 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Logger.recordOutput("Turret/Voltage", turret.getMotorVoltage());
+        //Logger.recordOutput("Turret/Voltage", turret.getMotorVoltage());
+        Logger.recordOutput("Intake/position", intake.intakePush.getPosition().getValueAsDouble());
     }
 
     public Command getAutonomousCommand() {

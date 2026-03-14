@@ -49,7 +49,7 @@ public class Turret extends SubsystemBase {
       new ProfiledPIDController(TurretConstants.kP, TurretConstants.kI, TurretConstants.kD, constraints, 0.02);
     
     public static Turret getInstance() {
-        motor = new TalonFX(PortNumbers.Turret_Motor);
+        motor = new TalonFX(22);
 
         if (instance == null) instance = new Turret(); 
         return instance; 
@@ -118,9 +118,7 @@ public class Turret extends SubsystemBase {
       // System.out.println(motor.getPosition().getValueAsDouble());
       // System.out.println("SENDING VOLTS TO CORRECT:");
       //System.out.println(motor.getMotorVoltage());
-      System.out.println("SENDING GOAL v. ACTUAL");
-      System.out.println(controller.getGoal().position);
-      System.out.println(encoder.getDistance());
+
       Logger.recordOutput("Turret/controllerGoal", controller.getGoal().position);
       Logger.recordOutput("Turret/encoderPos", encoder.getDistance());
         //get the angle from the shooter, convert to relative turret angle, and set that as the goal for the turret

@@ -29,8 +29,10 @@ import frc.robot.Robot;
 public class Intake extends SubsystemBase {
 
     private static Intake instance = null;
-    private TalonFX intakePush;
+    public TalonFX intakePush;
     private TalonFX intakeSpin;
+    public boolean isOut = false;
+    public PositionVoltage m_request = new PositionVoltage(0);
     private DigitalInput frontLimit = new DigitalInput(PortNumbers.Intake_Front_Limit_ID); 
     private DigitalInput backLimit = new DigitalInput(PortNumbers.Intake_Back_Limit_ID); 
 
@@ -45,14 +47,16 @@ public class Intake extends SubsystemBase {
   }
 
   private Intake() {
+    intakePush = new TalonFX(PortNumbers.Intake_Motor_ID);
+    //TODO: define Intake Drive Motor
   }
 
   public void switchSpinForComp() {
     if (isOut) {
-      intakePush.setControl(m_request.withPosition(1));
+      intakePush.setControl(m_request.withPosition(intakePush.getPosition().getValueAsDouble()+1));
       isOut = false;
     } else {
-      intakePush.setControl(m_request.withPosition(0));
+      intakePush.setControl(m_request.withPosition(intakePush.getPosition().getValueAsDouble()-1));
       isOut = true;
     }
   }

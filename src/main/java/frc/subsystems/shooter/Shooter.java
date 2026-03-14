@@ -51,7 +51,7 @@ public class Shooter extends SubsystemBase {
   private boolean ballWasInAir = false; // used for getting distance ball lands from target
 
   //WE ARE USING SIMPLE FEEDFORWARD AND PID BECAUSE WE ARE SETTING FLYWHEEL VELOCITIES AND DON'T NEED POSITION ACCURACY
-  private final PIDController pid = new PIDController(ShooterConstants.kP, 0.0, 0.0);
+  private final PIDController pid = new PIDController(ShooterConstants.kP, 0.0, 0.1);
   private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
 
   private static ShooterSim sim = new ShooterSim();
@@ -133,7 +133,9 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setGoalSpeed(double goalSpeed) {
-    this.goalSpeed = goalSpeed;
+    if (goalSpeed>0) {
+      this.goalSpeed = goalSpeed;
+    }
   }
 
     public double getAngleForPose(Pose2d robotPose) {

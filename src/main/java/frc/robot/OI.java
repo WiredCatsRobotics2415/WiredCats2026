@@ -26,7 +26,7 @@ public class OI {
         climbHighGoal,
         climbLowGoal,
         climbZero, 
-        stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp, intake,
+        stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp, intake, manualSpeedUp, manualSpeedDown,
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -49,6 +49,8 @@ public class OI {
         binds.put(Bind.manualTurretLeft, controller.button(GulikitButtons.ManualTurretLeft));
         binds.put(Bind.manualTurretRight, controller.button(GulikitButtons.ManualTurretRight));  
         binds.put(Bind.manualTurretUp, controller.button(GulikitButtons.ManualTurretUp));  
+        binds.put(Bind.manualSpeedUp, controller.button(GulikitButtons.ManualSpeedUp));  
+        binds.put(Bind.manualSpeedDown, controller.button(GulikitButtons.ManualSpeedDown));  
          binds.put(Bind.manualTurretDown, controller.button(GulikitButtons.ManualTurretDown)); 
           binds.put(Bind.manualTurretSwitch, controller.button(GulikitButtons.manualTurretSwitch)); 
         binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
