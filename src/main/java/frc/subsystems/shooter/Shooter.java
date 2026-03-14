@@ -93,10 +93,13 @@ public class Shooter extends SubsystemBase {
       Pose2d robotPose = drive.getPose(); 
       setTurretAndShooterForPose(robotPose); // ensures up-to-date
 
+      ChassisSpeeds fieldVel = ChassisSpeeds.fromFieldRelativeSpeeds(drive.getVelocity(), robotPose.getRotation());
+      Translation2d robotVelocity = new Translation2d(fieldVel.vxMetersPerSecond, fieldVel.vyMetersPerSecond);
+
       ball.throwBall(
           new Pose3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround, new Rotation3d()),
           new Rotation3d(0, lastCalculationPitchRadians, lastCalculatedAngleInFieldFrame),
-          lastCalculatedNeededSpeed
+          lastCalculatedNeededSpeed, robotVelocity
       );
     }
   }
@@ -200,6 +203,8 @@ public class Shooter extends SubsystemBase {
       
       double vertical = shooterCompensationVector.getZ();
 
+      Logger.recordOutput("Shooter/vertical", vertical); // this is obvi correct
+
       Logger.recordOutput("Shooter/pitch", pitch); 
 
       Logger.recordOutput("Shooter/time before square root", ((horizontalDist * Math.tan(pitch)) - vertical)/4.8); 
@@ -214,7 +219,6 @@ public class Shooter extends SubsystemBase {
       return result; 
     }
 
-    // TODO: figure out why the hub having a goal height is causing the radicant to be negative
     private double getDistBallFromTarget(Pose2d target) {
       Pose3d Target3D = new Pose3d(target.getX(), target.getY(), 0, new Rotation3d(0, 0,0)); 
       Pose3d landedBallPose = ball.getLandedPose3d(); 

@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Timer;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.shooter.Shooter;
+import edu.wpi.first.math.geometry.Translation2d;
 
 import org.littletonrobotics.junction.Logger;
 import java.util.List;
@@ -32,15 +33,15 @@ public class BallSim {
     private List<Pose3d> arc = new java.util.ArrayList<>();
 
     /** Start a throw from an initial pose, with roll/pitch/yaw and a launch speed (m/s). */
-    public void throwBall(Pose3d startPose, Rotation3d rpy, double speedMps) {
+    public void throwBall(Pose3d startPose, Rotation3d rpy, double speedMps, Translation2d robotVelocity) {
       // Launch direction is robot +X rotated by the given RPY (roll doesn’t matter for a sphere, but harmless).
       Translation3d dir = new Translation3d(1, 0, 0).rotateBy(rpy);
-
+      
       //reset arc to have nothing
       arc = new java.util.ArrayList<>();
 
       pos = startPose.getTranslation();
-      vel = new Translation3d(dir.getX() * speedMps, dir.getY() * speedMps, dir.getZ() * speedMps);
+      vel = new Translation3d(dir.getX() * speedMps + robotVelocity.getX(), dir.getY() * speedMps + robotVelocity.getY(), dir.getZ() * speedMps);
 
       active = true;
       lastT = Timer.getFPGATimestamp();
