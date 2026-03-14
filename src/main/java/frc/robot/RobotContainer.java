@@ -11,7 +11,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand; 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.constants.Controls;
 import frc.robot.generated.TunerConstants;
 import frc.subsystems.climb.Climber;
@@ -123,5 +124,14 @@ public class RobotContainer {
 
     public Vision getVision() {
         return vision;
+    }
+
+    public void ShootPathPlanner() //TODO: Hastily written code, hope it works but if robot doesn't shoot during auton this is the issue
+    {
+        inShootingMode = true;
+        Shooter.getInstance().startShooting();
+        new WaitCommand(5);
+        inShootingMode = false;
+        Shooter.getInstance().stopShooting();
     }
 }
