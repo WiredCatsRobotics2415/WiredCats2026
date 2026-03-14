@@ -21,6 +21,12 @@
           "data": {
             "pathName": "Right2Load"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 6.0
+          }
         }
       ]
     }

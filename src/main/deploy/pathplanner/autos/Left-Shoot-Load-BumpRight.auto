@@ -23,9 +23,9 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "WaitForSeconds"
+            "waitTime": 6.0
           }
         },
         {

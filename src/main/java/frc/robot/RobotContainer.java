@@ -114,4 +114,8 @@ public class RobotContainer {
     public Vision getVision() {
         return vision;
     }
+
+    public void WaitForSeconds()
+    {
+    }
 }
