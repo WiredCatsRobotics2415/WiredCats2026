@@ -1,7 +1,13 @@
 package frc.robot;
 
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand; 
@@ -15,17 +21,19 @@ import frc.subsystems.turret.Turret;
 
 public class RobotContainer {
     private static RobotContainer instance;
-    private CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+    private CommandSwerveDrivetrain drive;
     private final Vision vision;
     private final OI oi = OI.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final Climber climber = Climber.getInstance();
     private final Turret turret = Turret.getInstance(); 
     private boolean inShootingMode = false; 
+    private SendableChooser<Command> autoChooser;
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
         this.vision = Vision.getInstance();
+        this.drive = CommandSwerveDrivetrain.getInstance();
 
         setupAuto();
         configureControls();
@@ -45,7 +53,9 @@ public class RobotContainer {
     }
 
     private void setupAuto() {
-        //setup auto named commands
+        autoChooser = AutoBuilder.buildAutoChooser("AUTO1");
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
     }
 
     public void teleopEnable() {
@@ -84,8 +94,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        //return chosen autonomous command
-        return null; 
+        return autoChooser.getSelected();
     }
 
     public void neutralizeSubsystems() {

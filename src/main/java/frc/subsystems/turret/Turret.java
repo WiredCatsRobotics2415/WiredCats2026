@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
@@ -28,11 +29,11 @@ import edu.wpi.first.wpilibj.Servo;
 public class Turret extends SubsystemBase {
     private static Turret instance; 
     private static Shooter shooter = Shooter.getInstance();
-    private final Encoder encoder = new Encoder(1, 2);
+    private final DutyCycleEncoder encoder = new DutyCycleEncoder(9);
     public double currentAngle = 0.0;
      public double currentPitch = 0.0;
     private static Servo turret1 = new Servo(0);
-    private static Servo turret2 = new Servo(0);
+    private static Servo turret2 = new Servo(1);
     private boolean currentlyUp = false;
 
     public TurretSim sim = new TurretSim();
@@ -102,7 +103,9 @@ public class Turret extends SubsystemBase {
 
         if (Robot.isReal()) {
           //based on encoder distance, set the motor to voltage necessary via PID
-          motor.setVoltage(controller.calculate(encoder.getDistance(), controller.getGoal()));
+          //encoder.get() returns a value from 0 to 1, representing the position of the turret within its 360 degree rotation, 
+          //which is what it needs for the calculate()
+          motor.setVoltage(controller.calculate(encoder.get(), controller.getGoal()));
         } else {
             sim.update(0.2);
             double currentPosition = sim.getEncoderPosition();
