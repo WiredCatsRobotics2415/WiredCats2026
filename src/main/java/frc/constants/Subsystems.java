@@ -16,8 +16,13 @@ import frc.utils.tuning.TuneableNumber;
 
 public class Subsystems {
     public static class DriveConstants {
-
+        public static final double PPTranslationP = 20;
+         public static final double RotationP = 15;
         public static final double HeadingKA = 0;
+        public static PIDConstants PPTranslationPID = new PIDConstants(PPTranslationP, 0, 0); // test 3: kp 1, test 4-: kp 5, test 13-: kp 10, test 15-: kp 7, test 19-: kp 5, test 21: kp 7
+        public static PIDConstants RotationPID = new PIDConstants(RotationP, 0, 0);
+        public static PathFollowingController PathFollowingController = new PPHolonomicDriveController(PPTranslationPID,
+            RotationPID);
 
     }
 

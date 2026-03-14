@@ -7,6 +7,7 @@ import frc.subsystems.shooter.Shooter;
 import frc.visualization.BallSim;
 import frc.constants.Measurements;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -17,17 +18,23 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 import frc.constants.Subsystems.TurretConstants;
 import frc.subsystems.turret.TurretSim; 
+import edu.wpi.first.wpilibj.Servo;
 
 public class Turret extends SubsystemBase {
     private static Turret instance; 
     private static Shooter shooter = Shooter.getInstance();
-    private static BallSim ball = BallSim.getInstance();
-    private final Encoder encoder = new Encoder(1, 2);
+    private final DutyCycleEncoder encoder = new DutyCycleEncoder(9);
+    public double currentAngle = 0.0;
+    public double currentPitch = 0.0;
+    private static Servo turret1 = new Servo(0);
+    private static Servo turret2 = new Servo(1);
+    private boolean currentlyUp = false;
 
     public TurretSim sim = new TurretSim();
 
@@ -46,8 +53,37 @@ public class Turret extends SubsystemBase {
     }
 
     public void setAngle(double angle) {
+      if (angle < Measurements.MaxTurretAngle && angle > Measurements.MinTurretAngle) {
+            currentAngle = angle;
             double position = angle / 360.0; // Convert from degrees to rotations
             controller.setGoal(position);
+      }
+    }
+
+    public void setPitchAngle(double angle) {
+      currentPitch = angle;
+      if (angle < Measurements.MaxTurretPitchAngle && angle > Measurements.MinTurretPitchAngle) {
+          turret1.setAngle(Measurements.TurretPitchOffset+angle);
+          turret2.setAngle(Measurements.TurretPitchOffset+angle);
+      }
+    }
+
+    public void IpswitchPitchSwitch() {
+      if (currentlyUp==false) {
+        turret1.setAngle(45);
+        turret2.setAngle(45);
+      } else {
+        turret1.setAngle(15);
+        turret2.setAngle(15);
+      }
+    }
+
+    public double getPitchAngle() {
+      return currentPitch;
+    }
+
+    public double getAngle() {
+        return currentAngle;
     }
 
     public double relativeToTurretAngle(double angle) {
@@ -56,14 +92,19 @@ public class Turret extends SubsystemBase {
 
     @Override
     public void periodic() {
+        //get the angle from the shooter, convert to relative turret angle, and set that as the goal for the turret
+        if (RobotContainer.getInstance().isInShootingMode()) {
         double angle = shooter.getLastAngle();
         double newAngle = relativeToTurretAngle(angle);
         setAngle(newAngle);
-        
         Logger.recordOutput("Turret/AngleGoal", newAngle);
+        }
 
         if (Robot.isReal()) {
-          motor.setVoltage(controller.calculate(encoder.getDistance(), controller.getGoal()));
+          //based on encoder distance, set the motor to voltage necessary via PID
+          //encoder.get() returns a value from 0 to 1, representing the position of the turret within its 360 degree rotation, 
+          //which is what it needs for the calculate()
+          motor.setVoltage(controller.calculate(encoder.get(), controller.getGoal()));
         } else {
             sim.update(0.2);
             double currentPosition = sim.getEncoderPosition();

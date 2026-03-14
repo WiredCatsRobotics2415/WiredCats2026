@@ -203,4 +203,10 @@ public class Measurements {
     );
 
     public static final double TurretAngleOffset = 0; 
+
+    public static final double MaxTurretAngle = 180;
+    public static final double MinTurretAngle = -180;
+    public static final double MaxTurretPitchAngle = 15;
+    public static final double MinTurretPitchAngle = 45;
+    public static final double TurretPitchOffset = 0;
 }

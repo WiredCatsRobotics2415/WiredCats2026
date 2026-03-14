@@ -1,8 +1,15 @@
 package frc.robot;
 
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand; 
 import frc.constants.Controls;
 import frc.robot.generated.TunerConstants;
@@ -14,17 +21,19 @@ import frc.subsystems.turret.Turret;
 
 public class RobotContainer {
     private static RobotContainer instance;
-    private CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+    private CommandSwerveDrivetrain drive;
     private final Vision vision;
     private final OI oi = OI.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final Climber climber = Climber.getInstance();
     private final Turret turret = Turret.getInstance(); 
     private boolean inShootingMode = false; 
+    private SendableChooser<Command> autoChooser;
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
         this.vision = Vision.getInstance();
+        this.drive = CommandSwerveDrivetrain.getInstance();
 
         setupAuto();
         configureControls();
@@ -44,7 +53,9 @@ public class RobotContainer {
     }
 
     private void setupAuto() {
-        //setup auto named commands
+        autoChooser = AutoBuilder.buildAutoChooser("AUTO1");
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
     }
 
     public void teleopEnable() {
@@ -61,16 +72,18 @@ public class RobotContainer {
             double[] linearInput = oi.getXY();
             double x = linearInput[1], y = linearInput[0];
             double rotation = oi.getRotation();
-            System.out.println(x);
-            System.out.println(y);
-            System.out.println(rotation);
             return drive.driveOpenLoopFieldCentricRequest.withVelocityX(x * Controls.MaxDriveMeterS)
                 .withVelocityY(y * Controls.MaxDriveMeterS).withRotationalRate(rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
         oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
-        oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting())); 
-        oi.binds.get(OI.Bind.setHighGoal).onTrue(climber.SetVolt(3.0)); 
+        oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
+        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setAngle(turret.getAngle() - 1)));  
+        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setAngle(turret.getAngle() + 1))); 
+        oi.binds.get(OI.Bind.manualTurretUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() - 1)));  
+        oi.binds.get(OI.Bind.manualTurretDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() + 1)));
+        oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
+        oi.binds.get(OI.Bind.setHighGoal).whileTrue(climber.SetVolt(3.0));
         oi.binds.get(OI.Bind.setLowGoal).onTrue(climber.SetVolt(0.0)); 
         oi.binds.get(OI.Bind.climbHighGoal).onTrue(climber.SetVolt(6)); 
         oi.binds.get(OI.Bind.climbLowGoal).onTrue(climber.SetVolt(0)); 
@@ -81,8 +94,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        //return chosen autonomous command
-        return null; 
+        System.out.println("Selected auto: " + autoChooser.getSelected());
+        return autoChooser.getSelected();
     }
 
     public void neutralizeSubsystems() {
