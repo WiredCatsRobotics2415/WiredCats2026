@@ -10,13 +10,6 @@
             "pathName": "NEWPATH1"
           }
         }
-
-        {
-          "type": "named",
-          "data": {
-            "name": ""
-          }
-        }
       ]
     }
   },
