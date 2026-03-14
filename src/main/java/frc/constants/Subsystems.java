@@ -101,12 +101,11 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static double kP = 0.7;
-        public static double kMaxVelocity = 3;
-        public static double kMaxAcceleration = 3;
-        public static double kI = 0;
-        public static double kD = 0.1;
-        //do not set this to 0!!!
-        public static double kDt = 0.1;
+        public static TuneableNumber kP = new TuneableNumber(10, "Turret/kP");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(5, "Turret/kMaxVelocity"); 
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(5, "Turret/kMaxAcceleration"); 
+        public static TuneableNumber kI = new TuneableNumber(0.1, "Turret/kI"); 
+        public static TuneableNumber kD = new TuneableNumber(0.1, "Turret/kD"); 
+        public static TuneableNumber kDt = new TuneableNumber(0.1, "Turret/kDt"); 
     }
 }

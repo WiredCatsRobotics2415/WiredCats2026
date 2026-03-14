@@ -44,9 +44,9 @@ public class Turret extends SubsystemBase {
     final PositionVoltage m_request = new PositionVoltage(0);
 
     private final TrapezoidProfile.Constraints constraints =
-      new TrapezoidProfile.Constraints(TurretConstants.kMaxVelocity, TurretConstants.kMaxAcceleration);
+      new TrapezoidProfile.Constraints(TurretConstants.kMaxVelocity.get(), TurretConstants.kMaxAcceleration.get());
     private final ProfiledPIDController controller =
-      new ProfiledPIDController(TurretConstants.kP, TurretConstants.kI, TurretConstants.kD, constraints, 0.02);
+      new ProfiledPIDController(TurretConstants.kP.get(), TurretConstants.kI.get(), TurretConstants.kD.get(), constraints, TurretConstants.kDt.get());
     
     public static Turret getInstance() {
         motor = new TalonFX(22);
@@ -123,10 +123,10 @@ public class Turret extends SubsystemBase {
       Logger.recordOutput("Turret/encoderPos", encoder.getDistance());
         //get the angle from the shooter, convert to relative turret angle, and set that as the goal for the turret
         if (RobotContainer.getInstance().isInShootingMode()) {
-        double angle = shooter.getLastAngle();
-        double newAngle = relativeToTurretAngle(angle);
-        setAngle(newAngle);
-        Logger.recordOutput("Turret/AngleGoal", newAngle);
+          double angle = shooter.getLastAngle();
+          double newAngle = relativeToTurretAngle(angle);
+          setAngle(newAngle);
+          Logger.recordOutput("Turret/AngleGoal", newAngle);
         }
 
         if (Robot.isReal()) {
