@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "TurnOnFlywheels"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Right1"
@@ -26,6 +32,12 @@
           "type": "wait",
           "data": {
             "waitTime": 6.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TurnOffFlywheels"
           }
         }
       ]

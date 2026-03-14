@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "TurnOnFlywheels"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Middle1"
@@ -37,7 +43,13 @@
         {
           "type": "named",
           "data": {
-            "name": "ShootPathplanner"
+            "name": "TurnOffFlywheels"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TurnOnFlywheels"
           }
         }
       ]
