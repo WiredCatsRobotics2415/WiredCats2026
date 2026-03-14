@@ -34,16 +34,20 @@ public class Controls {
         public static final int RightTrigger = XboxController.Axis.kRightTrigger.value;
 
         //define buttons!!!
-        public static final int EnterShootingModeButton = 1; 
-        public static final int StartShootingButton = 2; 
-        public static final int setHighGoal = 4;
-        public static final int setLowGoal = 5;
-        public static final int setZeroGoal = 3;
-        public static final int ManualTurretLeft = 6;
+        public static final int EnterShootingModeButton = 80; 
+        public static final int StartShootingButton = 1;
+        public static final int setHighGoal = 80;
+        public static final int setLowGoal = 81;
+        public static final int setZeroGoal = 82;
+        public static final int ManualTurretLeft = 9;
         public static final int ManualTurretRight = 7;
         public static final int ManualTurretUp = 8;
-        public static final int ManualTurretDown = 9;
+        public static final int ManualTurretDown = 6;
+        public static final int ManualSpeedUp = 11;
+        public static final int ManualSpeedDown = 13;
         public static int manualTurretSwitch = 10;
+        public static int intake = 83;
+        public static int flywheel = 3;
     }
 
     public class NumpadButtons {

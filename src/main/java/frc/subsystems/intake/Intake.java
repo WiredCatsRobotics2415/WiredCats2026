@@ -1,6 +1,7 @@
 package frc.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
@@ -22,15 +23,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Subsystems.ClimberConstants;
 import frc.constants.Subsystems.IntakeConstants;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.constants.Subsystems.PortNumbers;
 import frc.robot.Robot;
 
 public class Intake extends SubsystemBase {
 
     private static Intake instance = null;
-    private TalonFX intakePush;
+    public TalonFX intakePush;
     private TalonFX intakeSpin;
-    private DigitalInput frontLimit = new DigitalInput(0); 
-    private DigitalInput backLimit = new DigitalInput(0); 
+    public boolean isOut = false;
+    public PositionVoltage m_request = new PositionVoltage(0);
+    private DigitalInput frontLimit = new DigitalInput(PortNumbers.Intake_Front_Limit_ID); 
+    private DigitalInput backLimit = new DigitalInput(PortNumbers.Intake_Back_Limit_ID); 
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -43,6 +47,18 @@ public class Intake extends SubsystemBase {
   }
 
   private Intake() {
+    intakePush = new TalonFX(PortNumbers.Intake_Motor_ID);
+    //TODO: define Intake Drive Motor
+  }
+
+  public void switchSpinForComp() {
+    if (isOut) {
+      intakePush.setControl(m_request.withPosition(intakePush.getPosition().getValueAsDouble()+1));
+      isOut = false;
+    } else {
+      intakePush.setControl(m_request.withPosition(intakePush.getPosition().getValueAsDouble()-1));
+      isOut = true;
+    }
   }
 
   public Command setSpin(double speed) {

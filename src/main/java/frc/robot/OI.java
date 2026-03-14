@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.constants.Controls;
 import frc.constants.Controls.GulikitButtons;
 import frc.constants.Controls.NumpadButtons;
+import frc.constants.Subsystems.PortNumbers;
 import frc.utils.math.Algebra;
 import frc.utils.math.Trig;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class OI {
         climbHighGoal,
         climbLowGoal,
         climbZero, 
-        stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp,
+        stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp, intake, manualSpeedUp, manualSpeedDown, flywheel,
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -40,14 +41,16 @@ public class OI {
     }
 
     private OI() {
-        controller = new CommandJoystick(4);
-        numpad = new CommandJoystick(1);
+        controller = new CommandJoystick(PortNumbers.ControllerPort);
+        numpad = new CommandJoystick(PortNumbers.NumpadPort);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
         binds.put(Bind.startShooting, controller.button(GulikitButtons.StartShootingButton));
         binds.put(Bind.manualTurretLeft, controller.button(GulikitButtons.ManualTurretLeft));
         binds.put(Bind.manualTurretRight, controller.button(GulikitButtons.ManualTurretRight));  
         binds.put(Bind.manualTurretUp, controller.button(GulikitButtons.ManualTurretUp));  
+        binds.put(Bind.manualSpeedUp, controller.button(GulikitButtons.ManualSpeedUp));  
+        binds.put(Bind.manualSpeedDown, controller.button(GulikitButtons.ManualSpeedDown));  
          binds.put(Bind.manualTurretDown, controller.button(GulikitButtons.ManualTurretDown)); 
           binds.put(Bind.manualTurretSwitch, controller.button(GulikitButtons.manualTurretSwitch)); 
         binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
@@ -55,6 +58,8 @@ public class OI {
         binds.put(Bind.climbHighGoal, controller.button(GulikitButtons.setHighGoal)); 
         binds.put(Bind.climbLowGoal, controller.button(GulikitButtons.setLowGoal)); 
         binds.put(Bind.climbZero, controller.button(GulikitButtons.setZeroGoal)); 
+        binds.put(Bind.intake, controller.button(GulikitButtons.intake)); 
+        binds.put(Bind.flywheel, controller.button(GulikitButtons.flywheel)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR

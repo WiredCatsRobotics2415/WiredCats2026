@@ -1,5 +1,6 @@
 package frc.robot;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -16,6 +17,7 @@ import frc.constants.Controls;
 import frc.robot.generated.TunerConstants;
 import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
+import frc.subsystems.intake.Intake;
 import frc.subsystems.vision.Vision;
 import frc.subsystems.shooter.Shooter;
 import frc.subsystems.turret.Turret; 
@@ -25,11 +27,13 @@ public class RobotContainer {
     private CommandSwerveDrivetrain drive;
     private final Vision vision;
     private final OI oi = OI.getInstance();
+    private final Intake intake = Intake.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final Climber climber = Climber.getInstance();
     private final Turret turret = Turret.getInstance(); 
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
+    public boolean isRunningFlywheel = false;
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -77,10 +81,14 @@ public class RobotContainer {
                 .withVelocityY(y * Controls.MaxDriveMeterS).withRotationalRate(rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
-        oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
+        // oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
         oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
-        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setAngle(turret.getAngle() - 1)));  
-        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setAngle(turret.getAngle() + 1))); 
+        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
+        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
+        oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
+        oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
+        // oi.binds.get(OI.Bind.manualTurretLeft).whileTrue(Commands.run(() -> turret.movePosChange(0.3)));  
+        // oi.binds.get(OI.Bind.manualTurretRight).whileTrue(Commands.run(() -> turret.movePosChange(-0.3))); 
         oi.binds.get(OI.Bind.manualTurretUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() - 1)));  
         oi.binds.get(OI.Bind.manualTurretDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() + 1)));
         oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
@@ -89,9 +97,16 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.climbHighGoal).onTrue(climber.SetVolt(6)); 
         oi.binds.get(OI.Bind.climbLowGoal).onTrue(climber.SetVolt(0)); 
         oi.binds.get(OI.Bind.climbZero).onTrue(climber.SetVolt(3)); 
+        oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> intake.switchSpinForComp())); 
+        oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
     }
 
     public void periodic() {
+        //Logger.recordOutput("Turret/Voltage", turret.getMotorVoltage());
+        // Logger.recordOutput("Intake/position", intake.intakePush.getPosition().getValueAsDouble());
+        Logger.recordOutput("Shooter/Voltage", shooter.getMotor1Voltage());
+        Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
+        Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
     }
 
     public Command getAutonomousCommand() {
