@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootPathplanner"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right2Load"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 6.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Load2Middle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootPathplanner"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

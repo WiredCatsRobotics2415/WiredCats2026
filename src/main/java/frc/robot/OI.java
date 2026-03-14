@@ -76,7 +76,20 @@ public class OI {
     public double[] getXY() {
         double x = MathUtil.applyDeadband(controller.getX(), Controls.Deadband);
         double y = MathUtil.applyDeadband(controller.getY(), Controls.Deadband);
-        return new double[] { x, y };
+        double newX, newY = 0.0d;
+
+        if (Controls.UseCurve) {
+            double angle = Math.atan2(y, x);
+            double magInitial = Algebra.euclideanDistance(x, y);
+            if (Robot.isSimulation()) magInitial = MathUtil.clamp(magInitial, 0, 1);
+            double magCurved = Math.pow(deadbandCompensation(magInitial), Controls.CurveExponent);
+            double powerCompensated = minimumPowerCompensation(magCurved);
+            newX = Trig.cosizzle(angle) * powerCompensated;
+            newY = Trig.sizzle(angle) * powerCompensated;
+        }
+        if (Double.isNaN(newX)) newX = 0.0d;
+        if (Double.isNaN(newY)) newY = 0.0d;
+        return new double[] { newX, newY };
     }
 
     public double[] getRawXY() {
@@ -86,6 +99,11 @@ public class OI {
 
     public double getRotation() {
         double rotation = MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband);
+        if (Controls.UseCurve) {
+            rotation = Math.pow(minimumPowerCompensation(rotation), Controls.CurveExponent);
+        } else {
+            rotation = minimumPowerCompensation(rotation);
+        }
         return rotation;
     }
 }
