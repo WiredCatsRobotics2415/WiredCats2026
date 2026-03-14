@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 import frc.constants.Subsystems.TurretConstants;
+import frc.constants.Subsystems.PortNumbers; 
 import frc.subsystems.turret.TurretSim; 
 import edu.wpi.first.wpilibj.Servo;
 
@@ -48,7 +49,7 @@ public class Turret extends SubsystemBase {
       new ProfiledPIDController(TurretConstants.kP, TurretConstants.kI, TurretConstants.kD, constraints, 0.02);
     
     public static Turret getInstance() {
-        motor = new TalonFX(22);
+        motor = new TalonFX(PortNumbers.Turret_Motor);
 
         if (instance == null) instance = new Turret(); 
         return instance; 
