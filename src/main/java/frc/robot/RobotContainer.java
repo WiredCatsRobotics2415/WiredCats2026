@@ -32,6 +32,7 @@ public class RobotContainer {
     private final Turret turret = Turret.getInstance(); 
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
+    public boolean isRunningFlywheel = false;
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -96,11 +97,15 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.climbLowGoal).onTrue(climber.SetVolt(0)); 
         oi.binds.get(OI.Bind.climbZero).onTrue(climber.SetVolt(3)); 
         oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> intake.switchSpinForComp())); 
+        oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
     }
 
     public void periodic() {
         //Logger.recordOutput("Turret/Voltage", turret.getMotorVoltage());
-        Logger.recordOutput("Intake/position", intake.intakePush.getPosition().getValueAsDouble());
+        // Logger.recordOutput("Intake/position", intake.intakePush.getPosition().getValueAsDouble());
+        Logger.recordOutput("Shooter/Voltage", shooter.getMotor1Voltage());
+        Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
+        Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
     }
 
     public Command getAutonomousCommand() {

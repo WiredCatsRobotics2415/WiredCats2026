@@ -76,13 +76,16 @@ public class Subsystems {
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
         public static double kSVolts = 0.0;
         public static double kVVoltSecondsPerRotation = 0.0;
-        public static double kP = 0.3; // PID proportional gain for feedback control
+        public static TuneableNumber kP = new TuneableNumber(0.1, "Shooter/kP"); 
         public static double kShooterToleranceRPS = 0.0;
         public static double kEncoderDistancePerPulse = 0.0;
         // Feedforward gains - these provide a model-based estimate of voltage needed
-        public static double kS = 0.1; // Voltage to overcome static friction (volts)
-        public static double kV = 0.12; // Voltage per unit velocity (volts per RPS) - tune this!
-        public static double kA = 0.01; // Voltage per unit acceleration (volts per RPS/s)
+        public static TuneableNumber kS = new TuneableNumber(0, "Shooter/kS"); 
+        public static TuneableNumber kV = new TuneableNumber(0, "Shooter/kV"); 
+        public static TuneableNumber kA = new TuneableNumber(0, "Shooter/kA");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(0, "Shooter/kMaxVelocity");
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(0, "Shooter/kMaxAccel");
+        public static TuneableNumber kD = new TuneableNumber(0, "Shooter/kMaxVelocity");
     }
 
     public static class ClimberConstants {

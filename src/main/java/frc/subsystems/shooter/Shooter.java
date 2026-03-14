@@ -13,8 +13,10 @@ import frc.subsystems.shooter.ShooterSim;
 import org.apache.commons.math3.analysis.function.Sqrt;
 import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -22,10 +24,12 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.constants.Subsystems.TurretConstants;
 import frc.constants.Subsystems.PortNumbers;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
@@ -43,7 +47,7 @@ public class Shooter extends SubsystemBase {
   private static TalonFX indexerMotor;
   private static TalonFX handoffMotor;
   private static Integer FLYWHEEL_1_ID = PortNumbers.Flywheel_1_ID;
-  private static Integer FLYWHEEL_2_ID = PortNumbers.Flywheel_1_ID;
+  private static Integer FLYWHEEL_2_ID = PortNumbers.Flywheel_2_ID;
   private static Integer INTAKE_MOTOR_ID = PortNumbers.Intake_Motor_ID;
   private static Integer HANDOFF_MOTOR_ID = PortNumbers.Handoff_Motor_ID;
 
@@ -51,8 +55,12 @@ public class Shooter extends SubsystemBase {
   private boolean ballWasInAir = false; // used for getting distance ball lands from target
 
   //WE ARE USING SIMPLE FEEDFORWARD AND PID BECAUSE WE ARE SETTING FLYWHEEL VELOCITIES AND DON'T NEED POSITION ACCURACY
-  private final PIDController pid = new PIDController(ShooterConstants.kP, 0.0, 0.1);
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
+ private final TrapezoidProfile.Constraints constraints =
+      new TrapezoidProfile.Constraints(ShooterConstants.kMaxVelocity.get(), ShooterConstants.kMaxAcceleration.get());
+    private final ProfiledPIDController pid =
+      new ProfiledPIDController(ShooterConstants.kP.get(),0, ShooterConstants.kD.get(), constraints, 0.02);
+
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(ShooterConstants.kS.get(), ShooterConstants.kV.get(), ShooterConstants.kA.get());
 
   private static ShooterSim sim = new ShooterSim();
 
@@ -72,8 +80,8 @@ public class Shooter extends SubsystemBase {
   // Intake Functions Below
   private Shooter() {
     // Constructor, idk what to put here rn
-    flywheel1 = new TalonFX(FLYWHEEL_1_ID);
-    flywheel2 = new TalonFX(FLYWHEEL_2_ID);
+    flywheel1 = new TalonFX(30);
+    flywheel2 = new TalonFX(0);
     indexerMotor = new TalonFX(INTAKE_MOTOR_ID);
     handoffMotor = new TalonFX(HANDOFF_MOTOR_ID);
   }
@@ -297,24 +305,24 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/actualSpeed", getSpeed());
 
       // Combine feedforward (estimates needed voltage) with feedback (corrects for errors)
-      double feedforwardVolts = feedforward.calculate(goalSpeed);
+      //double feedforwardVolts = feedforward.calculate(goalSpeed);
       double feedbackVolts = pid.calculate(getSpeed(), goalSpeed);
-      double voltage = feedforwardVolts + feedbackVolts;
-
-      Logger.recordOutput("Shooter/feedforwardVolts", feedforwardVolts);
-      Logger.recordOutput("Shooter/feedbackVolts", feedbackVolts);
+      double voltage =  feedbackVolts;
       Logger.recordOutput("Shooter/totalVoltage", voltage);
 
       Logger.recordOutput("Shooter/isInShootingMode", RobotContainer.getInstance().isInShootingMode()); 
       
-      if (Robot.isReal()) {
-          flywheel1.setVoltage(voltage);
-          flywheel2.setVoltage(voltage);
-      } else {
-          sim.setFlywheel1Voltage(voltage);
-          sim.setFlywheel2Voltage(voltage);
-          sim.update(0.02);
-          ball.update();
+      if (RobotContainer.getInstance().isRunningFlywheel) {
+        if (Robot.isReal()) {
+          //both should be positive
+            flywheel1.setVoltage(voltage);
+            flywheel2.setVoltage(voltage);
+        } else {
+            sim.setFlywheel1Voltage(voltage);
+            sim.setFlywheel2Voltage(voltage);
+            sim.update(0.02);
+            ball.update();
+        }
       }
 
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
@@ -331,4 +339,11 @@ public class Shooter extends SubsystemBase {
           ballWasInAir = isInAir; // update was in air to false so it doesn't run again
       }
   }
+
+    public double getMotor1Voltage() {
+      return flywheel1.getMotorVoltage().getValueAsDouble();
+    }
+    public double getMotor2Voltage() {
+      return flywheel2.getMotorVoltage().getValueAsDouble();
+    }
 }
