@@ -93,10 +93,13 @@ public class Shooter extends SubsystemBase {
       Pose2d robotPose = drive.getPose(); 
       setTurretAndShooterForPose(robotPose); // ensures up-to-date
 
+      ChassisSpeeds fieldVel = ChassisSpeeds.fromFieldRelativeSpeeds(drive.getVelocity(), robotPose.getRotation());
+      Translation2d robotVelocity = new Translation2d(fieldVel.vxMetersPerSecond, fieldVel.vyMetersPerSecond);
+
       ball.throwBall(
           new Pose3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround, new Rotation3d()),
           new Rotation3d(0, lastCalculationPitchRadians, lastCalculatedAngleInFieldFrame),
-          lastCalculatedNeededSpeed
+          lastCalculatedNeededSpeed, robotVelocity
       );
     }
   }
@@ -127,21 +130,19 @@ public class Shooter extends SubsystemBase {
     this.goalSpeed = goalSpeed;
   }
 
-    public int getAngleForPose(Pose2d robotPose) {
-      int angle; 
-
+    public double getAngleForPose(Pose2d robotPose) {
+      double angle; 
       if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
-          angle = (int) (Math.toRadians((double) Measurements.ShooterAngleLow) - Math.PI/2); // closer to hub (inside region)
+          angle = Math.toRadians((double) Measurements.ShooterAngleLow) - Math.PI/2;
       } else {
-          angle = (int) (Math.toRadians((double) Measurements.ShooterAngleHigh) - Math.PI/2); // further from hub (outside region)
+          angle = Math.toRadians((double) Measurements.ShooterAngleHigh) - Math.PI/2;
       }
-
       return angle; 
     }
 
     public Pose2d getTarget(Pose2d robotPose) {
-      int shooterAngle = getAngleForPose(robotPose); 
-      if (shooterAngle != (int) (Math.toRadians((double) 45) - Math.PI/2)) {
+      double shooterAngle = getAngleForPose(robotPose); 
+      if (shooterAngle != (Math.toRadians((double) 45) - Math.PI/2)) {
             return Measurements.HubLocation;
         }
         // low angle, selects closest target for left or right
@@ -201,29 +202,25 @@ public class Shooter extends SubsystemBase {
       // vertical = t * s * sin(pitch) - 4.8t^2
       
       double vertical = shooterCompensationVector.getZ();
-      
-      double ts = horizontalDist / Math.cos(pitch); 
-      double radicand = ((ts * Math.sin(pitch)) - vertical) / 4.8; 
 
-      if (radicand < 0) {
-          Logger.recordOutput("Shooter/ERR_neg_radicand", radicand);
-          // return new double[]{Double.NaN, Double.NaN};
-          radicand *= -1; 
-      }
+      Logger.recordOutput("Shooter/vertical", vertical); // this is obvi correct
 
-      double t = Math.sqrt(radicand);
+      Logger.recordOutput("Shooter/pitch", pitch); 
 
-      // double t = Math.sqrt(((ts * Math.sin(pitch)) - vertical) / 4.8); 
-      double s = ts / t; 
-      double[] result = new double[]{t, s}; 
-      Logger.recordOutput("Shooter/t & s", result); 
+      Logger.recordOutput("Shooter/time before square root", ((horizontalDist * Math.tan(pitch)) - vertical)/4.8); 
+
+      double time = Math.sqrt(Math.abs(((horizontalDist * Math.tan(pitch)) - vertical)/4.8)); 
+      double speed = horizontalDist/(time * Math.cos(pitch)); 
+
+      double[] result = new double[]{time, speed}; 
+      Logger.recordOutput("Shooter/time", time); 
+      Logger.recordOutput("Shooter/speed", speed); 
 
       return result; 
     }
 
-    // TODO: figure out why the hub having a goal height is causing the radicant to be negative
     private double getDistBallFromTarget(Pose2d target) {
-      Pose3d Target3D = new Pose3d(target.getX(), target.getY(), getTargetHeight(target), new Rotation3d(0, 0,0)); 
+      Pose3d Target3D = new Pose3d(target.getX(), target.getY(), 0, new Rotation3d(0, 0,0)); 
       Pose3d landedBallPose = ball.getLandedPose3d(); 
       if (landedBallPose == null) {
         return Double.NaN; 
