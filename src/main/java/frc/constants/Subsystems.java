@@ -58,7 +58,7 @@ public class Subsystems {
         public static final int NumpadPort = 1; 
         public static final int ControllerPort = 4; 
         public static final int Flywheel_1_ID = 30; 
-        public static final int Flywheel_2_ID = 0; 
+        public static final int Flywheel_2_ID = 31; 
         public static final int Intake_Motor_ID = 18; 
         public static final int Intake_Drive_ID = 55; 
         public static final int Handoff_Motor_ID = 4; 
@@ -66,7 +66,9 @@ public class Subsystems {
         public static final int Climb_Motor = 6; 
 
         public static final int Intake_Front_Limit_ID = 0; 
-        public static final int Intake_Back_Limit_ID = 1; 
+        public static final int Intake_Back_Limit_ID = 1;
+        public static final int TurretServo1 = 8; 
+        public static final int TurretServo2 = 9; 
     }
 
     public static class ShooterConstants {
@@ -77,6 +79,7 @@ public class Subsystems {
         public static double kSVolts = 0.0;
         public static double kVVoltSecondsPerRotation = 0.0;
         public static TuneableNumber kP = new TuneableNumber(0.1, "Shooter/kP"); 
+        // public static double kP = 0.1;
         public static double kShooterToleranceRPS = 0.0;
         public static double kEncoderDistancePerPulse = 0.0;
         // Feedforward gains - these provide a model-based estimate of voltage needed
@@ -86,6 +89,12 @@ public class Subsystems {
         public static TuneableNumber kMaxVelocity = new TuneableNumber(0, "Shooter/kMaxVelocity");
         public static TuneableNumber kMaxAcceleration = new TuneableNumber(0, "Shooter/kMaxAccel");
         public static TuneableNumber kD = new TuneableNumber(0, "Shooter/kMaxVelocity");
+        // public static double kS = 0;
+        // public static double kV = 0;
+        // public static double kA = 0;
+        // public static double kMaxVelocity = 0;
+        // public static double kMaxAcceleration = 0;
+        // public static double kD = 0; 
     }
 
     public static class ClimberConstants {
@@ -104,11 +113,17 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static TuneableNumber kP = new TuneableNumber(0.7, "Turret/kP");
+        public static TuneableNumber kP = new TuneableNumber(0.83, "Turret/kP");
         public static TuneableNumber kMaxVelocity = new TuneableNumber(3, "Turret/kMaxVelocity"); 
         public static TuneableNumber kMaxAcceleration = new TuneableNumber(3, "Turret/kMaxAcceleration"); 
         public static TuneableNumber kI = new TuneableNumber(0, "Turret/kI"); 
         public static TuneableNumber kD = new TuneableNumber(0.1, "Turret/kD"); 
         public static TuneableNumber kDt = new TuneableNumber(0.1, "Turret/kDt"); 
+        // public static double kP = 0.7;
+        // public static double kMaxVelocity = 3;
+        // public static double kMaxAcceleration = 3;
+        // public static double kI = 0;
+        // public static double kD = 0;
+        // public static double kDt = 0.1;
     }
 }

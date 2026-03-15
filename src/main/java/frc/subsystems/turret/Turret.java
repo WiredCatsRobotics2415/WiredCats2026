@@ -34,8 +34,8 @@ public class Turret extends SubsystemBase {
     private final Encoder encoder = new Encoder(8, 7);
     public double currentAngle = 0.0;
     public double currentPitch = 0.0;
-    private static Servo turret1 = new Servo(0);
-    private static Servo turret2 = new Servo(1);
+    public Servo turret1;
+    public Servo turret2;
     private boolean currentlyUp = false;
 
     public TurretSim sim = new TurretSim();
@@ -46,16 +46,18 @@ public class Turret extends SubsystemBase {
     private final TrapezoidProfile.Constraints constraints =
       new TrapezoidProfile.Constraints(TurretConstants.kMaxVelocity.get(), TurretConstants.kMaxAcceleration.get());
     private final ProfiledPIDController controller =
-      new ProfiledPIDController(TurretConstants.kP.get(), TurretConstants.kI.get(), TurretConstants.kD.get(), constraints, TurretConstants.kDt.get());
+      new ProfiledPIDController(TurretConstants.kP.get(), TurretConstants.kI.get(), TurretConstants.kD.get(), constraints, 0.02);
     
     public static Turret getInstance() {
-        motor = new TalonFX(22);
+        motor = new TalonFX(PortNumbers.Turret_Motor);
 
         if (instance == null) instance = new Turret(); 
         return instance; 
     }
 
     public Turret() {
+      turret1 = new Servo(PortNumbers.TurretServo1);;
+      turret2 = new Servo(PortNumbers.TurretServo2);
       encoder.reset();
       encoder.setDistancePerPulse(0.001);
     }
@@ -134,7 +136,6 @@ public class Turret extends SubsystemBase {
           //encoder.get() returns a value from 0 to 1, representing the position of the turret within its 360 degree rotation, 
           //which is what it needs for the calculate()
           double calculate = controller.calculate(encoder.getDistance(), controller.getGoal());
-          System.out.println(calculate);
           motor.setVoltage(-calculate);
         } else {
             sim.update(0.2);

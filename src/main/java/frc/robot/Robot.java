@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.constants.RuntimeConstants;
 import frc.utils.LimelightHelpers;
+import frc.utils.tuning.TuneableBoolean;
+import frc.utils.tuning.TuneableNumber;
 import frc.visualization.BallSim;
 
 import java.util.HashMap;
@@ -67,7 +69,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         if (RuntimeConstants.TuningMode) {
-            // TuneableNumber.periodic();
+            TuneableNumber.periodic();
             // TuneableBoolean.periodic();
             // TorqueSafety.getInstance().periodic();
         }

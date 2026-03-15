@@ -80,10 +80,11 @@ public class Shooter extends SubsystemBase {
   // Intake Functions Below
   private Shooter() {
     // Constructor, idk what to put here rn
-    flywheel1 = new TalonFX(30);
-    flywheel2 = new TalonFX(0);
-    indexerMotor = new TalonFX(INTAKE_MOTOR_ID);
-    handoffMotor = new TalonFX(HANDOFF_MOTOR_ID);
+    //fix this later
+    flywheel1 = new TalonFX(FLYWHEEL_1_ID);
+    flywheel2 = new TalonFX(FLYWHEEL_2_ID);
+    indexerMotor = new TalonFX(19);
+    handoffMotor = new TalonFX(16);
   }
 
   public static Shooter getInstance() {
@@ -323,6 +324,17 @@ public class Shooter extends SubsystemBase {
             sim.update(0.02);
             ball.update();
         }
+      } else {
+        if (Robot.isReal()) {
+          //both should be positive
+            flywheel1.setVoltage(0);
+            flywheel2.setVoltage(0);
+        }  else {
+          sim.setFlywheel1Voltage(0);
+          sim.setFlywheel2Voltage(0);
+          sim.update(0.02);
+          ball.update();
+      }
       }
 
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();

@@ -4,8 +4,8 @@ import edu.wpi.first.wpilibj.XboxController;
 
 public class Controls {
     //public static final double MaxDriveMeterS = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    public static final double MaxDriveMeterS=1;
-    public static final double MaxAngularRadS = 1.2 * Math.PI;
+    public static final double MaxDriveMeterS=4;
+    public static final double MaxAngularRadS = 1 * Math.PI;
     public static final double Deadband = 0.05d;
     public static final double MinimumDrivePower = 0.05d;
     public static final boolean UseCurve = true;
@@ -39,12 +39,12 @@ public class Controls {
         public static final int setHighGoal = 80;
         public static final int setLowGoal = 81;
         public static final int setZeroGoal = 82;
-        public static final int ManualTurretLeft = 9;
-        public static final int ManualTurretRight = 7;
-        public static final int ManualTurretUp = 8;
-        public static final int ManualTurretDown = 6;
-        public static final int ManualSpeedUp = 11;
-        public static final int ManualSpeedDown = 13;
+        public static final int ManualTurretLeft =5;
+        public static final int ManualTurretRight = 4;
+        public static final int ManualTurretUp = 85;
+        public static final int ManualTurretDown = 85;
+        public static final int ManualSpeedUp = 6;
+        public static final int ManualSpeedDown = XboxController.Axis.kRightTrigger.value;
         public static int manualTurretSwitch = 10;
         public static int intake = 83;
         public static int flywheel = 3;

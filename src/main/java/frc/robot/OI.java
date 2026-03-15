@@ -15,7 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OI {
-    CommandJoystick controller;
+    CommandJoystick joystick;
+    CommandXboxController controller;
     CommandJoystick numpad;
 
     public enum Bind {
@@ -41,17 +42,18 @@ public class OI {
     }
 
     private OI() {
-        controller = new CommandJoystick(PortNumbers.ControllerPort);
+        joystick = new CommandJoystick(PortNumbers.ControllerPort);
+        controller = new CommandXboxController(0);
         numpad = new CommandJoystick(PortNumbers.NumpadPort);
 
         binds.put(Bind.enterShootingMode, controller.button(GulikitButtons.EnterShootingModeButton)); 
         binds.put(Bind.startShooting, controller.button(GulikitButtons.StartShootingButton));
-        binds.put(Bind.manualTurretLeft, controller.button(GulikitButtons.ManualTurretLeft));
-        binds.put(Bind.manualTurretRight, controller.button(GulikitButtons.ManualTurretRight));  
-        binds.put(Bind.manualTurretUp, controller.button(GulikitButtons.ManualTurretUp));  
+        binds.put(Bind.manualTurretLeft, controller.povLeft());
+        binds.put(Bind.manualTurretRight, controller.povRight());  
+        binds.put(Bind.manualTurretUp, controller.povUp());  
         binds.put(Bind.manualSpeedUp, controller.button(GulikitButtons.ManualSpeedUp));  
-        binds.put(Bind.manualSpeedDown, controller.button(GulikitButtons.ManualSpeedDown));  
-         binds.put(Bind.manualTurretDown, controller.button(GulikitButtons.ManualTurretDown)); 
+        binds.put(Bind.manualSpeedDown, controller.rightTrigger());  
+         binds.put(Bind.manualTurretDown, controller.povDown()); 
           binds.put(Bind.manualTurretSwitch, controller.button(GulikitButtons.manualTurretSwitch)); 
         binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
         binds.put(Bind.setLowGoal, controller.button(GulikitButtons.setLowGoal)); 
@@ -73,10 +75,20 @@ public class OI {
         return r * (1 - Controls.MinimumDrivePower) + Controls.MinimumDrivePower;
     }
 
-    public double[] getXY() {
-        double x = MathUtil.applyDeadband(controller.getX(), Controls.Deadband);
-        double y = MathUtil.applyDeadband(controller.getY(), Controls.Deadband);
+    public double[] getXY(boolean isFlight) {
+        double x = 0;
+        double y = 0;
         double newX, newY = 0.0d;
+
+        if (isFlight) {
+        x = MathUtil.applyDeadband(joystick.getX(), Controls.Deadband);
+        y = MathUtil.applyDeadband(joystick.getY(), Controls.Deadband);
+        newX = 0.0d;
+        newY = 0.0d;
+        } else {
+        x = MathUtil.applyDeadband(controller.getRawAxis(0), Controls.Deadband);
+        y = MathUtil.applyDeadband(controller.getRawAxis(1), Controls.Deadband);
+        }
 
         if (Controls.UseCurve) {
             double angle = Math.atan2(y, x);
@@ -89,16 +101,23 @@ public class OI {
         }
         if (Double.isNaN(newX)) newX = 0.0d;
         if (Double.isNaN(newY)) newY = 0.0d;
-        return new double[] { newX, newY };
-    }
+        return new double[] { newX, newY }; 
+        }
+    
 
     public double[] getRawXY() {
         return new double[] { controller.getRawAxis(GulikitButtons.LeftJoystickX),
             controller.getRawAxis(GulikitButtons.LeftJoystickY) };
     }
 
-    public double getRotation() {
-        double rotation = MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband);
+    public double getRotation(boolean isFlight) {
+       double rotation = 0;
+        if (isFlight) {
+             rotation = MathUtil.applyDeadband(controller.getRawAxis(5), Controls.Deadband);
+        } else {
+             rotation = MathUtil.applyDeadband(controller.getRawAxis(4), Controls.Deadband);
+        }
+
         if (Controls.UseCurve) {
             rotation = Math.pow(minimumPowerCompensation(rotation), Controls.CurveExponent);
         } else {

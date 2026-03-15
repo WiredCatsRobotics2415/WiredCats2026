@@ -4,9 +4,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,11 +37,17 @@ public class RobotContainer {
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
     public boolean isRunningFlywheel = false;
+    public Servo servo1 = new Servo(5);
+    public Servo servo2 = new Servo(6);
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
         this.vision = Vision.getInstance();
         this.drive = CommandSwerveDrivetrain.getInstance();
+
+        NamedCommands.registerCommand("ShootPathplanner", new InstantCommand(() -> shooter.startShooting()).andThen(new WaitCommand(5)).andThen(new InstantCommand(() -> shooter.stopShooting())));
+        NamedCommands.registerCommand("TurnOnFlywheels", new InstantCommand(() -> isRunningFlywheel = true));
+        NamedCommands.registerCommand("TurnOffFlywheels", new InstantCommand(() -> isRunningFlywheel = false));
 
         setupAuto();
         configureControls();
@@ -58,7 +67,7 @@ public class RobotContainer {
     }
 
     private void setupAuto() {
-        autoChooser = AutoBuilder.buildAutoChooser("AUTO1");
+        autoChooser = AutoBuilder.buildAutoChooser("LoadRight");
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
     }
@@ -74,11 +83,11 @@ public class RobotContainer {
 
     private void configureControls() {
         drive.setDefaultCommand(drive.applyRequest(() -> {
-            double[] linearInput = oi.getXY();
+            double[] linearInput = oi.getXY(false);
             double x = linearInput[1], y = linearInput[0];
-            double rotation = oi.getRotation();
-            return drive.driveOpenLoopFieldCentricRequest.withVelocityX(x * Controls.MaxDriveMeterS)
-                .withVelocityY(y * Controls.MaxDriveMeterS).withRotationalRate(rotation * Controls.MaxAngularRadS);
+            double rotation = oi.getRotation(false);
+            return drive.driveOpenLoopFieldCentricRequest.withVelocityX(-x * Controls.MaxDriveMeterS)
+                .withVelocityY(-y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
         // oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
@@ -107,6 +116,8 @@ public class RobotContainer {
         Logger.recordOutput("Shooter/Voltage", shooter.getMotor1Voltage());
         Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
         Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
+        Logger.recordOutput("Turret/servo1", servo1.getPosition());
+        Logger.recordOutput("Turret/servo2", servo2.getPosition());
     }
 
     public Command getAutonomousCommand() {
@@ -129,14 +140,5 @@ public class RobotContainer {
 
     public Vision getVision() {
         return vision;
-    }
-
-    public void ShootPathPlanner() //TODO: Hastily written code, hope it works but if robot doesn't shoot during auton this is the issue
-    {
-        inShootingMode = true;
-        Shooter.getInstance().startShooting();
-        new WaitCommand(5);
-        inShootingMode = false;
-        Shooter.getInstance().stopShooting();
     }
 }
