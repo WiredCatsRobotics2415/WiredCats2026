@@ -43,7 +43,7 @@ public class Shooter extends SubsystemBase {
   private static TalonFX indexerMotor;
   private static TalonFX handoffMotor;
   private static Integer FLYWHEEL_1_ID = PortNumbers.Flywheel_1_ID;
-  private static Integer FLYWHEEL_2_ID = PortNumbers.Flywheel_1_ID;
+  private static Integer FLYWHEEL_2_ID = PortNumbers.Flywheel_2_ID;
   private static Integer INTAKE_MOTOR_ID = PortNumbers.Intake_Motor_ID;
   private static Integer HANDOFF_MOTOR_ID = PortNumbers.Handoff_Motor_ID;
 
@@ -139,21 +139,21 @@ public class Shooter extends SubsystemBase {
   }
 
     public double getAngleForPose(Pose2d robotPose) {
-      double angle; 
-      if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
-          angle = Math.toRadians((double) Measurements.ShooterAngleLow) - Math.PI/2;
+      boolean inHub = Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation()); 
+      Logger.recordOutput("Shooter/inHubRegion", inHub);
+      Logger.recordOutput("Shooter/robotPoseForAngle", robotPose);
+      if (inHub) {
+          return Math.toRadians(Measurements.ShooterAngleLow);
       } else {
-          angle = Math.toRadians((double) Measurements.ShooterAngleHigh) - Math.PI/2;
+          return Math.toRadians(Measurements.ShooterAngleHigh);
       }
-      return angle; 
-    }
+  }
 
     public Pose2d getTarget(Pose2d robotPose) {
-      double shooterAngle = getAngleForPose(robotPose); 
-      if (shooterAngle != (Math.toRadians((double) 45) - Math.PI/2)) {
-            return Measurements.HubLocation;
-        }
-        // low angle, selects closest target for left or right
+      if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
+        return Measurements.HubLocation;
+      }
+        // if shooter angle is very similar to low angle (15 degree)
         return (robotPose.getTranslation().getDistance(Measurements.LeftMidAllianceRegion.getTranslation()) < 
                 robotPose.getTranslation().getDistance(Measurements.RightMidAllianceRegion.getTranslation())) 
                 ? Measurements.LeftMidAllianceRegion : Measurements.RightMidAllianceRegion;
@@ -178,23 +178,23 @@ public class Shooter extends SubsystemBase {
       CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
       ChassisSpeeds fieldVel = ChassisSpeeds.fromRobotRelativeSpeeds(drive.getVelocity(), robotPose.getRotation());
       Translation3d robotVelocity3d = new Translation3d(fieldVel.vxMetersPerSecond, fieldVel.vyMetersPerSecond, 0.0);
-      Logger.recordOutput("Shooter/robotVelocityVector", makeAdvantageScopeLine(robotVelocity3d, robotPose)); 
+      Logger.recordOutput("Shooter/robotVelocityVector", makeAdvantageScopeLine(robotVelocity3d, robotPose, 0)); 
       return robotVelocity3d; 
     }
 
     private double getTargetHeight(Pose2d target) {
-      if (target == Measurements.LeftMidAllianceRegion || target == Measurements.RightMidAllianceRegion) {
-        return 0.0; 
+      if (target == Measurements.HubLocation) {
+        return Measurements.HubGoalHeight;
       }
-      return Measurements.HubGoalHeight; 
+      return 0.0;
     }
 
     private Translation3d getVectorFromRobotToTarget(Pose2d robotPose, Pose2d target) {
-      Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), 0); // temporarily assuming ball is in ground
+      Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround);
       Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), getTargetHeight(target)); 
       Logger.recordOutput("Shooter/targetPose", targetGoalPositionVector); // this is correct/what I want
 
-      Translation3d vectorFromRobotToTarget = targetGoalPositionVector.minus(ballPositionVector); 
+      Translation3d vectorFromRobotToTarget = targetGoalPositionVector.minus(ballPositionVector); // this is correct
       return vectorFromRobotToTarget; 
     }
 
@@ -202,23 +202,33 @@ public class Shooter extends SubsystemBase {
       Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
       Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
 
-      return vectorFromRobotToTarget.minus(robotVelocity3d);
+      return vectorFromRobotToTarget.minus(robotVelocity3d); // this is visibly the difference between the velocity vector and the robot to target vector
     }
 
+    /*
+    this calculates the speed based on the shooter compensation vector (which is what we want to shoot it along)
+    it is not correctly shooting the ball from the start of the vector to the end of the vector
+     */
     private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector, double horizontalDist) {
       // horizontal = t * s * cos(pitch)
       // vertical = t * s * sin(pitch) - 4.8t^2
       
       double vertical = shooterCompensationVector.getZ();
 
-      Logger.recordOutput("Shooter/vertical", vertical); // this is obvi correct
+      Logger.recordOutput("Shooter/horizontalDist", horizontalDist);
+      Logger.recordOutput("Shooter/tanPitch", Math.tan(pitch));
+      Logger.recordOutput("Shooter/tanPitch_x_dist", horizontalDist * Math.tan(pitch));
+      Logger.recordOutput("Shooter/vertical", vertical);
 
-      Logger.recordOutput("Shooter/pitch", pitch); 
+      if ((horizontalDist * Math.cos(pitch) / Math.sin(pitch) - vertical) / 4.8 <= 0) {
+        Logger.recordOutput("Shooter/calcError", "Invalid pitch: tSquared <= 0, pitch=" + pitch);
+        return new double[]{0.0, 0.0};
+    }
 
-      Logger.recordOutput("Shooter/time before square root", ((horizontalDist * Math.tan(pitch)) - vertical)/4.8); 
-
-      double time = Math.sqrt(Math.abs(((horizontalDist * Math.tan(pitch)) - vertical)/4.8)); 
-      double speed = horizontalDist/(time * Math.cos(pitch)); 
+      // double time = Math.sqrt(Math.abs(((horizontalDist * Math.tan(pitch)) - vertical)/4.8)); 
+      // double speed = horizontalDist/(time * Math.cos(pitch)); 
+      double time = Math.sqrt((horizontalDist * Math.cos(pitch) / Math.sin(pitch) - vertical) / 4.8);
+      double speed = horizontalDist / (time * Math.sin(pitch));
 
       double[] result = new double[]{time, speed}; 
       Logger.recordOutput("Shooter/time", time); 
@@ -236,12 +246,12 @@ public class Shooter extends SubsystemBase {
       return landedBallPose.getTranslation().getDistance(Target3D.getTranslation()); 
     }
 
-    public Pose3d[] makeAdvantageScopeLine(Translation3d vector, Pose2d robotPose) {
+    public Pose3d[] makeAdvantageScopeLine(Translation3d vector, Pose2d robotPose, double heightOffset) {
       Pose3d[] final_array = new Pose3d[9]; 
       double robotX = robotPose.getX(); 
       double robotY = robotPose.getY(); 
       for (int i = 0; i < 9; i++) {
-        Pose3d to_add = new Pose3d(vector.getX()/(i+1) + robotX, vector.getY()/(i+1) + robotY, vector.getZ()/(i+1), new Rotation3d(0,0,0)); 
+        Pose3d to_add = new Pose3d(vector.getX()/(i+1) + robotX, vector.getY()/(i+1) + robotY, heightOffset + vector.getZ()/(i+1), new Rotation3d(0,0,0)); 
         final_array[i] = to_add; 
       }
       return final_array; 
@@ -259,10 +269,10 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/target", target); 
 
       Translation3d shooterSpeedVector = getShooterSpeedVector(robotPose, target); 
-      Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose)); 
+      Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose, Measurements.ShooterHeightFromGround)); 
 
       Translation3d robotToTarget = getVectorFromRobotToTarget(robotPose, target); 
-      Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(robotToTarget, robotPose)); 
+      Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(robotToTarget, robotPose, Measurements.ShooterHeightFromGround)); 
       double dx = shooterSpeedVector.getX();
       double dy = shooterSpeedVector.getY();
 

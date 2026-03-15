@@ -79,7 +79,7 @@ public class RobotContainer {
                 .withVelocityY(y * Controls.MaxDriveMeterS).withRotationalRate(rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
-        // oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
+        oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
         oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
         oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
         oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
