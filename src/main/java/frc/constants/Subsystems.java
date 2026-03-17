@@ -67,8 +67,8 @@ public class Subsystems {
 
         public static final int Intake_Front_Limit_ID = 0; 
         public static final int Intake_Back_Limit_ID = 1;
-        public static final int TurretServo1 = 8; 
-        public static final int TurretServo2 = 9; 
+        public static final int TurretServo1 = 5; 
+        public static final int TurretServo2 = 6; 
     }
 
     public static class ShooterConstants {

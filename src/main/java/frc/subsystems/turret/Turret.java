@@ -33,7 +33,7 @@ public class Turret extends SubsystemBase {
     private static Shooter shooter = Shooter.getInstance();
     private final Encoder encoder = new Encoder(8, 7);
     public double currentAngle = 0.0;
-    public double currentPitch = 0.0;
+    public double currentPosition = 0.5;
     public Servo turret1;
     public Servo turret2;
     private boolean currentlyUp = false;
@@ -56,8 +56,8 @@ public class Turret extends SubsystemBase {
     }
 
     public Turret() {
-      turret1 = new Servo(PortNumbers.TurretServo1);;
-      turret2 = new Servo(PortNumbers.TurretServo2);
+      turret1 = new Servo(5);;
+      turret2 = new Servo(6);
       encoder.reset();
       encoder.setDistancePerPulse(0.001);
     }
@@ -84,26 +84,30 @@ public class Turret extends SubsystemBase {
       controller.setGoal(controller.getGoal().position + posChange);
     }
 
-    public void setPitchAngle(double angle) {
-      currentPitch = angle;
-      if (angle < Measurements.MaxTurretPitchAngle && angle > Measurements.MinTurretPitchAngle) {
-          turret1.setAngle(Measurements.TurretPitchOffset+angle);
-          turret2.setAngle(Measurements.TurretPitchOffset+angle);
-      }
+    public void setPitchAngle(double change) {
+      System.out.println("SETTING PITCH");
+      System.out.println(currentPosition+change);
+      currentPosition = currentPosition+change;
     }
 
     public void IpswitchPitchSwitch() {
       if (currentlyUp==false) {
-        turret1.setAngle(45);
-        turret2.setAngle(45);
+              //up is 0.88 for turret1, down is 0.48
+      //down is 0.95 for turret2, up is 0.55
+      System.out.println("GOING UP");
+        turret1.set(0.88);
+        turret2.set(0.55);
+        currentlyUp = true;
       } else {
-        turret1.setAngle(15);
-        turret2.setAngle(15);
+        System.out.println("GOING DOWN");
+        turret1.set(0.48);
+        turret2.set(0.95);
+        currentlyUp= false;
       }
     }
 
     public double getPitchAngle() {
-      return currentPitch;
+      return currentPosition;
     }
 
     public double getAngle() {
@@ -116,6 +120,9 @@ public class Turret extends SubsystemBase {
 
     @Override
     public void periodic() {
+      Logger.recordOutput("Turret/currrentPitch", currentPosition);
+      //turret2.set(currentPosition);
+      //up is 
       // System.out.println("CURRENTLY AT:");
       // System.out.println(motor.getPosition().getValueAsDouble());
       // System.out.println("SENDING VOLTS TO CORRECT:");

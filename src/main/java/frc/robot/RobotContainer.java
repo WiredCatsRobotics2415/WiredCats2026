@@ -37,8 +37,6 @@ public class RobotContainer {
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
     public boolean isRunningFlywheel = false;
-    public Servo servo1 = new Servo(5);
-    public Servo servo2 = new Servo(6);
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -98,9 +96,9 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
         // oi.binds.get(OI.Bind.manualTurretLeft).whileTrue(Commands.run(() -> turret.movePosChange(0.3)));  
         // oi.binds.get(OI.Bind.manualTurretRight).whileTrue(Commands.run(() -> turret.movePosChange(-0.3))); 
-        oi.binds.get(OI.Bind.manualTurretUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() - 1)));  
-        oi.binds.get(OI.Bind.manualTurretDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setPitchAngle(turret.getPitchAngle() + 1)));
-        oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
+        oi.binds.get(OI.Bind.manualTurretUp).onTrue(new InstantCommand(() -> System.out.println("TESTING"))).whileTrue(Commands.run(() -> turret.setPitchAngle(-0.001)));  
+        oi.binds.get(OI.Bind.manualTurretDown).onTrue(new InstantCommand(() -> System.out.println("TESTIN2G"))).whileTrue(Commands.run(() -> turret.setPitchAngle(0.001)));
+        oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> System.out.println("TESTING SWITCH"))).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
         oi.binds.get(OI.Bind.setHighGoal).whileTrue(climber.SetVolt(3.0));
         oi.binds.get(OI.Bind.setLowGoal).onTrue(climber.SetVolt(0.0)); 
         oi.binds.get(OI.Bind.climbHighGoal).onTrue(climber.SetVolt(6)); 
@@ -116,8 +114,7 @@ public class RobotContainer {
         Logger.recordOutput("Shooter/Voltage", shooter.getMotor1Voltage());
         Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
         Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
-        Logger.recordOutput("Turret/servo1", servo1.getPosition());
-        Logger.recordOutput("Turret/servo2", servo2.getPosition());
+
     }
 
     public Command getAutonomousCommand() {
