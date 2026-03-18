@@ -72,22 +72,8 @@ public class Turret extends SubsystemBase {
       }
     }
 
-  //   public void movePosChange(double change) {
-  //     System.out.println("CURRENT MOTOR POSITION:");
-  //     System.out.println(motor.getPosition().getValueAsDouble());
-  //     System.out.println("CURRENT GOAL POSITION:");
-  //     System.out.println(motor.getPosition().getValueAsDouble() + change);
-  //     motor.setControl(m_request.withPosition(motor.getPosition().getValueAsDouble() + change));
-  // }
-
     public void setControllerChange(double posChange) {
       controller.setGoal(controller.getGoal().position + posChange);
-    }
-
-    public void setPitchAngle(double change) {
-      System.out.println("SETTING PITCH");
-      System.out.println(currentPosition+change);
-      currentPosition = currentPosition+change;
     }
 
     public void IpswitchPitchSwitch() {
@@ -121,16 +107,11 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
       Logger.recordOutput("Turret/currrentPitch", currentPosition);
-      //turret2.set(currentPosition);
-      //up is 
-      // System.out.println("CURRENTLY AT:");
-      // System.out.println(motor.getPosition().getValueAsDouble());
-      // System.out.println("SENDING VOLTS TO CORRECT:");
-      //System.out.println(motor.getMotorVoltage());
-
       Logger.recordOutput("Turret/controllerGoal", controller.getGoal().position);
       Logger.recordOutput("Turret/encoderPos", encoder.getDistance());
-        //get the angle from the shooter, convert to relative turret angle, and set that as the goal for the turret
+
+        //get the angle from the shooter, convert to relative turret angle, then 
+        //convert that to a 0-1 position, and set that as the controller goal for the turret
         if (RobotContainer.getInstance().isInShootingMode()) {
           double angle = shooter.getLastAngle();
           double newAngle = relativeToTurretAngle(angle);
@@ -139,9 +120,11 @@ public class Turret extends SubsystemBase {
         }
 
         if (Robot.isReal()) {
+          
           //based on encoder distance, set the motor to voltage necessary via PID
           //encoder.get() returns a value from 0 to 1, representing the position of the turret within its 360 degree rotation, 
           //which is what it needs for the calculate()
+          
           double calculate = controller.calculate(encoder.getDistance(), controller.getGoal());
           motor.setVoltage(-calculate);
         } else {

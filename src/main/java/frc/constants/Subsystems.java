@@ -29,6 +29,11 @@ public class Subsystems {
 
         public static final double HeadingKA = 0;
         public static double kSwitchThreshold;
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(0.2, "Intake/kP");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(0.1, "Intake/kP");
+        public static TuneableNumber kP = new TuneableNumber(0.4, "Intake/kP");
+        public static TuneableNumber kI = new TuneableNumber(0, "Intake/kP");
+        public static TuneableNumber kD = new TuneableNumber(0.01, "Intake/kP");
 
     }
 
@@ -65,8 +70,8 @@ public class Subsystems {
         public static final int Turret_Motor = 22; 
         public static final int Climb_Motor = 6; 
 
-        public static final int Intake_Front_Limit_ID = 0; 
-        public static final int Intake_Back_Limit_ID = 1;
+        public static final int Intake_Front_Limit_ID = 10; 
+        public static final int Intake_Back_Limit_ID = 11;
         public static final int TurretServo1 = 5; 
         public static final int TurretServo2 = 6; 
     }

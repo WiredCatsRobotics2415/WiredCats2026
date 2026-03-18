@@ -35,7 +35,7 @@ public class Controls {
 
         //define buttons!!!
         public static final int EnterShootingModeButton = 80; 
-        public static final int StartShootingButton = 85;
+        public static final int StartShootingButton = 9;
         public static final int setHighGoal = 80;
         public static final int setLowGoal = 81;
         public static final int setZeroGoal = 82;
@@ -46,7 +46,7 @@ public class Controls {
         public static final int ManualSpeedUp = 6;
         public static final int ManualSpeedDown = XboxController.Axis.kRightTrigger.value;
         public static int manualTurretSwitch = 1;
-        public static int intake = 83;
+        public static int intake = 4;
         public static int flywheel = 3;
     }
 
