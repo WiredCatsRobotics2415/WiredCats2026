@@ -98,7 +98,7 @@ public class Shooter extends SubsystemBase {
     System.out.println("START SHOOTING!!");
     if (Robot.isReal()) {
       //starting it at 50%
-      handoffMotor.set(-0.5);
+      handoffMotor.set(-0.75);
       indexerMotor.set(0.5);
       // shoot in real? can use lastCalculationPitchRadians, lastCalculationTurretAngleRadians, lastCalculatedNeededSpeed
     } else {

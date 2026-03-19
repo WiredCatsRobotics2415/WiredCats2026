@@ -38,13 +38,11 @@ public class RobotContainer {
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
     public boolean isRunningFlywheel = false;
-    private DigitalInput limitswitch;
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
         this.vision = Vision.getInstance();
         this.drive = CommandSwerveDrivetrain.getInstance();
-        this.limitswitch = new DigitalInput(1);
 
         NamedCommands.registerCommand("ShootPathplanner", new InstantCommand(() -> shooter.startShooting()).andThen(new WaitCommand(5)).andThen(new InstantCommand(() -> shooter.stopShooting())));
         NamedCommands.registerCommand("TurnOnFlywheels", new InstantCommand(() -> isRunningFlywheel = true));
@@ -113,7 +111,6 @@ public class RobotContainer {
         Logger.recordOutput("Shooter/Voltage", shooter.getMotor1Voltage());
         Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
         Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
-        Logger.recordOutput("intake/limitswitch", limitswitch.get());
 
     }
 

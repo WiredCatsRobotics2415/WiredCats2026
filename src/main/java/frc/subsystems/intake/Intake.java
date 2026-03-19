@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
     public PositionVoltage m_request = new PositionVoltage(0);
     private DigitalInput frontLimit = new DigitalInput(PortNumbers.Intake_Front_Limit_ID); 
     private DigitalInput backLimit = new DigitalInput(PortNumbers.Intake_Back_Limit_ID); 
-    private double amountToMove = 0.5;
+    private double amountToMove = 30;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -64,7 +64,7 @@ public class Intake extends SubsystemBase {
   public void switchSpinForComp() {
     System.out.println("Switching");
     if (isOut) {
-      controller.setGoal(-amountToMove);
+      controller.setGoal(0);
       isOut = false;
     } else {
       controller.setGoal(amountToMove);
@@ -97,17 +97,24 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
       //if not there
-      if (controller.atGoal() || frontLimit.get() || backLimit.get()) {
+      if (controller.atGoal() || frontLimit.get()) {
+        System.out.println(frontLimit.get());
+        System.out.println(controller.atGoal());
+        
         intakePush.setVoltage(0);
         if (backLimit.get()) {
           intakeDrive.setVoltage(0);
         }
+
       } else {
-        double calculate = controller.calculate(intakePush.getPosition().getValueAsDouble(), controller.getGoal());
+
+        System.out.println("sending voltage");
+        double calculate = controller.calculate(-intakePush.getPosition().getValueAsDouble(), controller.getGoal());
         intakePush.setVoltage(-calculate);
       }
-      Logger.recordOutput("Intake/currentPos", intakePush.getPosition().getValueAsDouble());
-      Logger.recordOutput("Intake/controllerGoal", controller.getGoal().getValueAsDouble());
+
+      Logger.recordOutput("Intake/currentPos", -intakePush.getPosition().getValueAsDouble());
+      Logger.recordOutput("Intake/controllerGoal", controller.getGoal().position);
       Logger.recordOutput("Intake/voltage", intakePush.getMotorVoltage().getValueAsDouble());
     }
 
