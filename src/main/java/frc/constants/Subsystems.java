@@ -74,6 +74,9 @@ public class Subsystems {
         public static final int Intake_Back_Limit_ID = 11;
         public static final int TurretServo1 = 5; 
         public static final int TurretServo2 = 6; 
+
+        public static final int LimitSwitchLeft_ID = 100;
+        public static final int LimitSwitchRight_ID = 100; //TODO: Assign proper port ID
     }
 
     public static class ShooterConstants {
@@ -103,7 +106,6 @@ public class Subsystems {
     }
 
     public static class ClimberConstants {
-        public static final double GoalDeadband = 0;
         public static final double MaxHeight = 0.5;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
@@ -112,6 +114,10 @@ public class Subsystems {
         public static double kClimbArmMassKg = 1;
         public static double kClimbArmLengthM = 1;
         public static double kClimbArmMOIkgm2 = 1;
+        //Not sure how important these things are so I'll just leave them for now
+
+        public static final double GoalDeadband = 0;
+        public static final double ClimberVoltage = 35; //TODO: Test and find best value
     }
 
     public static class TurretConstants {

@@ -12,6 +12,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,10 +25,14 @@ import frc.robot.Robot;
 public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
-    private AnalogInput wirePotentiometer;
     private TalonFX climbMotor = new TalonFX(PortNumbers.Climb_Motor);
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
+    private DigitalInput limitSwitchLeft = new DigitalInput(PortNumbers.LimitSwitchLeft_ID);
+    private DigitalInput limitSwitchRight = new DigitalInput(PortNumbers.LimitSwitchRight_ID);
+    private boolean leftRight = false; //False = left, Right = true. If left (meaning left hook is all the way down), bring right hook up and vice versa
+    private boolean climberRunning = false;
+
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -40,7 +45,6 @@ public class Climber extends SubsystemBase {
   }
 
   private Climber() {
-    wirePotentiometer = new AnalogInput(0);
     pid.setTolerance(0.05); 
   }
 
@@ -48,37 +52,31 @@ public class Climber extends SubsystemBase {
     return currentHeight / 3 * ClimberConstants.MaxHeight;
   }
 
-    public Command SetVolt(double voltage) {
-    return runOnce(
-        () -> {
-          pid.setSetpoint(voltage);
-          System.out.println("Set climber setpoint to " + voltage);
-        });
-    }
+  public void SetClimberState(boolean turnOnOrNot)
+  {
+    climberRunning = turnOnOrNot;
+    if(climberRunning) {SetVoltage();}
+  }
 
-    
-    public boolean getForwardLimit() {
-        return false;
-    }
-
-    public boolean getSideLimit() {
-        return false;
+    public void SetVoltage() 
+    {
+      //TODO: Not sure what voltage goes which direction, change later
+      climbMotor.setVoltage(leftRight ? /*Move Left Hook Up*/ClimberConstants.ClimberVoltage : /*Move RIght Hook Up*/-ClimberConstants.ClimberVoltage);
     }
 
     @Override 
     public void periodic() {
-      if (Robot.isReal()) {
-        Logger.recordOutput("Climber/PotentiometerVoltage", wirePotentiometer.getVoltage());
-        Logger.recordOutput("Climber/Voltage", climbMotor.getMotorVoltage().getValueAsDouble());
-        currentHeight = wirePotentiometer.getVoltage();
-        climbMotor.setVoltage(pid.calculate(wirePotentiometer.getVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
-      } else {
-        sim.update(0.02);
-        Logger.recordOutput("Climber/PotentiometerVoltage", sim.getPotentiometerVoltage());
-        double voltage = (pid.calculate(sim.getPotentiometerVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
-        Logger.recordOutput("Climber/Voltage", voltage);
-        currentHeight = sim.getPotentiometerVoltage();
-        sim.setMotorVoltage(voltage);
+      if (Robot.isReal() && climberRunning) {
+        if(limitSwitchLeft.get())
+        {
+          leftRight = false;
+          SetVoltage();
+        }
+        if(limitSwitchRight.get())
+        {
+          leftRight = true;
+          SetVoltage();
+        }
       }
     }
 }
