@@ -48,6 +48,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("TurnOnFlywheels", new InstantCommand(() -> isRunningFlywheel = true));
         NamedCommands.registerCommand("TurnOffFlywheels", new InstantCommand(() -> isRunningFlywheel = false));
 
+        SmartDashboard.putData("Reset Position to M2", new InstantCommand(() -> this.drive.resetPose(vision.getCurrentAveragePose())));
+        SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> this.drive.resetRotation(vision.getCurrentAverageRotation())));
+
         setupAuto();
         configureControls();
         neutralizeSubsystems();
@@ -91,8 +94,8 @@ public class RobotContainer {
         
         oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
         oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
-        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
-        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
+        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> {inShootingMode=false; System.out.println("up 0.5!");})).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
+        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> {inShootingMode=false; System.out.println("down 0.5!");})).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
         oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
         oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
         oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> System.out.println("TESTING SWITCH"))).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
@@ -101,7 +104,7 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.climbHighGoal).onTrue(climber.SetVolt(6)); 
         oi.binds.get(OI.Bind.climbLowGoal).onTrue(climber.SetVolt(0)); 
         oi.binds.get(OI.Bind.climbZero).onTrue(climber.SetVolt(3)); 
-        oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> intake.switchSpinForComp())); 
+        oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
     }
 

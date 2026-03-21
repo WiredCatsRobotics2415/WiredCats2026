@@ -2,6 +2,9 @@ package frc.subsystems.vision;
 
 // unit/math imports
 import static edu.wpi.first.units.Units.Degrees;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Rotation2d; 
 
@@ -47,6 +50,8 @@ public class VisionIOReal implements VisionIO {
                 estimate = PoseEstimate.zero;
             }
             inputs.poseEstimates[i] = estimate.pose;
+            String name = "Vision/estimate" + i;
+            Logger.recordOutput(name, estimate.pose);
             inputs.poseLatencies[i] = estimate.latency;
             inputs.poseTimestampsSeconds[i] = estimate.timestampSeconds;
             inputs.poseTagCounts[i] = estimate.tagCount;

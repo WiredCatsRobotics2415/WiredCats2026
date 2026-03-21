@@ -97,10 +97,7 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
       //if not there
-      if (controller.atGoal() || frontLimit.get()) {
-        System.out.println(frontLimit.get());
-        System.out.println(controller.atGoal());
-        
+      if (controller.atGoal() || frontLimit.get()) {   
         intakePush.setVoltage(0);
         if (backLimit.get()) {
           intakeDrive.setVoltage(0);
