@@ -14,6 +14,7 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,7 +34,7 @@ import edu.wpi.first.wpilibj.Servo;
 public class Turret extends SubsystemBase {
     private static Turret instance; 
     private static Shooter shooter = Shooter.getInstance();
-    private final Encoder encoder = new Encoder(8, 7);
+    private final Encoder encoder = new Encoder(0, 1);
     public double currentAngle = 0.0;
     public double currentPosition = 0.5;
     public Servo turret1;
@@ -119,6 +120,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
       Logger.recordOutput("Turret/currrentPitch", currentPosition);
       Logger.recordOutput("Turret/controllerGoal", controller.getGoal().position);
+      Logger.recordOutput("Turret/encoderConnected", encoder.get());
       Logger.recordOutput("Turret/encoderPos", encoder.getDistance());
 
       Logger.recordOutput("Turret/turret1", turret1.get());
@@ -155,7 +157,9 @@ public class Turret extends SubsystemBase {
             System.out.println("hitting right switch and going right");
             calculate = 0;
           }
+
           motor.setVoltage(-calculate);
+          System.out.println(motor.getMotorVoltage().getValueAsDouble());
         } else {
             sim.update(0.2);
             double currentPosition = sim.getEncoderPosition();
