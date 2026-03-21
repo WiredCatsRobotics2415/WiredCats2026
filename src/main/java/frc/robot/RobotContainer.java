@@ -49,7 +49,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("TurnOffFlywheels", new InstantCommand(() -> isRunningFlywheel = false));
 
         SmartDashboard.putData("Reset Position to M2", new InstantCommand(() -> this.drive.resetPose(vision.getCurrentAveragePose())));
-        SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> this.drive.resetRotation(vision.getCurrentAverageRotation())));
+        SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> {System.out.println("Reseting rotation"); this.drive.resetRotation(vision.getCurrentAverageRotation()); }));
 
         setupAuto();
         configureControls();

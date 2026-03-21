@@ -74,8 +74,8 @@ public class Turret extends SubsystemBase {
     public void setAngle(double angle) {
       if (angle < Measurements.MaxTurretAngle && angle > Measurements.MinTurretAngle) {
             currentAngle = angle;
-            double position = (angle+180) / 360.0; // Convert from degrees to rotations
-            if (position > 0 && position < 1) {
+            double position = angle / 60; // Convert from degrees to rotations
+            if (position > -3 && position < 3) {
               Logger.recordOutput("Turret/SettingPosition", position);
               controller.setGoal(position);
             }

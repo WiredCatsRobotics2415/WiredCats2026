@@ -175,10 +175,6 @@ public class Vision extends SubsystemBase {
         io.setTurretPipeline(pipeline);
     }
 
-    public void updateInputsNow() {
-        io.updateInputs(inputs);
-    }
-
     public boolean objectDetected() {
         return inputs.objectDetected;
     }

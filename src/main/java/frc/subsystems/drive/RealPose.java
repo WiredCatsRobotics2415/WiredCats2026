@@ -3,6 +3,7 @@ package frc.subsystems.drive;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.subsystems.vision.Vision;
+import frc.utils.LimelightHelpers;
 import frc.utils.LimelightHelpers.PoseEstimate;
 import org.littletonrobotics.junction.Logger;
 
@@ -71,27 +72,23 @@ public class RealPose {
 
             // Only add measurement if we detected at least one AprilTag
             if (estimate.tagCount > 0) {
-                // Calculate standard deviations based on tag count and distance
-                double xyStdDev = calculateXYStdDev(estimate);
-                double rotStdDev = ROTATION_STD_DEV;
 
                 // Add the vision measurement to Phoenix 6's pose estimator
+                drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
                 drivetrain.addVisionMeasurement(
                     estimate.pose,
-                    estimate.timestampSeconds,
-                    VecBuilder.fill(xyStdDev, xyStdDev, rotStdDev)
-                );
+                    estimate.timestampSeconds);
+              }
 
                 // Log the vision measurement
                 Logger.recordOutput("Drive/VisionPose" + i, estimate.pose);
                 Logger.recordOutput("Drive/VisionTagCount" + i, estimate.tagCount);
-                Logger.recordOutput("Drive/VisionXYStdDev" + i, xyStdDev);
 
                 if (estimate.avgTagDist > 0) {
                     Logger.recordOutput("Drive/VisionAvgTagDist" + i, estimate.avgTagDist);
                 }
             }
-        }
+        
 
         // Log current pose
         Logger.recordOutput("Drive/EstimatedPose", currentPose);

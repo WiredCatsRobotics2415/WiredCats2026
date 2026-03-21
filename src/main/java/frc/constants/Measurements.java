@@ -78,9 +78,9 @@ public class Measurements {
         }
 
         public static final Transform3d FrontLeftCamera = new Transform3d(Inches.of(11.75), Inches.of(9.875),
-            Inches.of(17.949), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(35)));
+            Inches.of(17.949), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(-55)));
             public static final Transform3d FrontRightCamera = new Transform3d(Inches.of(11.75),Inches.of(-9.875),
-            Inches.of(17.949), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(-35)));
+            Inches.of(17.949), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(55)));
         public static final Transform3d BackCamera = new Transform3d(Inches.of(-11.5), Inches.of(-11.5),
             Inches.of(17), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(-195)));
         public static final Transform3d[] PECameraTransforms = new Transform3d[] { FrontLeftCamera, FrontRightCamera,
