@@ -46,7 +46,7 @@ public class VisionIOReal implements VisionIO {
         for (int i = 0; i < VisionConstants.PoseEstimationLLNames.length; i++) {
             PoseEstimate estimate = LimelightHelpers
                 .getBotPoseEstimate_wpiBlue_MegaTag2(VisionConstants.PoseEstimationLLNames[i]);
-            if (estimate == null) {
+            if (estimate == null || estimate.tagCount == 0) {
                 inputs.poseTagCounts[i] = 0;
                 inputs.nearestTags[i] = -1;
                 continue;
@@ -58,6 +58,19 @@ public class VisionIOReal implements VisionIO {
             inputs.poseTimestampsSeconds[i] = estimate.timestampSeconds;
             inputs.poseTagCounts[i] = estimate.tagCount;
             inputs.poseTagDistances[i] = estimate.avgTagDist;
+
+            Logger.recordOutput("Vision/Camera" + i + "/Name", VisionConstants.PoseEstimationLLNames[i]);
+            Logger.recordOutput("Vision/Camera" + i + "/EstimateIsNull", estimate == null);
+
+            if (estimate != null) {
+                Logger.recordOutput("Vision/Camera" + i + "/TagCount", estimate.tagCount);
+                Logger.recordOutput("Vision/Camera" + i + "/Pose", estimate.pose);
+                Logger.recordOutput("Vision/Camera" + i + "/Timestamp", estimate.timestampSeconds);
+                Logger.recordOutput("Vision/Camera" + i + "/Latency", estimate.latency);
+                Logger.recordOutput("Vision/Camera" + i + "/AvgTagDist", estimate.avgTagDist);
+            } else {
+                Logger.recordOutput("Vision/Camera" + i + "/TagCount", 0);
+            }
 
             double nearestTagLength = Double.MAX_VALUE;
             int nearestTagId = -1;

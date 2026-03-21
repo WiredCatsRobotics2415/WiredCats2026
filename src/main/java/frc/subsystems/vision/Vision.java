@@ -144,6 +144,10 @@ public class Vision extends SubsystemBase {
         return false;
     }
 
+    public void updateInputsNow() {
+        io.updateInputs(inputs);
+    }
+
     /**
      * Returns the current average rotation reported by megatag 1. Will return null if no limelights can see any tags.
      */
