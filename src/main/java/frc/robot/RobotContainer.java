@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -46,6 +47,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("ShootPathplanner", new InstantCommand(() -> shooter.startShooting()).andThen(new WaitCommand(5)).andThen(new InstantCommand(() -> shooter.stopShooting())));
         NamedCommands.registerCommand("TurnOnFlywheels", new InstantCommand(() -> isRunningFlywheel = true));
         NamedCommands.registerCommand("TurnOffFlywheels", new InstantCommand(() -> isRunningFlywheel = false));
+
+        SmartDashboard.putData("Reset Position to M2", new InstantCommand(() -> this.drive.resetPose(vision.getCurrentAveragePose())));
+        SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> this.drive.resetRotation(vision.getCurrentAverageRotation())));
 
         setupAuto();
         configureControls();
@@ -90,21 +94,17 @@ public class RobotContainer {
         
         oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
         oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
-        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
-        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
+        oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> {inShootingMode=false; System.out.println("up 0.5!");})).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
+        oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> {inShootingMode=false; System.out.println("down 0.5!");})).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
         oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
         oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
-        // oi.binds.get(OI.Bind.manualTurretLeft).whileTrue(Commands.run(() -> turret.movePosChange(0.3)));  
-        // oi.binds.get(OI.Bind.manualTurretRight).whileTrue(Commands.run(() -> turret.movePosChange(-0.3))); 
-        oi.binds.get(OI.Bind.manualTurretUp).onTrue(new InstantCommand(() -> System.out.println("TESTING"))).whileTrue(Commands.run(() -> turret.setPitchAngle(-0.001)));  
-        oi.binds.get(OI.Bind.manualTurretDown).onTrue(new InstantCommand(() -> System.out.println("TESTIN2G"))).whileTrue(Commands.run(() -> turret.setPitchAngle(0.001)));
         oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> System.out.println("TESTING SWITCH"))).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
-        oi.binds.get(OI.Bind.setHighGoal).whileTrue(climber.SetVolt(3.0));
+        oi.binds.get(OI.Bind.setHighGoal).whileTrue(climber.SetVolt(3.0)); 
         oi.binds.get(OI.Bind.setLowGoal).onTrue(climber.SetVolt(0.0)); 
         oi.binds.get(OI.Bind.climbHighGoal).onTrue(climber.SetVolt(6)); 
         oi.binds.get(OI.Bind.climbLowGoal).onTrue(climber.SetVolt(0)); 
         oi.binds.get(OI.Bind.climbZero).onTrue(climber.SetVolt(3)); 
-        oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> intake.switchSpinForComp())); 
+        oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
     }
 

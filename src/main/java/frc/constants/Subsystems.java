@@ -29,18 +29,23 @@ public class Subsystems {
 
         public static final double HeadingKA = 0;
         public static double kSwitchThreshold;
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(7, "Intake/kP");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(7, "Intake/kP");
+        public static TuneableNumber kP = new TuneableNumber(0.5, "Intake/kP");
+        public static TuneableNumber kI = new TuneableNumber(0, "Intake/kP");
+        public static TuneableNumber kD = new TuneableNumber(0.01, "Intake/kP");
 
     }
 
     public static class VisionConstants {
         public static final String[] PoseEstimationLLNames = {
-            "limelight-front-left", // or whatever your names are
-            "limelight-front-right",
+            "limelight-left", // or whatever your names are
+            "limelight-right",
             "limelight-back"
         };
         
-        public static final String FrontLeftName = "limelight-front-left";
-        public static final String FrontRightName = "limelight-front-right";
+        public static final String FrontLeftName = "limelight-left";
+        public static final String FrontRightName = "limelight-right";
         public static final String BackCenterName = "limelight-back";
         public static final String TurretName = "limelight-turret"; // or whatever
         
@@ -57,18 +62,20 @@ public class Subsystems {
     public static class PortNumbers {
         public static final int NumpadPort = 1; 
         public static final int ControllerPort = 4; 
-        public static final int Flywheel_1_ID = 30; 
-        public static final int Flywheel_2_ID = 31; 
+        public static final int Flywheel_1_ID = 31; 
+        public static final int Flywheel_2_ID = 32; 
         public static final int Intake_Motor_ID = 18; 
         public static final int Intake_Drive_ID = 55; 
         public static final int Handoff_Motor_ID = 4; 
         public static final int Turret_Motor = 22; 
         public static final int Climb_Motor = 6; 
 
-        public static final int Intake_Front_Limit_ID = 0; 
-        public static final int Intake_Back_Limit_ID = 1;
+        public static final int Intake_Front_Limit_ID = 3; 
+        public static final int Intake_Back_Limit_ID = 4;
         public static final int TurretServo1 = 5; 
-        public static final int TurretServo2 = 6; 
+        public static final int TurretServo2 = 6;
+        public static final int TurretLimit1 = 1;
+        public static final int TurretLimit2 = 2; 
     }
 
     public static class ShooterConstants {

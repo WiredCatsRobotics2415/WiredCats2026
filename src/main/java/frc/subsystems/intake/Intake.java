@@ -3,6 +3,8 @@ package frc.subsystems.intake;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 import java.util.function.BooleanSupplier;
@@ -23,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Subsystems.ClimberConstants;
 import frc.constants.Subsystems.IntakeConstants;
 import frc.constants.Subsystems.ShooterConstants;
+import frc.constants.Subsystems.TurretConstants;
 import frc.constants.Subsystems.PortNumbers;
 import frc.robot.Robot;
 
@@ -30,15 +33,19 @@ public class Intake extends SubsystemBase {
 
     private static Intake instance = null;
     public TalonFX intakePush;
-    private TalonFX intakeSpin;
+    private TalonFX intakeDrive;
     public boolean isOut = false;
     public PositionVoltage m_request = new PositionVoltage(0);
     private DigitalInput frontLimit = new DigitalInput(PortNumbers.Intake_Front_Limit_ID); 
     private DigitalInput backLimit = new DigitalInput(PortNumbers.Intake_Back_Limit_ID); 
+    private double amountToMove = 30;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
-    private final PIDController pid = new PIDController(ClimberConstants.kP, 0.0, 0.0);
+    private final TrapezoidProfile.Constraints constraints =
+      new TrapezoidProfile.Constraints(IntakeConstants.kMaxVelocity.get(), IntakeConstants.kMaxAcceleration.get());
+    private final ProfiledPIDController controller =
+      new ProfiledPIDController(IntakeConstants.kP.get(), IntakeConstants.kI.get(), IntakeConstants.kD.get(), constraints, 0.02);
     
     public static Intake getInstance() {
     if (instance == null)
@@ -48,26 +55,21 @@ public class Intake extends SubsystemBase {
 
   private Intake() {
     intakePush = new TalonFX(PortNumbers.Intake_Motor_ID);
+    intakeDrive = new TalonFX(PortNumbers.Intake_Drive_ID);
+    intakePush.setNeutralMode(NeutralModeValue.Coast);
+    intakePush.setPosition(0);
     //TODO: define Intake Drive Motor
   }
 
   public void switchSpinForComp() {
-    System.out.println("Switching Intake Spin");
-    intakePush.setPosition(0);
+    System.out.println("Switching");
     if (isOut) {
-      intakePush.setControl(m_request.withPosition(-1));
+      controller.setGoal(0);
       isOut = false;
     } else {
-      intakePush.setControl(m_request.withPosition(1));
+      controller.setGoal(amountToMove);
       isOut = true;
     }
-  }
-
-  public Command setSpin(double speed) {
-    return runOnce(
-        () -> {
-          intakeSpin.set(speed);
-        });
   }
 
   public BooleanSupplier getFrontSwitchSupplier() {
@@ -90,6 +92,27 @@ public class Intake extends SubsystemBase {
           intakePush.setVoltage(0);
         });
         }
+    }
+
+    @Override
+    public void periodic() {
+      //if not there
+      if (controller.atGoal() || frontLimit.get()) {   
+        intakePush.setVoltage(0);
+        if (backLimit.get()) {
+          intakeDrive.setVoltage(0);
+        }
+
+      } else {
+
+        System.out.println("sending voltage");
+        double calculate = controller.calculate(-intakePush.getPosition().getValueAsDouble(), controller.getGoal());
+        intakePush.setVoltage(-calculate);
+      }
+
+      Logger.recordOutput("Intake/currentPos", -intakePush.getPosition().getValueAsDouble());
+      Logger.recordOutput("Intake/controllerGoal", controller.getGoal().position);
+      Logger.recordOutput("Intake/voltage", intakePush.getMotorVoltage().getValueAsDouble());
     }
 
     public void Switch(double voltage) {

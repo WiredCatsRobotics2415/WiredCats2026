@@ -52,6 +52,8 @@ public class VisionIOReal implements VisionIO {
                 continue;
             }
             inputs.poseEstimates[i] = estimate.pose;
+            String name = "Vision/estimate" + i;
+            Logger.recordOutput(name, estimate.pose);
             inputs.poseLatencies[i] = estimate.latency;
             inputs.poseTimestampsSeconds[i] = estimate.timestampSeconds;
             inputs.poseTagCounts[i] = estimate.tagCount;
