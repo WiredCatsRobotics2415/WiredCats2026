@@ -40,10 +40,15 @@ public class RealPose {
         gyroRate = Math.toDegrees(gyroRate); // Convert from rad/s to deg/s
 
         // 2. Send robot orientation to vision subsystem (required for MegaTag2)
+        Logger.recordOutput("Drive/gyroRate", gyroRate);
+        Logger.recordOutput("Drive/rotation", currentPose.getRotation().getDegrees());
         vision.sendOrientation(
             currentPose.getRotation().getDegrees(),
             gyroRate
         );
+
+        //update inputs
+        vision.updateInputsNow();
 
         // 3. Get vision estimates from all cameras
         PoseEstimate[] visionEstimates = vision.getPoseEstimates();
@@ -61,6 +66,8 @@ public class RealPose {
         // 5. Fuse vision measurements into Phoenix 6's pose estimator
         for (int i = 0; i < visionEstimates.length; i++) {
             PoseEstimate estimate = visionEstimates[i];
+            String name2 = "Drive/estimateWithoutChecking" + i;
+            Logger.recordOutput(name2, estimate.pose);
 
             // Only add measurement if we detected at least one AprilTag
             if (estimate.tagCount > 0) {

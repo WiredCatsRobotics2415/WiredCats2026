@@ -74,8 +74,9 @@ public class Turret extends SubsystemBase {
     public void setAngle(double angle) {
       if (angle < Measurements.MaxTurretAngle && angle > Measurements.MinTurretAngle) {
             currentAngle = angle;
-            double position = angle / 360.0; // Convert from degrees to rotations
+            double position = (angle+180) / 360.0; // Convert from degrees to rotations
             if (position > 0 && position < 1) {
+              Logger.recordOutput("Turret/SettingPosition", position);
               controller.setGoal(position);
             }
       }
@@ -135,11 +136,12 @@ public class Turret extends SubsystemBase {
     
         //get the angle from the shooter, convert to relative turret angle, then 
         //convert that to a 0-1 position, and set that as the controller goal for the turret
+        double angle = shooter.getLastAngle();
+        double newAngle = relativeToTurretAngle(Math.toDegrees(angle));
+        Logger.recordOutput("Turret/AngleGoal", newAngle);
+
         if (RobotContainer.getInstance().isInShootingMode()) {
-          double angle = shooter.getLastAngle();
-          double newAngle = relativeToTurretAngle(angle);
           setAngle(newAngle);
-          Logger.recordOutput("Turret/AngleGoal", newAngle);
         }
 
         //only run if you're not getting limit switch data

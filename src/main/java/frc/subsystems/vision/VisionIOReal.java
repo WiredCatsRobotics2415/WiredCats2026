@@ -47,7 +47,9 @@ public class VisionIOReal implements VisionIO {
             PoseEstimate estimate = LimelightHelpers
                 .getBotPoseEstimate_wpiBlue_MegaTag2(VisionConstants.PoseEstimationLLNames[i]);
             if (estimate == null) {
-                estimate = PoseEstimate.zero;
+                inputs.poseTagCounts[i] = 0;
+                inputs.nearestTags[i] = -1;
+                continue;
             }
             inputs.poseEstimates[i] = estimate.pose;
             String name = "Vision/estimate" + i;
@@ -112,6 +114,9 @@ public class VisionIOReal implements VisionIO {
     @Override
     public void setRobotOrientation(double yaw, double yawRate) {
         for (String llName : VisionConstants.PoseEstimationLLNames) {
+            String name = "Drive/" + llName;
+            Logger.recordOutput(name + "yaw", yaw);
+            Logger.recordOutput(name + "yawRate", yawRate);
             LimelightHelpers.SetRobotOrientation(llName, yaw, yawRate, 0, 0, 0, 0); 
         }
     }
