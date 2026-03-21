@@ -45,6 +45,8 @@ public class RealPose {
             gyroRate
         );
 
+        vision.updateInputsNow();
+
         // 3. Get vision estimates from all cameras
         PoseEstimate[] visionEstimates = vision.getPoseEstimates();
 

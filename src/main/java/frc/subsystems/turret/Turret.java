@@ -72,14 +72,6 @@ public class Turret extends SubsystemBase {
       }
     }
 
-  //   public void movePosChange(double change) {
-  //     System.out.println("CURRENT MOTOR POSITION:");
-  //     System.out.println(motor.getPosition().getValueAsDouble());
-  //     System.out.println("CURRENT GOAL POSITION:");
-  //     System.out.println(motor.getPosition().getValueAsDouble() + change);
-  //     motor.setControl(m_request.withPosition(motor.getPosition().getValueAsDouble() + change));
-  // }
-
     public void setControllerChange(double posChange) {
       controller.setGoal(controller.getGoal().position + posChange);
     }

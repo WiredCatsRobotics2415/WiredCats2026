@@ -2,6 +2,9 @@ package frc.subsystems.vision;
 
 // unit/math imports
 import static edu.wpi.first.units.Units.Degrees;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Rotation2d; 
 
@@ -43,14 +46,29 @@ public class VisionIOReal implements VisionIO {
         for (int i = 0; i < VisionConstants.PoseEstimationLLNames.length; i++) {
             PoseEstimate estimate = LimelightHelpers
                 .getBotPoseEstimate_wpiBlue_MegaTag2(VisionConstants.PoseEstimationLLNames[i]);
-            if (estimate == null) {
-                estimate = PoseEstimate.zero;
+            if (estimate == null || estimate.tagCount == 0) {
+                inputs.poseTagCounts[i] = 0;
+                inputs.nearestTags[i] = -1;
+                continue;
             }
             inputs.poseEstimates[i] = estimate.pose;
             inputs.poseLatencies[i] = estimate.latency;
             inputs.poseTimestampsSeconds[i] = estimate.timestampSeconds;
             inputs.poseTagCounts[i] = estimate.tagCount;
             inputs.poseTagDistances[i] = estimate.avgTagDist;
+
+            Logger.recordOutput("Vision/Camera" + i + "/Name", VisionConstants.PoseEstimationLLNames[i]);
+            Logger.recordOutput("Vision/Camera" + i + "/EstimateIsNull", estimate == null);
+
+            if (estimate != null) {
+                Logger.recordOutput("Vision/Camera" + i + "/TagCount", estimate.tagCount);
+                Logger.recordOutput("Vision/Camera" + i + "/Pose", estimate.pose);
+                Logger.recordOutput("Vision/Camera" + i + "/Timestamp", estimate.timestampSeconds);
+                Logger.recordOutput("Vision/Camera" + i + "/Latency", estimate.latency);
+                Logger.recordOutput("Vision/Camera" + i + "/AvgTagDist", estimate.avgTagDist);
+            } else {
+                Logger.recordOutput("Vision/Camera" + i + "/TagCount", 0);
+            }
 
             double nearestTagLength = Double.MAX_VALUE;
             int nearestTagId = -1;

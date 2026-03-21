@@ -52,11 +52,13 @@ public class Intake extends SubsystemBase {
   }
 
   public void switchSpinForComp() {
+    System.out.println("Switching Intake Spin");
+    intakePush.setPosition(0);
     if (isOut) {
-      intakePush.setControl(m_request.withPosition(intakePush.getPosition().getValueAsDouble()+1));
+      intakePush.setControl(m_request.withPosition(-1));
       isOut = false;
     } else {
-      intakePush.setControl(m_request.withPosition(intakePush.getPosition().getValueAsDouble()-1));
+      intakePush.setControl(m_request.withPosition(1));
       isOut = true;
     }
   }
