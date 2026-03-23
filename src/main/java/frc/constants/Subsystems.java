@@ -35,6 +35,7 @@ public class Subsystems {
         public static TuneableNumber kI = new TuneableNumber(0, "Intake/kP");
         public static TuneableNumber kD = new TuneableNumber(0.01, "Intake/kP");
 
+        public static float goalDistance = 55;
     }
 
     public static class VisionConstants {
@@ -83,7 +84,7 @@ public class Subsystems {
     }
 
     public static class ShooterConstants {
-        
+
         public static final int FLYWHEEL_1_ID = 53; //TODO: Placeholder ID values, change when systems connects them
         public static final int FLYWHEEL_2_ID = 54;  //Placeholder
         public static final int INTAKE_MOTOR_ID = 55; //Placeholder
@@ -125,7 +126,7 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static TuneableNumber kP = new TuneableNumber(1.7, "Turret/kP");
+        public static TuneableNumber kP = new TuneableNumber(5, "Turret/kP");
         public static TuneableNumber kMaxVelocity = new TuneableNumber(5, "Turret/kMaxVelocity"); 
         public static TuneableNumber kMaxAcceleration = new TuneableNumber(5, "Turret/kMaxAcceleration"); 
         public static TuneableNumber kI = new TuneableNumber(0.2, "Turret/kI"); 
