@@ -70,15 +70,20 @@ public class Subsystems {
         public static final int Turret_Motor = 22; 
         public static final int Climb_Motor = 6; 
 
-        public static final int Intake_Front_Limit_ID = 2; 
-        public static final int Intake_Back_Limit_ID = 3;
+        public static final int Intake_Front_Limit_ID = 0; 
+        public static final int Intake_Back_Limit_ID = 1;
         public static final int TurretServo1 = 5; 
         public static final int TurretServo2 = 6;
         public static final int TurretLimit1 = 9;
         public static final int TurretLimit2 = 4; 
+
+        public static final int encoderChannelA = 7;
+        public static final int encoderChannelB = 8;
+
     }
 
     public static class ShooterConstants {
+        
         public static final int FLYWHEEL_1_ID = 53; //TODO: Placeholder ID values, change when systems connects them
         public static final int FLYWHEEL_2_ID = 54;  //Placeholder
         public static final int INTAKE_MOTOR_ID = 55; //Placeholder

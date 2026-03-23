@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj.Servo;
 public class Turret extends SubsystemBase {
     private static Turret instance; 
     private static Shooter shooter = Shooter.getInstance();
-    private final Encoder encoder = new Encoder(0, 1);
+    private final Encoder encoder = new Encoder(PortNumbers.encoderChannelA, PortNumbers.encoderChannelB);
     public double currentAngle = 0.0;
     public double currentPosition = 0.5;
     public Servo turret1;
@@ -131,10 +131,6 @@ public class Turret extends SubsystemBase {
 
       turret1.set(turret1.get());
       turret2.set(turret2.get());
-
-      if (leftLimitSwitch.get()) {
-        encoder.reset();
-      }
     
         //get the angle from the shooter, convert to relative turret angle, then 
         //convert that to a 0-1 position, and set that as the controller goal for the turret
