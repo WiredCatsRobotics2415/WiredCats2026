@@ -112,14 +112,17 @@ public class Subsystems {
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
         public static double kP = 1;
+        public static double kI = 1;
+        public static double kD = 1;
+        public static double kMaxVelocity = 2;
+        public static double kMaxAcceleration = 1.5;
         public static double kG = 0.3;
         public static double kClimbArmMassKg = 1;
         public static double kClimbArmLengthM = 1;
         public static double kClimbArmMOIkgm2 = 1;
-        //Not sure how important these things are so I'll just leave them for now
 
         public static final double GoalDeadband = 0;
-        public static final double ClimberVoltage = 35; //TODO: Test and find best value
+        public static final double amountToMove = 20; //Should be half the chain's rotation
     }
 
     public static class TurretConstants {
