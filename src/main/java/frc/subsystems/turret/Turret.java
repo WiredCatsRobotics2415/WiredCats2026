@@ -155,7 +155,7 @@ public class Turret extends SubsystemBase {
           }
 
           motor.setVoltage(-calculate);
-          System.out.println(motor.getMotorVoltage().getValueAsDouble());
+          //System.out.println(motor.getMotorVoltage().getValueAsDouble());
         } else {
             sim.update(0.2);
             double currentPosition = sim.getEncoderPosition();

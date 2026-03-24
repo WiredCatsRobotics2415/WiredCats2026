@@ -96,10 +96,11 @@ public class Intake extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
+      public void periodic() {
       //if not there
+      if(frontLimit.get() == false){System.out.println("LIMIT SWITCH RETURNS FALSE!!!");}
       if (controller.atGoal() || !frontLimit.get()) { 
-        System.out.println("Not Moving");  
+        //System.out.println("Not Moving");  
         intakePush.setVoltage(0);
         if (backLimit.get()) {
           intakeDrive.setVoltage(0);
@@ -107,17 +108,17 @@ public class Intake extends SubsystemBase {
 
       } else {
 
-        System.out.println("Moving");
+        //System.out.println("Moving");
         double calculate = controller.calculate(-intakePush.getPosition().getValueAsDouble(), controller.getGoal());
-        intakePush.setVoltage(-calculate);
+        intakePush.setVoltage(-calculate*2);
       }
 
       Logger.recordOutput("Intake/currentPos", -intakePush.getPosition().getValueAsDouble());
       Logger.recordOutput("Intake/controllerGoal", controller.getGoal().position);
       Logger.recordOutput("Intake/voltage", intakePush.getMotorVoltage().getValueAsDouble());
-      System.out.println("Intake/currentPos"+ -intakePush.getPosition().getValueAsDouble());
-      System.out.println("Intake/controllerGoal"+ controller.getGoal().position);
-      System.out.println("Intake/voltage"+intakePush.getMotorVoltage().getValueAsDouble());
+      //System.out.println("Intake/currentPos"+ -intakePush.getPosition().getValueAsDouble());
+      //System.out.println("Intake/controllerGoal"+ controller.getGoal().position);
+      //System.out.println("Intake/voltage"+intakePush.getMotorVoltage().getValueAsDouble());
     }
 
     public void Switch(double voltage) {
