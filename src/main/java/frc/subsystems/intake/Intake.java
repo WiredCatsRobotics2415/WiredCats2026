@@ -97,25 +97,35 @@ public class Intake extends SubsystemBase {
 
     @Override
       public void periodic() {
-      //if not there
-      if(frontLimit.get() == false){System.out.println("LIMIT SWITCH RETURNS FALSE!!!");}
-      if (controller.atGoal() || !frontLimit.get()) { 
-        //System.out.println("Not Moving");  
+
+      double calculate = controller.calculate(-intakePush.getPosition().getValueAsDouble(), controller.getGoal());
+      //|| (!frontLimit.get() && (calculate>0)) || (!backLimit.get() && (calculate<0))
+      if (controller.atGoal()) { 
         intakePush.setVoltage(0);
-        if (backLimit.get()) {
-          intakeDrive.setVoltage(0);
-        }
-
       } else {
-
         //System.out.println("Moving");
-        double calculate = controller.calculate(-intakePush.getPosition().getValueAsDouble(), controller.getGoal());
-        intakePush.setVoltage(-calculate*2);
+        intakePush.setVoltage(-calculate*3);
+      }
+
+      
+      if ((controller.getGoal().position==0) || !backLimit.get()) {
+        intakeDrive.set(0);
+      } else {
+        intakeDrive.set(0.5);
+      }
+      
+      if(controller.atGoal() && !backLimit.get()) //Flip back to normal when limit switches working
+      {
+        intakeDrive.set(0.2);
+        
       }
 
       Logger.recordOutput("Intake/currentPos", -intakePush.getPosition().getValueAsDouble());
       Logger.recordOutput("Intake/controllerGoal", controller.getGoal().position);
       Logger.recordOutput("Intake/voltage", intakePush.getMotorVoltage().getValueAsDouble());
+      Logger.recordOutput("Intake/frontLimit", frontLimit.get());
+      Logger.recordOutput("Intake/backLimit", backLimit.get());
+      Logger.recordOutput("Intake/intakeAtGoal", controller.atGoal());
       //System.out.println("Intake/currentPos"+ -intakePush.getPosition().getValueAsDouble());
       //System.out.println("Intake/controllerGoal"+ controller.getGoal().position);
       //System.out.println("Intake/voltage"+intakePush.getMotorVoltage().getValueAsDouble());

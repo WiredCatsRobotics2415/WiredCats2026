@@ -43,7 +43,8 @@ public class VisionIOReal implements VisionIO {
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        for (int i = 0; i < VisionConstants.PoseEstimationLLNames.length; i++) {
+
+        for (int i = 0; i < VisionConstants.PoseEstimationLLNames.length; i++) {    
             PoseEstimate estimate = LimelightHelpers
                 .getBotPoseEstimate_wpiBlue_MegaTag2(VisionConstants.PoseEstimationLLNames[i]);
             if (estimate == null || estimate.tagCount == 0) {
@@ -51,6 +52,7 @@ public class VisionIOReal implements VisionIO {
                 inputs.nearestTags[i] = -1;
                 continue;
             }
+
             inputs.poseEstimates[i] = estimate.pose;
             String name = "Vision/estimate" + i;
             Logger.recordOutput(name, estimate.pose);
@@ -132,12 +134,6 @@ public class VisionIOReal implements VisionIO {
             Logger.recordOutput(name + "yawRate", yawRate);
             LimelightHelpers.SetRobotOrientation(llName, yaw, yawRate, 0, 0, 0, 0); 
         }
-    }
-
-    @Override
-    public Rotation2d getMT1RotationOf(int index) {
-        Rotation2d rotation = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.PoseEstimationLLNames[index]).pose.getRotation(); 
-        return rotation; 
     }
 
     @Override

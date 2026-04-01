@@ -24,7 +24,6 @@ import frc.robot.Robot;
 public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
-    private AnalogInput wirePotentiometer;
     private TalonFX climbMotor = new TalonFX(PortNumbers.Climb_Motor);
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
@@ -40,7 +39,6 @@ public class Climber extends SubsystemBase {
   }
 
   private Climber() {
-    wirePotentiometer = new AnalogInput(0);
     pid.setTolerance(0.05); 
   }
 
@@ -68,10 +66,7 @@ public class Climber extends SubsystemBase {
     @Override 
     public void periodic() {
       if (Robot.isReal()) {
-        Logger.recordOutput("Climber/PotentiometerVoltage", wirePotentiometer.getVoltage());
         Logger.recordOutput("Climber/Voltage", climbMotor.getMotorVoltage().getValueAsDouble());
-        currentHeight = wirePotentiometer.getVoltage();
-        climbMotor.setVoltage(pid.calculate(wirePotentiometer.getVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
       } else {
         sim.update(0.02);
         Logger.recordOutput("Climber/PotentiometerVoltage", sim.getPotentiometerVoltage());
