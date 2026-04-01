@@ -152,9 +152,9 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/inHubRegion", inHub);
       Logger.recordOutput("Shooter/robotPoseForAngle", robotPose);
       if (inHub) {
-          return Math.toRadians(Measurements.ShooterAngleLow);
-      } else {
           return Math.toRadians(Measurements.ShooterAngleHigh);
+      } else {
+          return Math.toRadians(Measurements.ShooterAngleLow);
       }
   }
 
@@ -229,15 +229,16 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/tanPitch_x_dist", horizontalDist * Math.tan(pitch));
       Logger.recordOutput("Shooter/vertical", vertical);
 
-      if ((horizontalDist * Math.cos(pitch) / Math.sin(pitch) - vertical) / 4.8 <= 0) {
-        Logger.recordOutput("Shooter/calcError", "Invalid pitch: tSquared <= 0, pitch=" + pitch);
-        return new double[]{0.0, 0.0};
-    }
-
       // double time = Math.sqrt(Math.abs(((horizontalDist * Math.tan(pitch)) - vertical)/4.8)); 
       // double speed = horizontalDist/(time * Math.cos(pitch)); 
-      double time = Math.sqrt((horizontalDist * Math.cos(pitch) / Math.sin(pitch) - vertical) / 4.8);
-      double speed = horizontalDist / (time * Math.sin(pitch));
+      // bc of our setup, the output of sin will always be positive, so taking the - will always give the furthest distance
+      double tSquared = (horizontalDist * Math.tan(pitch) - vertical) / 4.9;
+      if (tSquared <= 0) {
+          Logger.recordOutput("Shooter/calcError", "Invalid: tSquared <= 0");
+          return new double[]{0.0, 0.0};
+      }
+      double time = Math.sqrt(tSquared);
+      double speed = horizontalDist / (time * Math.cos(pitch));
 
       double[] result = new double[]{time, speed}; 
       Logger.recordOutput("Shooter/time", time); 
