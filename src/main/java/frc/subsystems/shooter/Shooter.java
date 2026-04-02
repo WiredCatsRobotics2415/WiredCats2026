@@ -147,14 +147,15 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+  // auto-targeting
     public double getAngleForPose(Pose2d robotPose) {
       boolean inHub = Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation()); 
       Logger.recordOutput("Shooter/inHubRegion", inHub);
       Logger.recordOutput("Shooter/robotPoseForAngle", robotPose);
       if (inHub) {
-          return Math.toRadians(Measurements.ShooterAngleHigh);
+          return Math.toRadians(90 - Measurements.ShooterAngleHigh);
       } else {
-          return Math.toRadians(Measurements.ShooterAngleLow);
+          return Math.toRadians(90 - Measurements.ShooterAngleLow);
       }
   }
 
@@ -198,6 +199,25 @@ public class Shooter extends SubsystemBase {
       return 0.0;
     }
 
+    private double[] calcTimeForBallToHitGoal(double pitchAngle, double xSpeed, double ySpeed, double xDist, double yDist, double zDist) {
+      double a = 4.9 - (Math.tan(pitchAngle) * ((xSpeed * xSpeed) + (ySpeed * ySpeed))); 
+      // double b = Math.tan(pitchAngle) * (xSpeed + ySpeed); 
+      // double c = zDist - (Math.tan(pitchAngle) * ((xDist * xDist) + (yDist * yDist))); 
+      double b = Math.tan(pitchAngle) * 2 * ((xDist*xSpeed) + (yDist*ySpeed));
+      double c = zDist - (Math.tan(pitchAngle) * (xDist*xDist + yDist*yDist));
+
+      double discriminant = (b*b) - (4*a*c);
+      // double pos_t = (-b + Math.sqrt((b*b) - (4*a*c))) / (2*a); 
+      // double neg_t = (-b - Math.sqrt((b*b) - (4*a*c))) / (2*a); 
+      double pos_t = (-b + Math.sqrt(discriminant)) / (2*a);
+      double neg_t = (-b - Math.sqrt(discriminant)) / (2*a);
+
+      double[] results = new double[2];
+      results[0] = pos_t; 
+      results[1] = neg_t; 
+      return results;  
+    }
+
     private Translation3d getVectorFromRobotToTarget(Pose2d robotPose, Pose2d target) {
       Translation3d ballPositionVector = new Translation3d(robotPose.getX(), robotPose.getY(), Measurements.ShooterHeightFromGround);
       Translation3d targetGoalPositionVector = new Translation3d(target.getX(), target.getY(), getTargetHeight(target)); 
@@ -207,11 +227,8 @@ public class Shooter extends SubsystemBase {
       return vectorFromRobotToTarget; 
     }
 
-    private Translation3d getShooterSpeedVector(Pose2d robotPose, Pose2d target) {
-      Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
-      Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
-
-      return vectorFromRobotToTarget.minus(robotVelocity3d); // this is visibly the difference between the velocity vector and the robot to target vector
+    private Translation3d getShooterSpeedVector(Pose2d robotPose, Pose2d target, Translation3d robotVelocityToDistance, Translation3d vectorFromRobotToTarget) {
+      return vectorFromRobotToTarget.minus(robotVelocityToDistance); // this is visibly the difference between the velocity vector and the robot to target vector
     }
 
     /*
@@ -278,7 +295,29 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/pitchAngle", pitchAngle); 
       Logger.recordOutput("Shooter/target", target); 
 
-      Translation3d shooterSpeedVector = getShooterSpeedVector(robotPose, target); 
+      Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
+      Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
+      double[] times = calcTimeForBallToHitGoal(pitchAngle, robotVelocity3d.getX(), robotVelocity3d.getY(), vectorFromRobotToTarget.getX(), vectorFromRobotToTarget.getY(), vectorFromRobotToTarget.getZ()); 
+
+      Logger.recordOutput("Shooter/calcdTimes/time1", times[0]); 
+      Logger.recordOutput("Shooter/calcdTimes/time2", times[1]); 
+
+      Translation3d robotDisplacementTime1 = new Translation3d(robotVelocity3d.getX() * times[0], robotVelocity3d.getY() * times[0], robotVelocity3d.getZ() * times[0]); 
+      Translation3d robotDisplacementTime2 = new Translation3d(robotVelocity3d.getX() * times[1], robotVelocity3d.getY() * times[1], robotVelocity3d.getZ() * times[1]); 
+      
+      Logger.recordOutput("Shooter/robotDisplacementTime1", makeAdvantageScopeLine(robotDisplacementTime1, robotPose, Measurements.ShooterHeightFromGround)); 
+      Logger.recordOutput("Shooter/robotDisplacementTime2", makeAdvantageScopeLine(robotDisplacementTime2, robotPose, Measurements.ShooterHeightFromGround)); 
+      
+      Translation3d shooterSpeedVector; 
+
+      if (!Double.isNaN(times[0]) && Double.isFinite(times[0]) && times[0] > 0) {
+        Logger.recordOutput("Shooter.calcdTimes/noValidTime", false); 
+        shooterSpeedVector = getShooterSpeedVector(robotPose, target, robotDisplacementTime1, vectorFromRobotToTarget); 
+      } else {
+          Logger.recordOutput("Shooter.calcdTimes/noValidTime", false); 
+          shooterSpeedVector = getShooterSpeedVector(robotPose, target, robotDisplacementTime2, vectorFromRobotToTarget);
+      }
+      
       Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose, Measurements.ShooterHeightFromGround)); 
 
       Translation3d robotToTarget = getVectorFromRobotToTarget(robotPose, target); 
