@@ -163,19 +163,10 @@ public class Shooter extends SubsystemBase {
       if (Measurements.ShootIntoHubRegion.contains(robotPose.getTranslation())) {
         return Measurements.HubLocation;
       }
-        // if shooter angle is very similar to low angle (15 degree)
+        // if not in shoot into hub region
         return (robotPose.getTranslation().getDistance(Measurements.LeftMidAllianceRegion.getTranslation()) < 
                 robotPose.getTranslation().getDistance(Measurements.RightMidAllianceRegion.getTranslation())) 
                 ? Measurements.LeftMidAllianceRegion : Measurements.RightMidAllianceRegion;
-    }
-
-    private double calculateShooterSpeedRequired(Pose2d robotPose, Translation3d shooterSpeedVector, double horizontalDistance) {
-      double pitch = getAngleForPose(robotPose);
-      double[] ts = calculateInitialSpeedAndImpactTime(pitch, shooterSpeedVector, horizontalDistance); 
-      double t = ts[0]; 
-      double speed = ts[1]; 
-
-      return speed; 
     }
 
     private double calculateTurretAngle(Pose2d robotPose, Translation3d shooterSpeedVector) {
@@ -199,12 +190,13 @@ public class Shooter extends SubsystemBase {
       return 0.0;
     }
 
+    // these time calculations are working correctly!! (estimated with counting seconds)
     private double[] calcTimeForBallToHitGoal(double pitchAngle, double xSpeed, double ySpeed, double xDist, double yDist, double zDist) {
-      double a = 4.9 - (Math.tan(pitchAngle) * ((xSpeed * xSpeed) + (ySpeed * ySpeed))); 
+      double a = -4.9 + (Math.tan(pitchAngle) * ((xSpeed * xSpeed) + (ySpeed * ySpeed))); 
       // double b = Math.tan(pitchAngle) * (xSpeed + ySpeed); 
       // double c = zDist - (Math.tan(pitchAngle) * ((xDist * xDist) + (yDist * yDist))); 
-      double b = Math.tan(pitchAngle) * 2 * ((xDist*xSpeed) + (yDist*ySpeed));
-      double c = zDist - (Math.tan(pitchAngle) * (xDist*xDist + yDist*yDist));
+      double b = Math.tan(pitchAngle) * -2 * ((xDist*xSpeed) + (yDist*ySpeed));
+      double c = - zDist + (Math.tan(pitchAngle) * (xDist*xDist + yDist*yDist));
 
       double discriminant = (b*b) - (4*a*c);
       // double pos_t = (-b + Math.sqrt((b*b) - (4*a*c))) / (2*a); 
@@ -229,39 +221,6 @@ public class Shooter extends SubsystemBase {
 
     private Translation3d getShooterSpeedVector(Pose2d robotPose, Pose2d target, Translation3d robotVelocityToDistance, Translation3d vectorFromRobotToTarget) {
       return vectorFromRobotToTarget.minus(robotVelocityToDistance); // this is visibly the difference between the velocity vector and the robot to target vector
-    }
-
-    /*
-    this calculates the speed based on the shooter compensation vector (which is what we want to shoot it along)
-    it is not correctly shooting the ball from the start of the vector to the end of the vector
-     */
-    private double[] calculateInitialSpeedAndImpactTime(double pitch, Translation3d shooterCompensationVector, double horizontalDist) {
-      // horizontal = t * s * cos(pitch)
-      // vertical = t * s * sin(pitch) - 4.8t^2
-      
-      double vertical = shooterCompensationVector.getZ();
-
-      Logger.recordOutput("Shooter/horizontalDist", horizontalDist);
-      Logger.recordOutput("Shooter/tanPitch", Math.tan(pitch));
-      Logger.recordOutput("Shooter/tanPitch_x_dist", horizontalDist * Math.tan(pitch));
-      Logger.recordOutput("Shooter/vertical", vertical);
-
-      // double time = Math.sqrt(Math.abs(((horizontalDist * Math.tan(pitch)) - vertical)/4.8)); 
-      // double speed = horizontalDist/(time * Math.cos(pitch)); 
-      // bc of our setup, the output of sin will always be positive, so taking the - will always give the furthest distance
-      double tSquared = (horizontalDist * Math.tan(pitch) - vertical) / 4.9;
-      if (tSquared <= 0) {
-          Logger.recordOutput("Shooter/calcError", "Invalid: tSquared <= 0");
-          return new double[]{0.0, 0.0};
-      }
-      double time = Math.sqrt(tSquared);
-      double speed = horizontalDist / (time * Math.cos(pitch));
-
-      double[] result = new double[]{time, speed}; 
-      Logger.recordOutput("Shooter/time", time); 
-      Logger.recordOutput("Shooter/speed", speed); 
-
-      return result; 
     }
 
     private double getDistBallFromTarget(Pose2d target) {
@@ -309,12 +268,15 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/robotDisplacementTime2", makeAdvantageScopeLine(robotDisplacementTime2, robotPose, Measurements.ShooterHeightFromGround)); 
       
       Translation3d shooterSpeedVector; 
-
+      
+      double time; 
       if (!Double.isNaN(times[0]) && Double.isFinite(times[0]) && times[0] > 0) {
         Logger.recordOutput("Shooter.calcdTimes/noValidTime", false); 
+        time = times[0]; 
         shooterSpeedVector = getShooterSpeedVector(robotPose, target, robotDisplacementTime1, vectorFromRobotToTarget); 
       } else {
           Logger.recordOutput("Shooter.calcdTimes/noValidTime", false); 
+          time = times[1]; 
           shooterSpeedVector = getShooterSpeedVector(robotPose, target, robotDisplacementTime2, vectorFromRobotToTarget);
       }
       
@@ -328,7 +290,8 @@ public class Shooter extends SubsystemBase {
       double horizontalDist = Math.sqrt(dx*dx + dy*dy);
       Logger.recordOutput("Shooter/horizontalDist", horizontalDist); 
 
-      double speed = calculateShooterSpeedRequired(robotPose, shooterSpeedVector, horizontalDist); 
+      double speed = horizontalDist / (time * Math.cos(pitchAngle));
+
       Logger.recordOutput("Shooter/speed", speed); 
 
       double turretAngle = calculateTurretAngle(robotPose, shooterSpeedVector); 
