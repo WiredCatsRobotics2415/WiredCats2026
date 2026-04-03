@@ -155,7 +155,7 @@ public class Shooter extends SubsystemBase {
       if (inHub) {
           return Math.toRadians(90 - Measurements.ShooterAngleHigh);
       } else {
-          return Math.toRadians(90 - Measurements.ShooterAngleLow);
+          return Math.toRadians(Measurements.ShooterAngleLow);
       }
   }
 
@@ -190,24 +190,94 @@ public class Shooter extends SubsystemBase {
       return 0.0;
     }
 
+    // Source - https://stackoverflow.com/a/37960741
+    // Posted by Salix alba
+    // Retrieved 2026-04-03, License - CC BY-SA 3.0
+
+  public static double[] solveRealQuarticRoots(double a, double b, double c, double d, double e) {
+    double s1 = 2 * c * c * c - 9 * b * c * d + 27 * (a * d * d + b * b * e) - 72 * a * c * e;
+    double q1 = c * c - 3 * b * d + 12 * a * e;
+    double discrim1 = -4 * q1 * q1 * q1 + s1 * s1;
+    if (discrim1 > 0) {
+      double s2 = s1 + Math.sqrt(discrim1);
+      double q2 = Math.cbrt(s2 / 2);
+      double s3 = q1 / (3 * a * q2) + q2 / (3 * a);
+      double discrim2 = (b * b) / (4 * a * a) - (2 * c) / (3 * a) + s3;
+      if (discrim2 > 0) {
+        double s4 = Math.sqrt(discrim2);
+        double s5 = (b * b) / (2 * a * a) - (4 * c) / (3 * a) - s3;
+        double s6 = (-(b * b * b) / (a * a * a) + (4 * b * c) / (a * a) - (8 * d) / a) / (4 * s4);
+        double discrim3 = (s5 - s6);
+        double discrim4 = (s5 + s6);
+        // actual root values, may not be set
+        double r1 = Double.NaN, r2 = Double.NaN, r3 = Double.NaN, r4 = Double.NaN;
+
+        if (discrim3 > 0) {
+          double sqrt1 = Math.sqrt(s5 - s6);
+          r1 = -b / (4 * a) - s4 / 2 + sqrt1 / 2;
+          r2 = -b / (4 * a) - s4 / 2 - sqrt1 / 2;
+        } else if (discrim3 == 0) {
+          // repeated root case
+          r1 = -b / (4 * a) - s4 / 2;
+        }
+        if (discrim4 > 0) {
+          double sqrt2 = Math.sqrt(s5 + s6);
+          r3 = -b / (4 * a) + s4 / 2 + sqrt2 / 2;
+          r4 = -b / (4 * a) + s4 / 2 - sqrt2 / 2;
+        } else if (discrim4 == 0) {
+          r3 = -b / (4 * a) + s4 / 2;
+        }
+        if (discrim3 > 0 && discrim4 > 0)
+          return new double[] { r1, r2, r3, r4 };
+        else if (discrim3 > 0 && discrim4 == 0)
+          return new double[] { r1, r2, r3 };
+        else if (discrim3 > 0 && discrim4 < 0)
+          return new double[] { r1, r2 };
+        else if (discrim3 == 0 && discrim4 > 0)
+          return new double[] { r1, r3, r4 };
+        else if (discrim3 == 0 && discrim4 == 0)
+          return new double[] { r1, r3 };
+        else if (discrim3 == 0 && discrim4 < 0)
+          return new double[] { r1 };
+        else if (discrim3 < 0 && discrim4 > 0)
+          return new double[] { r3, r4 };
+        else if (discrim3 < 0 && discrim4 == 0)
+          return new double[] { r3 };
+        else if (discrim3 < 0 && discrim4 < 0)
+          return new double[0];
+      }
+    }
+    return new double[0];
+  }
+
     // these time calculations are working correctly!! (estimated with counting seconds)
     private double[] calcTimeForBallToHitGoal(double pitchAngle, double xSpeed, double ySpeed, double xDist, double yDist, double zDist) {
-      double a = -4.9 + (Math.tan(pitchAngle) * ((xSpeed * xSpeed) + (ySpeed * ySpeed))); 
-      // double b = Math.tan(pitchAngle) * (xSpeed + ySpeed); 
-      // double c = zDist - (Math.tan(pitchAngle) * ((xDist * xDist) + (yDist * yDist))); 
-      double b = Math.tan(pitchAngle) * -2 * ((xDist*xSpeed) + (yDist*ySpeed));
-      double c = - zDist + (Math.tan(pitchAngle) * (xDist*xDist + yDist*yDist));
+      double a = -(4.9*4.9); 
+      double b = 0; 
+      double c = -9.8 * zDist + ((Math.tan(pitchAngle) * Math.tan(pitchAngle)) * ((xSpeed * xSpeed) + (ySpeed * ySpeed))); 
+      double d = -2 * (Math.tan(pitchAngle) * Math.tan(pitchAngle)) * ((xSpeed * xDist) + (ySpeed * yDist)); 
+      double e = -zDist + ((Math.tan(pitchAngle) * Math.tan(pitchAngle)) * ((xDist * xDist) + (yDist * yDist))); 
 
-      double discriminant = (b*b) - (4*a*c);
-      // double pos_t = (-b + Math.sqrt((b*b) - (4*a*c))) / (2*a); 
-      // double neg_t = (-b - Math.sqrt((b*b) - (4*a*c))) / (2*a); 
-      double pos_t = (-b + Math.sqrt(discriminant)) / (2*a);
-      double neg_t = (-b - Math.sqrt(discriminant)) / (2*a);
+      // use function from stackoverflow to get roots
+      double[] rawResults = solveRealQuarticRoots(a, b, c, d, e); 
 
-      double[] results = new double[2];
-      results[0] = pos_t; 
-      results[1] = neg_t; 
-      return results;  
+      // filter roots
+      java.util.List<Double> validRoots = new java.util.ArrayList<>();
+      for (int i = 0; i < rawResults.length; i++) {
+        double t = rawResults[i];
+        Logger.recordOutput("Shooter/roots/" + i, t);
+        // needs to exist and be positive (neg time isn't a thing)
+        if (!Double.isNaN(t) && !Double.isInfinite(t) && t > 0) {
+          validRoots.add(t);
+        }
+      }
+
+      // convert valid values to array to return
+      double[] filtered = new double[validRoots.size()];
+      for (int i = 0; i < validRoots.size(); i++) {
+        filtered[i] = validRoots.get(i);
+      }
+      return filtered;
     }
 
     private Translation3d getVectorFromRobotToTarget(Pose2d robotPose, Pose2d target) {
@@ -217,10 +287,6 @@ public class Shooter extends SubsystemBase {
 
       Translation3d vectorFromRobotToTarget = targetGoalPositionVector.minus(ballPositionVector); // this is correct
       return vectorFromRobotToTarget; 
-    }
-
-    private Translation3d getShooterSpeedVector(Pose2d robotPose, Pose2d target, Translation3d robotVelocityToDistance, Translation3d vectorFromRobotToTarget) {
-      return vectorFromRobotToTarget.minus(robotVelocityToDistance); // this is visibly the difference between the velocity vector and the robot to target vector
     }
 
     private double getDistBallFromTarget(Pose2d target) {
@@ -248,67 +314,75 @@ public class Shooter extends SubsystemBase {
     }
 
     private void setTurretAndShooterForPose(Pose2d robotPose) {
-      double pitchAngle = getAngleForPose(robotPose); 
-      Pose2d target = getTarget(robotPose); 
+      double pitchAngle = getAngleForPose(robotPose);
+      Pose2d target = getTarget(robotPose);
 
-      Logger.recordOutput("Shooter/pitchAngle", pitchAngle); 
-      Logger.recordOutput("Shooter/target", target); 
+      Logger.recordOutput("Shooter/pitchAngle", pitchAngle);
+      Logger.recordOutput("Shooter/target", target);
 
       Translation3d robotVelocity3d = getRobotVector(robotPose); // m/s
       Translation3d vectorFromRobotToTarget = getVectorFromRobotToTarget(robotPose, target); // meters
-      double[] times = calcTimeForBallToHitGoal(pitchAngle, robotVelocity3d.getX(), robotVelocity3d.getY(), vectorFromRobotToTarget.getX(), vectorFromRobotToTarget.getY(), vectorFromRobotToTarget.getZ()); 
+      double[] times = calcTimeForBallToHitGoal(pitchAngle, robotVelocity3d.getX(), robotVelocity3d.getY(), vectorFromRobotToTarget.getX(), vectorFromRobotToTarget.getY(), vectorFromRobotToTarget.getZ());
 
-      Logger.recordOutput("Shooter/calcdTimes/time1", times[0]); 
-      Logger.recordOutput("Shooter/calcdTimes/time2", times[1]); 
-
-      Translation3d robotDisplacementTime1 = new Translation3d(robotVelocity3d.getX() * times[0], robotVelocity3d.getY() * times[0], robotVelocity3d.getZ() * times[0]); 
-      Translation3d robotDisplacementTime2 = new Translation3d(robotVelocity3d.getX() * times[1], robotVelocity3d.getY() * times[1], robotVelocity3d.getZ() * times[1]); 
-      
-      Logger.recordOutput("Shooter/robotDisplacementTime1", makeAdvantageScopeLine(robotDisplacementTime1, robotPose, Measurements.ShooterHeightFromGround)); 
-      Logger.recordOutput("Shooter/robotDisplacementTime2", makeAdvantageScopeLine(robotDisplacementTime2, robotPose, Measurements.ShooterHeightFromGround)); 
-      
-      Translation3d shooterSpeedVector; 
-      
-      double time; 
-      if (!Double.isNaN(times[0]) && Double.isFinite(times[0]) && times[0] > 0) {
-        Logger.recordOutput("Shooter.calcdTimes/noValidTime", false); 
-        time = times[0]; 
-        shooterSpeedVector = getShooterSpeedVector(robotPose, target, robotDisplacementTime1, vectorFromRobotToTarget); 
-      } else {
-          Logger.recordOutput("Shooter.calcdTimes/noValidTime", false); 
-          time = times[1]; 
-          shooterSpeedVector = getShooterSpeedVector(robotPose, target, robotDisplacementTime2, vectorFromRobotToTarget);
+      if (times.length == 0) {
+        Logger.recordOutput("Shooter/calcdTimes/noValidTime", true);
+        // set defaults if nothing found (could be impossible shot)
+        lastCalculationPitchRadians = pitchAngle;
+        lastCalculatedNeededSpeed = 0.0;
+        lastCalculatedAngleInFieldFrame = 0.0;
+        lastCalculationTurretAngleDegrees = 0.0;
+        Logger.recordOutput("Shooter/ballToTarget", Double.NaN);
+        return;
       }
-      
-      Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose, Measurements.ShooterHeightFromGround)); 
 
-      Translation3d robotToTarget = getVectorFromRobotToTarget(robotPose, target); 
-      Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(robotToTarget, robotPose, Measurements.ShooterHeightFromGround)); 
+      // log calculated times
+      Logger.recordOutput("Shooter/calcdTimes/time1", times[0]);
+      if (times.length > 1) {
+        Logger.recordOutput("Shooter/calcdTimes/time2", times[1]);
+        if (times.length > 2) {
+          Logger.recordOutput("Shooter/calcdTimes/time3", times[2]);
+          if (times.length > 3) {
+            Logger.recordOutput("Shooter/calcdTimes/time4", times[3]);
+          }
+        }
+      }
+
+      // use first time for calculations (works in sim :) lol
+      double time = times[0];
+      Translation3d robotDisplacementTime = new Translation3d(robotVelocity3d.getX() * time, robotVelocity3d.getY() * time, robotVelocity3d.getZ() * time);
+
+      Logger.recordOutput("Shooter/robotDisplacementTime", makeAdvantageScopeLine(robotDisplacementTime, robotPose, Measurements.ShooterHeightFromGround));
+
+      Translation3d shooterSpeedVector = vectorFromRobotToTarget.minus(robotDisplacementTime); 
+
+      Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose, Measurements.ShooterHeightFromGround));
+      Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(vectorFromRobotToTarget, robotPose, Measurements.ShooterHeightFromGround));
+
       double dx = shooterSpeedVector.getX();
       double dy = shooterSpeedVector.getY();
 
-      double horizontalDist = Math.sqrt(dx*dx + dy*dy);
-      Logger.recordOutput("Shooter/horizontalDist", horizontalDist); 
+      double horizontalDist = Math.sqrt(dx * dx + dy * dy);
+      Logger.recordOutput("Shooter/horizontalDist", horizontalDist);
 
       double speed = horizontalDist / (time * Math.cos(pitchAngle));
 
-      Logger.recordOutput("Shooter/speed", speed); 
+      Logger.recordOutput("Shooter/speed", speed);
 
-      double turretAngle = calculateTurretAngle(robotPose, shooterSpeedVector); 
-      Logger.recordOutput("Shooter/turretAngle", turretAngle); 
+      double turretAngle = calculateTurretAngle(robotPose, shooterSpeedVector);
+      Logger.recordOutput("Shooter/turretAngle", turretAngle);
 
-      Logger.recordOutput("Shooter/origin", new Translation3d(0.0, 0.0, 0.0)); 
-      
+      Logger.recordOutput("Shooter/origin", new Translation3d(0.0, 0.0, 0.0));
+
       lastCalculationPitchRadians = pitchAngle; // related to how the ball shooting is configured
-      lastCalculatedNeededSpeed = speed; 
-      lastCalculatedAngleInFieldFrame = getAngleInFieldFrame(shooterSpeedVector); 
-      lastCalculationTurretAngleDegrees = turretAngle; 
+      lastCalculatedNeededSpeed = speed;
+      lastCalculatedAngleInFieldFrame = getAngleInFieldFrame(shooterSpeedVector);
+      lastCalculationTurretAngleDegrees = turretAngle;
 
-      setGoalSpeed(speed); 
+      setGoalSpeed(speed);
 
-      //Logger.recordOutput("Shooter/ballTrajectory", 
-        //mapTrajectory(speed, Math.toRadians(pitchAngle), 
-        //new Rotation3d(0, 0, lastCalculatedAngleInFieldFrame), robotPose));
+      //Logger.recordOutput("Shooter/ballTrajectory",
+      //mapTrajectory(speed, Math.toRadians(pitchAngle),
+      //new Rotation3d(0, 0, lastCalculatedAngleInFieldFrame), robotPose));
 
       Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target)); // updates when landed
     }
