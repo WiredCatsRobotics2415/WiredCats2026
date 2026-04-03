@@ -358,6 +358,9 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/shooterSpeedVector", makeAdvantageScopeLine(shooterSpeedVector, robotPose, Measurements.ShooterHeightFromGround));
       Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(vectorFromRobotToTarget, robotPose, Measurements.ShooterHeightFromGround));
 
+      Translation3d robotToTarget = getVectorFromRobotToTarget(robotPose, target); 
+      Logger.recordOutput("Shooter/robotToTarget", makeAdvantageScopeLine(robotToTarget, robotPose, Measurements.ShooterHeightFromGround)); 
+      Logger.recordOutput("Shooter/robotToTargetDistance", Math.sqrt((robotToTarget.getX() * robotToTarget.getX()) + (robotToTarget.getY() * robotToTarget.getY()) + (robotToTarget.getZ() * robotToTarget.getZ())));
       double dx = shooterSpeedVector.getX();
       double dy = shooterSpeedVector.getY();
 

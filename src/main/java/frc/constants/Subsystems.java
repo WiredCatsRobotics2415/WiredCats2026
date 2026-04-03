@@ -29,11 +29,11 @@ public class Subsystems {
 
         public static final double HeadingKA = 0;
         public static double kSwitchThreshold;
-        public static TuneableNumber kMaxAcceleration = new TuneableNumber(50, "Intake/kP");
-        public static TuneableNumber kMaxVelocity = new TuneableNumber(50, "Intake/kP");
-        public static TuneableNumber kP = new TuneableNumber(1, "Intake/kP");
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(150, "Intake/kP");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(150, "Intake/kP");
+        public static TuneableNumber kP = new TuneableNumber(1.35, "Intake/kP");
         public static TuneableNumber kI = new TuneableNumber(0, "Intake/kP");
-        public static TuneableNumber kD = new TuneableNumber(0.05, "Intake/kP");
+        public static TuneableNumber kD = new TuneableNumber(0.006, "Intake/kP");
 
         public static float goalDistance = 55;
     }
@@ -72,7 +72,7 @@ public class Subsystems {
         public static final int Climb_Motor = 6; 
 
         public static final int Intake_Front_Limit_ID = 3; 
-        public static final int Intake_Back_Limit_ID = 1;
+        public static final int Intake_Back_Limit_ID = 2;
         public static final int TurretServo1 = 5; 
         public static final int TurretServo2 = 6;
         public static final int TurretLimit1 = 9;
@@ -80,6 +80,8 @@ public class Subsystems {
 
         public static final int encoderChannelA = 7;
         public static final int encoderChannelB = 8;
+        public static final int TurretServo1Analog = 0;
+        public static final int TurretServo2Analog = 1;
 
     }
 
@@ -126,11 +128,13 @@ public class Subsystems {
         public static final double GoalDeadband = 0;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static TuneableNumber kP = new TuneableNumber(5, "Turret/kP");
-        public static TuneableNumber kMaxVelocity = new TuneableNumber(5, "Turret/kMaxVelocity"); 
-        public static TuneableNumber kMaxAcceleration = new TuneableNumber(5, "Turret/kMaxAcceleration"); 
-        public static TuneableNumber kI = new TuneableNumber(0.2, "Turret/kI"); 
-        public static TuneableNumber kD = new TuneableNumber(0.1, "Turret/kD"); 
+        //used to be 2
+        public static TuneableNumber kP = new TuneableNumber(2.1, "Turret/kP");
+        //5 and 5
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(0.9, "Turret/kMaxVelocity"); 
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(0.9, "Turret/kMaxAcceleration"); 
+        public static TuneableNumber kI = new TuneableNumber(0.0, "Turret/kI"); 
+        public static TuneableNumber kD = new TuneableNumber(0.15, "Turret/kD"); 
         public static TuneableNumber kDt = new TuneableNumber(0.1, "Turret/kDt"); 
         // public static double kP = 0.7;
         // public static double kMaxVelocity = 3;
