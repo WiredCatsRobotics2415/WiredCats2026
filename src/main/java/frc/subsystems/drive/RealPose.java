@@ -3,6 +3,7 @@ package frc.subsystems.drive;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.subsystems.vision.Vision;
+import frc.utils.LimelightHelpers;
 import frc.utils.LimelightHelpers.PoseEstimate;
 import org.littletonrobotics.junction.Logger;
 
@@ -40,10 +41,15 @@ public class RealPose {
         gyroRate = Math.toDegrees(gyroRate); // Convert from rad/s to deg/s
 
         // 2. Send robot orientation to vision subsystem (required for MegaTag2)
+        Logger.recordOutput("Drive/gyroRate", gyroRate);
+        Logger.recordOutput("Drive/rotation", currentPose.getRotation().getDegrees());
         vision.sendOrientation(
             currentPose.getRotation().getDegrees(),
             gyroRate
         );
+
+        //update inputs
+        vision.updateInputsNow();
 
         // 3. Get vision estimates from all cameras
         PoseEstimate[] visionEstimates = vision.getPoseEstimates();
@@ -61,30 +67,28 @@ public class RealPose {
         // 5. Fuse vision measurements into Phoenix 6's pose estimator
         for (int i = 0; i < visionEstimates.length; i++) {
             PoseEstimate estimate = visionEstimates[i];
+            String name2 = "Drive/estimateWithoutChecking" + i;
+            Logger.recordOutput(name2, estimate.pose);
 
             // Only add measurement if we detected at least one AprilTag
             if (estimate.tagCount > 0) {
-                // Calculate standard deviations based on tag count and distance
-                double xyStdDev = calculateXYStdDev(estimate);
-                double rotStdDev = ROTATION_STD_DEV;
 
                 // Add the vision measurement to Phoenix 6's pose estimator
+                drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
                 drivetrain.addVisionMeasurement(
                     estimate.pose,
-                    estimate.timestampSeconds,
-                    VecBuilder.fill(xyStdDev, xyStdDev, rotStdDev)
-                );
+                    estimate.timestampSeconds);
+              }
 
                 // Log the vision measurement
                 Logger.recordOutput("Drive/VisionPose" + i, estimate.pose);
                 Logger.recordOutput("Drive/VisionTagCount" + i, estimate.tagCount);
-                Logger.recordOutput("Drive/VisionXYStdDev" + i, xyStdDev);
 
                 if (estimate.avgTagDist > 0) {
                     Logger.recordOutput("Drive/VisionAvgTagDist" + i, estimate.avgTagDist);
                 }
             }
-        }
+        
 
         // Log current pose
         Logger.recordOutput("Drive/EstimatedPose", currentPose);

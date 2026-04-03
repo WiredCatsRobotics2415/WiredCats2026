@@ -34,7 +34,7 @@ public class Controls {
         public static final int RightTrigger = XboxController.Axis.kRightTrigger.value;
 
         //define buttons!!!
-        public static final int EnterShootingModeButton = 80; 
+        public static final int EnterShootingModeButton = 10; 
         public static final int StartShootingButton = 9;
         public static final int setHighGoal = 80;
         public static final int setLowGoal = 81;

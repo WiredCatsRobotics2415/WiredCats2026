@@ -77,12 +77,12 @@ public class Measurements {
             }
         }
 
-        public static final Transform3d FrontLeftCamera = new Transform3d(Inches.of(2.644), Inches.of(-11.784437),
-            Inches.of(26.531608), new Rotation3d(Degrees.of(0), Degrees.of(3.7 + 16.5), Degrees.of(-20)));
-        public static final Transform3d FrontRightCamera = new Transform3d(Inches.of(2.644), Inches.of(11.784437),
-            Inches.of(26.531608), new Rotation3d(Degrees.of(0), Degrees.of(3.7 + 16.5), Degrees.of(20)));
-        public static final Transform3d BackCamera = new Transform3d(Inches.of(-7.578), Inches.of(10.052),
-            Inches.of(27.982014), new Rotation3d(Degrees.of(0), Degrees.of(3.7 - 32), Degrees.of(-190)));
+        public static final Transform3d FrontLeftCamera = new Transform3d(Inches.of(11.75), Inches.of(9.875),
+            Inches.of(17.949), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(-55)));
+            public static final Transform3d FrontRightCamera = new Transform3d(Inches.of(11.75),Inches.of(-9.875),
+            Inches.of(17.949), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(55)));
+        public static final Transform3d BackCamera = new Transform3d(Inches.of(-11.5), Inches.of(-11.5),
+            Inches.of(17), new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(-195)));
         public static final Transform3d[] PECameraTransforms = new Transform3d[] { FrontLeftCamera, FrontRightCamera,
             BackCamera };
 
