@@ -69,18 +69,19 @@ public class Subsystems {
         public static final int Intake_Drive_ID = 55; 
         public static final int Handoff_Motor_ID = 4; 
         public static final int Turret_Motor = 22; 
-        public static final int Climb_Motor = 6; 
+        public static final int Climb_Motor = 11; 
 
         public static final int Intake_Front_Limit_ID = 3; 
-        public static final int Intake_Back_Limit_ID = 2;
+        public static final int Intake_Back_Limit_ID = 5;
         public static final int TurretServo1 = 5; 
         public static final int TurretServo2 = 6;
         public static final int TurretLimit1 = 9;
         public static final int TurretLimit2 = 4; 
+        public static final int TurretUpLimit = 0;
 
         public static final int encoderChannelA = 7;
         public static final int encoderChannelB = 8;
-        public static final int TurretServo1Analog = 0;
+        public static final int TurretServo1Analog = 2;
         public static final int TurretServo2Analog = 1;
 
     }
@@ -117,11 +118,21 @@ public class Subsystems {
         public static final double MaxHeight = 0.5;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;
-        public static double kP = 1;
+        public static TuneableNumber kP = new TuneableNumber(0.7, "Shooter/kS"); 
         public static double kG = 0.3;
         public static double kClimbArmMassKg = 1;
         public static double kClimbArmLengthM = 1;
         public static double kClimbArmMOIkgm2 = 1;
+        // public static double kP = 0.1;
+        public static double kShooterToleranceRPS = 0.0;
+        public static double kEncoderDistancePerPulse = 0.0;
+        // Feedforward gains - these provide a model-based estimate of voltage needed
+        public static TuneableNumber kS = new TuneableNumber(0, "Shooter/kS"); 
+        public static TuneableNumber kV = new TuneableNumber(0, "Shooter/kV"); 
+        public static TuneableNumber kA = new TuneableNumber(0, "Shooter/kA");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(0.5, "Shooter/kMaxVelocity");
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(0.5, "Shooter/kMaxAccel");
+        public static TuneableNumber kD = new TuneableNumber(0.1, "Shooter/kMaxVelocity");
     }
 
     public static class TurretConstants {

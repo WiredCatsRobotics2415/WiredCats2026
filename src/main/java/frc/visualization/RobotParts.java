@@ -36,11 +36,6 @@ public class RobotParts {
         return new Pose3d(0.25, 0.25, 0.1, new Rotation3d(0, 0, Math.toRadians(90)));
     }
 
-    public Pose3d climberPose3D() {
-        double height = climber.getHeight();
-        return new Pose3d(0, 0.25, height, new Rotation3d(0, 0, Math.toRadians(90)));
-    }
-
     public Pose3d limelightPose1() {
         Transform3d transform = RobotMeasurements.FrontLeftCamera;
         return new Pose3d(transform.getX(), transform.getY(), transform.getZ(), transform.getRotation());
@@ -58,7 +53,6 @@ public class RobotParts {
     public void update() {
         Logger.recordOutput("Turret/Pose", turretPose3D());
         Logger.recordOutput("Intake/Pose", intakePose3D());
-        Logger.recordOutput("Climber/Pose", climberPose3D());
         Logger.recordOutput("Vision/LimelightPose1", limelightPose1());
         Logger.recordOutput("Vision/LimelightPose2", limelightPose2());
         Logger.recordOutput("Vision/LimelightPose3", limelightPose3());

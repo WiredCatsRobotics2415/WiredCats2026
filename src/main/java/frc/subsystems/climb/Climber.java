@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Subsystems.ClimberConstants;
+import frc.constants.Subsystems.IntakeConstants;
 import frc.constants.Subsystems.ShooterConstants;
 import frc.constants.Subsystems.PortNumbers;
 import frc.robot.Robot;
@@ -24,13 +25,18 @@ import frc.robot.Robot;
 public class Climber extends SubsystemBase {
 
     private static Climber instance = null;
-    private TalonFX climbMotor = new TalonFX(PortNumbers.Climb_Motor);
+    private TalonFX climbMotor;
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
+    public double sendingVolts = 0;
+    public double maxHeight = 10;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
-    private final PIDController pid = new PIDController(ClimberConstants.kP, 0.0, 0.0);
+  private final TrapezoidProfile.Constraints constraints =
+      new TrapezoidProfile.Constraints(ClimberConstants.kMaxVelocity.get(), ClimberConstants.kMaxAcceleration.get());
+    private final ProfiledPIDController controller =
+      new ProfiledPIDController(ClimberConstants.kP.get(), 0, ClimberConstants.kD.get(), constraints, 0.02);
     
     public static Climber getInstance() {
     if (instance == null)
@@ -38,21 +44,17 @@ public class Climber extends SubsystemBase {
     return instance;
   }
 
-  private Climber() {
-    pid.setTolerance(0.05); 
+  public Climber() {
+    climbMotor = new TalonFX(PortNumbers.Climb_Motor);
+    climbMotor.setPosition(0);
   }
 
-  public double getHeight() {
-    return currentHeight / 3 * ClimberConstants.MaxHeight;
+  public void setClimberChange(double posChange) {
+    // controller.setGoal(controller.getGoal().position + posChange);
+    // System.out.println(controller.getGoal().position + posChange);
+    sendingVolts = sendingVolts + posChange;
   }
 
-    public Command SetVolt(double voltage) {
-    return runOnce(
-        () -> {
-          pid.setSetpoint(voltage);
-          System.out.println("Set climber setpoint to " + voltage);
-        });
-    }
 
     
     public boolean getForwardLimit() {
@@ -65,15 +67,19 @@ public class Climber extends SubsystemBase {
 
     @Override 
     public void periodic() {
-      if (Robot.isReal()) {
-        Logger.recordOutput("Climber/Voltage", climbMotor.getMotorVoltage().getValueAsDouble());
+      // double calculate = controller.calculate(-climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
+      double calculate = sendingVolts;
+      if ((climbMotor.getPosition().getValueAsDouble() > 0) && (climbMotor.getPosition().getValueAsDouble() < maxHeight)) {
+        climbMotor.setVoltage(calculate);
       } else {
-        sim.update(0.02);
-        Logger.recordOutput("Climber/PotentiometerVoltage", sim.getPotentiometerVoltage());
-        double voltage = (pid.calculate(sim.getPotentiometerVoltage(), pid.getSetpoint()) + ClimberConstants.kG);
-        Logger.recordOutput("Climber/Voltage", voltage);
-        currentHeight = sim.getPotentiometerVoltage();
-        sim.setMotorVoltage(voltage);
+        climbMotor.setVoltage(0);
       }
+      Logger.recordOutput("Climber/voltage", climbMotor.getMotorVoltage().getValueAsDouble());
+      Logger.recordOutput("Climber/goal", sendingVolts);
+      Logger.recordOutput("Climber/position", climbMotor.getPosition().getValueAsDouble());
+    }
+
+    public void setVoltage(int volts) {
+     climbMotor.setVoltage(volts);
     }
 }

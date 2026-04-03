@@ -50,6 +50,7 @@ public class Turret extends SubsystemBase {
 
     private DigitalInput leftLimitSwitch;
     private DigitalInput rightLimitSwitch;
+    private DigitalInput turretUpLimit;
 
     public TurretSim sim = new TurretSim();
 
@@ -76,6 +77,7 @@ public class Turret extends SubsystemBase {
 
       leftLimitSwitch = new DigitalInput(PortNumbers.TurretLimit1);
       rightLimitSwitch = new DigitalInput(PortNumbers.TurretLimit2);
+      turretUpLimit = new DigitalInput(PortNumbers.TurretUpLimit);
 
       encoder.reset();
       encoder.setDistancePerPulse(0.001);
@@ -85,7 +87,7 @@ public class Turret extends SubsystemBase {
       if (angle < Measurements.MaxTurretAngle && angle > Measurements.MinTurretAngle) {
             currentAngle = angle;
             //angle from -180 to 180
-            double position = ((angle + 180)/360 * totalEncoderDisplacement); // Convert from degrees to rotations
+            double position = ((angle)/180 * (totalEncoderDisplacement/2)); // Convert from degrees to rotations
             if (position > 0 && position < totalEncoderDisplacement) {
               Logger.recordOutput("Turret/SettingPosition", position);
               return position;
@@ -141,6 +143,14 @@ public class Turret extends SubsystemBase {
       Logger.recordOutput("Turret/encoderConnected", encoder.get());
       Logger.recordOutput("Turret/encoderPos", encoder.getDistance());
 
+      Logger.recordOutput("Turret/upLimit", turretUpLimit.get());
+      
+      // if (turretUpLimit.get()) {
+      //   //sets the turrets to WHERE THEY ARE CURRENTLY
+      //   turret1.set(mapPotentiometerToOne(turret1analog.getValue()));
+      //   turret2.set(mapPotentiometerToOne(turret2analog.getValue()));
+      // }
+
       if ((turret1analog!=null)) {
         Logger.recordOutput("Turret/turret1", turret1analog.getValue());
       }
@@ -157,8 +167,7 @@ public class Turret extends SubsystemBase {
         //get the angle from the shooter, convert to relative turret angle, then 
         //convert that to a 0-1 position, and set that as the controller goal for the turret
         double angle = shooter.getLastAngle();
-        //double newAngle = relativeToTurretAngle(Math.toDegrees(angle));
-        double newAngle = -160;
+        double newAngle = relativeToTurretAngle(Math.toDegrees(angle));
         Logger.recordOutput("Turret/AngleGoal", newAngle);
         double setting = 0;
         setting = setAngle(newAngle);
@@ -168,8 +177,8 @@ public class Turret extends SubsystemBase {
         }
 
         Logger.recordOutput("Turret/wouldBeSendingIfSending", setting);
-        //double position = ((angle + 180)/360 * totalEncoderDisplacement);
-        Logger.recordOutput("Turret/atCurrentAngle", ((-encoder.getDistance()/totalEncoderDisplacement)*360)-180);
+        //double position = ((angle)/180 * (totalEncoderDisplacement/2)); // Convert from degrees to rotations
+        Logger.recordOutput("Turret/atCurrentAngle", (-encoder.getDistance()/(totalEncoderDisplacement/2))*180);
 
         //only run if you're not getting limit switch data
         if (Robot.isReal()) {  
