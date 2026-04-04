@@ -35,7 +35,7 @@ public class BallSim {
     /** Start a throw from an initial pose, with roll/pitch/yaw and a launch speed (m/s). */
     public void throwBall(Pose3d startPose, Rotation3d rpy, double speedMps, Translation2d robotVelocity) {
       // Launch direction is robot +X rotated by the given RPY (roll doesn’t matter for a sphere, but harmless).
-      Rotation3d corrected = new Rotation3d(0, -(Math.PI/2 - rpy.getY()), rpy.getZ());
+      Rotation3d corrected = new Rotation3d(0, -rpy.getY(), rpy.getZ());
       Translation3d dir = new Translation3d(1, 0, 0).rotateBy(corrected);
       
       //reset arc to have nothing

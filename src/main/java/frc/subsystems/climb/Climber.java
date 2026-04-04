@@ -26,21 +26,19 @@ import frc.robot.Robot;
 
 public class Climber extends SubsystemBase {
 
-  private static Climber instance = null;
-  private TalonFX climbMotor = new TalonFX(PortNumbers.Climb_Motor);
-  private ClimberSim sim = new ClimberSim();
-  private DigitalInput limitSwitchLeft = new DigitalInput(PortNumbers.LimitSwitchLeft_ID);
-  private DigitalInput limitSwitchRight = new DigitalInput(PortNumbers.LimitSwitchRight_ID);
-  private boolean leftRight = false; //False = left, Right = true. If left (meaning left hook is all the way down), bring right hook up and vice versa
-  private boolean climberRunning = false;
+    private static Climber instance = null;
+    private TalonFX climbMotor;
+    private ClimberSim sim = new ClimberSim();
+    private double currentHeight = 0.0;
+    public double sendingVolts = 0;
+    public double maxHeight = 102.3;
 
-
-    // Create a PID controller whose setpoint's change is subject to maximum
-// velocity and acceleration constraints.
+      // Create a PID controller whose setpoint's change is subject to maximum
+  // velocity and acceleration constraints.
   private final TrapezoidProfile.Constraints constraints =
-    new TrapezoidProfile.Constraints(ClimberConstants.kMaxVelocity, ClimberConstants.kMaxAcceleration);
-  private final ProfiledPIDController controller =
-    new ProfiledPIDController(ClimberConstants.kP, ClimberConstants.kI, ClimberConstants.kD, constraints, 0.02);
+      new TrapezoidProfile.Constraints(ClimberConstants.kMaxVelocity.get(), ClimberConstants.kMaxAcceleration.get());
+    private final ProfiledPIDController controller =
+      new ProfiledPIDController(ClimberConstants.kP.get(), 0, ClimberConstants.kD.get(), constraints, 0.02);
     
     public static Climber getInstance() {
     if (instance == null)
@@ -48,19 +46,22 @@ public class Climber extends SubsystemBase {
     return instance;
   }
 
-  private Climber() {
-    controller.setTolerance(0.05); 
+  public Climber() {
+    climbMotor = new TalonFX(PortNumbers.Climb_Motor);
+    climbMotor.setPosition(0);
   }
 
-  public double getHeight() {
-    return climbMotor.getPosition().getValueAsDouble(); //not accurate, in rotations
+  public void setClimberChange(double posChange) {
+    controller.setGoal(controller.getGoal().position + posChange);
+    System.out.println(controller.getGoal().position + posChange);
+    //sendingVolts = sendingVolts + posChange;
   }
 
-  public void setClimberState(boolean turnOnOrNot)
-  {
-    climberRunning = turnOnOrNot;
-    if(climberRunning) {makeRotation();}
-  }
+
+    
+    public boolean getForwardLimit() {
+        return false;
+    }
 
   public void makeRotation() 
   {
@@ -70,24 +71,21 @@ public class Climber extends SubsystemBase {
 
     @Override 
     public void periodic() {
-      if (Robot.isReal() && climberRunning) {
-        makeRotation();
+      double calculate = controller.calculate(-climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
 
-        if(limitSwitchLeft.get())
-        {
-          //leftRight = false;
-          controller.setGoal(ClimberConstants.amountToMove); //May need to switch these values if going wrong way
-        }
-        if(limitSwitchRight.get())
-        {
-          //leftRight = true;
-          controller.setGoal(-ClimberConstants.amountToMove);
-        }
-      }
-      else if(!climberRunning)
-      {
+      if ((climbMotor.getPosition().getValueAsDouble() > -0.5) && (climbMotor.getPosition().getValueAsDouble() < maxHeight)) {
+        climbMotor.setVoltage(calculate);
+      } else {
         climbMotor.setVoltage(0);
+
       }
+      Logger.recordOutput("Climber/voltage", climbMotor.getMotorVoltage().getValueAsDouble());
+      Logger.recordOutput("Climber/goal", sendingVolts);
+      Logger.recordOutput("Climber/position", climbMotor.getPosition().getValueAsDouble());
+    }
+
+    public void setVoltage(int volts) {
+     climbMotor.setVoltage(volts);
     }
    
 }

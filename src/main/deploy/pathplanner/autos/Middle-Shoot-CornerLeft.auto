@@ -23,6 +23,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "TurnOffFlywheels"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Middle2BackLeft"

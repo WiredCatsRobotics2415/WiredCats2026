@@ -3,6 +3,7 @@ package frc.subsystems.turret;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.subsystems.intake.Intake;
 import frc.subsystems.shooter.Shooter;
 import frc.visualization.BallSim;
 import frc.constants.Measurements;
@@ -21,6 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
@@ -39,10 +41,16 @@ public class Turret extends SubsystemBase {
     public double currentPosition = 0.5;
     public Servo turret1;
     public Servo turret2;
+    public AnalogInput turret1analog;
+    public AnalogInput turret2analog;
     private boolean currentlyUp = false;
+    public double totalEncoderDisplacement = 17.43;
+    public double startingTurret1Pos=490;
+    public double startingTurret2Pos=490;
 
     private DigitalInput leftLimitSwitch;
     private DigitalInput rightLimitSwitch;
+    private DigitalInput turretUpLimit;
 
     public TurretSim sim = new TurretSim();
 
@@ -62,24 +70,32 @@ public class Turret extends SubsystemBase {
     }
 
     public Turret() {
-      turret1 = new Servo(PortNumbers.TurretServo1);;
+      turret1 = new Servo(PortNumbers.TurretServo1);
       turret2 = new Servo(PortNumbers.TurretServo2);
+      turret1analog = new AnalogInput(PortNumbers.TurretServo1Analog);
+      turret2analog = new AnalogInput(PortNumbers.TurretServo2Analog);
 
       leftLimitSwitch = new DigitalInput(PortNumbers.TurretLimit1);
       rightLimitSwitch = new DigitalInput(PortNumbers.TurretLimit2);
+      turretUpLimit = new DigitalInput(PortNumbers.TurretUpLimit);
 
       encoder.reset();
       encoder.setDistancePerPulse(0.001);
     }
 
-    public void setAngle(double angle) {
+    public double setAngle(double angle) {
       if (angle < Measurements.MaxTurretAngle && angle > Measurements.MinTurretAngle) {
             currentAngle = angle;
-            double position = angle / 60; // Convert from degrees to rotations
-            if (position > -3 && position < 3) {
+            //angle from -180 to 180
+            double position = ((angle)/180 * (totalEncoderDisplacement/2)); // Convert from degrees to rotations
+            if (position > 0 && position < totalEncoderDisplacement) {
               Logger.recordOutput("Turret/SettingPosition", position);
-              controller.setGoal(position);
+              return position;
+            } else {
+              return encoder.getDistance();
             }
+      } else {
+        return encoder.getDistance();
       }
     }
 
@@ -88,18 +104,22 @@ public class Turret extends SubsystemBase {
       System.out.println(controller.getGoal().position + posChange);
     }
 
+    public double mapPotentiometerToOne(double pot) {
+      return Math.abs(1-(pot-373)/(1947));
+    }
+    
     public void IpswitchPitchSwitch() {
       if (currentlyUp==false) {
-      //up is 0.88 for turret1, down is 0.48
-      //down is 0.95 for turret2, up is 0.55
-      System.out.println("GOING UP");
-        turret1.set(0.88);
-        turret2.set(0.55);
+      //up for turret 1: 1651
+      //down for turret 1: 1368
+      //up for turret 2: 1112
+      //down for turret 2: 1426
+        turret1.set(mapPotentiometerToOne(1651));
+        turret2.set(mapPotentiometerToOne(1112));
         currentlyUp = true;
       } else {
-        System.out.println("GOING DOWN");
-        turret1.set(0.3);
-        turret2.set(0.95);
+        turret1.set(mapPotentiometerToOne(1368));
+        turret2.set(mapPotentiometerToOne(1426));
         currentlyUp= false;
       }
     }
@@ -123,47 +143,70 @@ public class Turret extends SubsystemBase {
       Logger.recordOutput("Turret/encoderConnected", encoder.get());
       Logger.recordOutput("Turret/encoderPos", encoder.getDistance());
 
-      Logger.recordOutput("Turret/turret1", turret1.get());
-      Logger.recordOutput("Turret/turret2", turret2.get());
+      Logger.recordOutput("Turret/upLimit", turretUpLimit.get());
+      
+      // if (turretUpLimit.get()) {
+      //   //sets the turrets to WHERE THEY ARE CURRENTLY
+      //   turret1.set(mapPotentiometerToOne(turret1analog.getValue()));
+      //   turret2.set(mapPotentiometerToOne(turret2analog.getValue()));
+      // }
+
+      if ((turret1analog!=null)) {
+        Logger.recordOutput("Turret/turret1", turret1analog.getValue());
+      }
+      if (turret2analog!=null) {
+        Logger.recordOutput("Turret/turret2", turret2analog.getValue());
+      }
 
       Logger.recordOutput("Turret/leftlimit", leftLimitSwitch.get());
       Logger.recordOutput("Turret/rightlimit", rightLimitSwitch.get());
 
-      turret1.set(turret1.get());
-      turret2.set(turret2.get());
+      // turret1.set(turret1.get());
+      // turret2.set(turret2.get());
     
         //get the angle from the shooter, convert to relative turret angle, then 
         //convert that to a 0-1 position, and set that as the controller goal for the turret
         double angle = shooter.getLastAngle();
         double newAngle = relativeToTurretAngle(Math.toDegrees(angle));
         Logger.recordOutput("Turret/AngleGoal", newAngle);
+        double setting = 0;
+        setting = setAngle(newAngle);
 
         if (RobotContainer.getInstance().isInShootingMode()) {
-          setAngle(newAngle);
+          controller.setGoal(-setting);
         }
+
+        Logger.recordOutput("Turret/wouldBeSendingIfSending", setting);
+        //double position = ((angle)/180 * (totalEncoderDisplacement/2)); // Convert from degrees to rotations
+        Logger.recordOutput("Turret/atCurrentAngle", (-encoder.getDistance()/(totalEncoderDisplacement/2))*180);
 
         //only run if you're not getting limit switch data
         if (Robot.isReal()) {  
+          // Logger.recordOutput("Turret/movingToPosition",((controller.getGoal().position + 180)/360 * totalEncoderDisplacement));
           double calculate = controller.calculate(encoder.getDistance(), controller.getGoal());
           Logger.recordOutput("Turret/voltage", calculate);
-          if ((leftLimitSwitch.get()==true) && (calculate>0)) {
-            System.out.println("hitting left switch and going left");
-            calculate = 0;
-          } else if ((rightLimitSwitch.get()==true) && (calculate<0)) {
-            System.out.println("hitting right switch and going right");
-            calculate = 0;
-          }
-
-          motor.setVoltage(-calculate);
-          System.out.println(motor.getMotorVoltage().getValueAsDouble());
+          //System.out.println("SENDING VOLTAGE " + calculate);
+          motor.setVoltage(calculate);
+          //System.out.println(motor.getMotorVoltage().getValueAsDouble());
         } else {
             sim.update(0.2);
             double currentPosition = sim.getEncoderPosition();
             sim.setMotorVoltage(controller.calculate(currentPosition, controller.getGoal()));
         }
+      
+      //Design issue w intake and turret, if the turret is rotated a certain way and you run intake they'll crash into each other
+      //so Felix asked me to add this conditional hard stop to keep this from happening. Bear in mind 0.9 may have to become <= 0.1
+      //depending on what angle value corresponds to turret rotated all the way to the right
+      if(angle >= 0.9) { Intake.getInstance().SetVolts(0);}
+      
   }
 
     public Double getMotorVoltage() {
       return motor.getMotorVoltage().getValueAsDouble();
+    }
+
+    public void resetEncoder() {
+      encoder.reset();
+      System.out.println("encoder reset");
     }
     }

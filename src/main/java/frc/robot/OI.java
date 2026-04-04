@@ -28,6 +28,7 @@ public class OI {
         climbLowGoal,
         climbZero, 
         stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp, intake, manualSpeedUp, manualSpeedDown, flywheel,
+        climberVoltageToZero, 
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -57,11 +58,9 @@ public class OI {
           binds.put(Bind.manualTurretSwitch, controller.button(GulikitButtons.manualTurretSwitch)); 
         binds.put(Bind.setHighGoal, controller.button(GulikitButtons.setHighGoal)); 
         binds.put(Bind.setLowGoal, controller.button(GulikitButtons.setLowGoal)); 
-        binds.put(Bind.climbHighGoal, controller.button(GulikitButtons.setHighGoal)); 
-        binds.put(Bind.climbLowGoal, controller.button(GulikitButtons.setLowGoal)); 
-        binds.put(Bind.climbZero, controller.button(GulikitButtons.setZeroGoal)); 
         binds.put(Bind.intake, controller.button(GulikitButtons.intake)); 
         binds.put(Bind.flywheel, controller.button(GulikitButtons.flywheel)); 
+        binds.put(Bind.climberVoltageToZero, controller.button(GulikitButtons.ClimberVoltageToZero)); 
 
         //binds.put(Bind._, controller.button(_)); OR
         //binds.put(Bind._, numpad.button(_)); OR
@@ -81,27 +80,29 @@ public class OI {
         double newX, newY = 0.0d;
 
         if (isFlight) {
-        x = MathUtil.applyDeadband(joystick.getX(), Controls.Deadband);
-        y = MathUtil.applyDeadband(joystick.getY(), Controls.Deadband);
-        newX = 0.0d;
-        newY = 0.0d;
+            x = MathUtil.applyDeadband(joystick.getX(), Controls.Deadband);
+            y = MathUtil.applyDeadband(joystick.getY(), Controls.Deadband);
+            newX = 0.0d;
+            newY = 0.0d;
         } else {
-        x = MathUtil.applyDeadband(controller.getRawAxis(0), Controls.Deadband);
-        y = MathUtil.applyDeadband(controller.getRawAxis(1), Controls.Deadband);
+            // inverted bc controller driving upside down but auto in correct direction
+            x = MathUtil.applyDeadband(controller.getRawAxis(0), Controls.Deadband);
+            y = MathUtil.applyDeadband(controller.getRawAxis(1), Controls.Deadband);
         }
 
         if (Controls.UseCurve) {
             double angle = Math.atan2(y, x);
             double magInitial = Algebra.euclideanDistance(x, y);
             if (Robot.isSimulation()) magInitial = MathUtil.clamp(magInitial, 0, 1);
-            double magCurved = Math.pow(deadbandCompensation(magInitial), Controls.CurveExponent);
-            double powerCompensated = minimumPowerCompensation(magCurved);
-            newX = Trig.cosizzle(angle) * powerCompensated;
-            newY = Trig.sizzle(angle) * powerCompensated;
+                double magCurved = Math.pow(deadbandCompensation(magInitial), Controls.CurveExponent);
+                double powerCompensated = minimumPowerCompensation(magCurved);
+                newX = Trig.cosizzle(angle) * powerCompensated;
+                newY = Trig.sizzle(angle) * powerCompensated;
         }
+
         if (Double.isNaN(newX)) newX = 0.0d;
         if (Double.isNaN(newY)) newY = 0.0d;
-        return new double[] { newX, newY }; 
+        return new double[] { -newX, -newY }; 
         }
     
 
