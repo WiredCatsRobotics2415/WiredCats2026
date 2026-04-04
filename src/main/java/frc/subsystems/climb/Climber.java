@@ -29,7 +29,7 @@ public class Climber extends SubsystemBase {
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
     public double sendingVolts = 0;
-    public double maxHeight = 10;
+    public double maxHeight = 102.3;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -50,9 +50,9 @@ public class Climber extends SubsystemBase {
   }
 
   public void setClimberChange(double posChange) {
-    // controller.setGoal(controller.getGoal().position + posChange);
-    // System.out.println(controller.getGoal().position + posChange);
-    sendingVolts = sendingVolts + posChange;
+    controller.setGoal(controller.getGoal().position + posChange);
+    System.out.println(controller.getGoal().position + posChange);
+    //sendingVolts = sendingVolts + posChange;
   }
 
 
@@ -67,12 +67,13 @@ public class Climber extends SubsystemBase {
 
     @Override 
     public void periodic() {
-      // double calculate = controller.calculate(-climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
-      double calculate = sendingVolts;
-      if ((climbMotor.getPosition().getValueAsDouble() > 0) && (climbMotor.getPosition().getValueAsDouble() < maxHeight)) {
+      double calculate = controller.calculate(-climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
+
+      if ((climbMotor.getPosition().getValueAsDouble() > -0.5) && (climbMotor.getPosition().getValueAsDouble() < maxHeight)) {
         climbMotor.setVoltage(calculate);
       } else {
         climbMotor.setVoltage(0);
+
       }
       Logger.recordOutput("Climber/voltage", climbMotor.getMotorVoltage().getValueAsDouble());
       Logger.recordOutput("Climber/goal", sendingVolts);

@@ -100,8 +100,8 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
         oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
         oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> System.out.println("TESTING SWITCH"))).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
-        oi.binds.get(OI.Bind.setHighGoal).onTrue(new InstantCommand(() -> climber.setClimberChange(0.06))); 
-        oi.binds.get(OI.Bind.setLowGoal).onTrue(new InstantCommand(() -> climber.setClimberChange(-0.06)));
+        oi.binds.get(OI.Bind.setHighGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(0.8))); 
+        oi.binds.get(OI.Bind.setLowGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(-0.8)));
         oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
         oi.binds.get(OI.Bind.climberVoltageToZero).onTrue(new InstantCommand(() -> climber.setVoltage(0))); 
