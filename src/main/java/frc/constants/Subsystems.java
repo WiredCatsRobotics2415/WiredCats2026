@@ -130,8 +130,8 @@ public class Subsystems {
         public static TuneableNumber kS = new TuneableNumber(0, "Shooter/kS"); 
         public static TuneableNumber kV = new TuneableNumber(0, "Shooter/kV"); 
         public static TuneableNumber kA = new TuneableNumber(0, "Shooter/kA");
-        public static TuneableNumber kMaxVelocity = new TuneableNumber(0.5, "Shooter/kMaxVelocity");
-        public static TuneableNumber kMaxAcceleration = new TuneableNumber(0.5, "Shooter/kMaxAccel");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(0.7, "Shooter/kMaxVelocity");
+        public static TuneableNumber kMaxAcceleration = new TuneableNumber(0.7, "Shooter/kMaxAccel");
         public static TuneableNumber kD = new TuneableNumber(0.1, "Shooter/kMaxVelocity");
     }
 

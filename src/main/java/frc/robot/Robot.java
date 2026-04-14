@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix6.HootReplay;
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -30,6 +31,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
     public Robot() {
+        //CameraServer.startAutomaticCapture();
         PowerDistribution pdh = new PowerDistribution();
         pdh.setSwitchableChannel(true);
         

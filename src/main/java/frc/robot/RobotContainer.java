@@ -3,6 +3,7 @@ package frc.robot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -38,6 +39,7 @@ public class RobotContainer {
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
     public boolean isRunningFlywheel = false;
+    public TalonFX motor = new TalonFX(40);
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
@@ -100,8 +102,8 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
         oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
         oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> System.out.println("TESTING SWITCH"))).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
-        oi.binds.get(OI.Bind.setHighGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(0.8))); 
-        oi.binds.get(OI.Bind.setLowGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(-0.8)));
+        oi.binds.get(OI.Bind.setHighGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(0.6))); 
+        oi.binds.get(OI.Bind.setLowGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(-0.6)));
         oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
         oi.binds.get(OI.Bind.climberVoltageToZero).onTrue(new InstantCommand(() -> climber.setVoltage(0))); 
@@ -113,6 +115,7 @@ public class RobotContainer {
         Logger.recordOutput("Shooter/Voltage", shooter.getMotor1Voltage());
         Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
         Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
+        Logger.recordOutput("Drive/backLeftOffset", motor.getPosition().getValueAsDouble());
 
     }
 

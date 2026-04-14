@@ -29,7 +29,7 @@ public class Climber extends SubsystemBase {
     private ClimberSim sim = new ClimberSim();
     private double currentHeight = 0.0;
     public double sendingVolts = 0;
-    public double maxHeight = 102.3;
+    public double maxHeight = 104.46;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -50,9 +50,9 @@ public class Climber extends SubsystemBase {
   }
 
   public void setClimberChange(double posChange) {
-    controller.setGoal(controller.getGoal().position + posChange);
-    System.out.println(controller.getGoal().position + posChange);
-    //sendingVolts = sendingVolts + posChange;
+    // controller.setGoal(controller.getGoal().position + posChange);
+    // System.out.println(controller.getGoal().position + posChange);
+    sendingVolts = sendingVolts + posChange;
   }
 
 
@@ -67,20 +67,31 @@ public class Climber extends SubsystemBase {
 
     @Override 
     public void periodic() {
-      double calculate = controller.calculate(-climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
+      //double calculate = controller.calculate(-climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
+      double calculate = sendingVolts;
 
-      if ((climbMotor.getPosition().getValueAsDouble() > -0.5) && (climbMotor.getPosition().getValueAsDouble() < maxHeight)) {
-        climbMotor.setVoltage(calculate);
-      } else {
+      if (((climbMotor.getPosition().getValueAsDouble() > maxHeight) && (calculate > 0)) || (climbMotor.getPosition().getValueAsDouble() < -0.5)) {
         climbMotor.setVoltage(0);
-
+      } else {
+        climbMotor.setVoltage(calculate);
       }
-      Logger.recordOutput("Climber/voltage", climbMotor.getMotorVoltage().getValueAsDouble());
-      Logger.recordOutput("Climber/goal", sendingVolts);
+
       Logger.recordOutput("Climber/position", climbMotor.getPosition().getValueAsDouble());
+      Logger.recordOutput("Climber/goal", sendingVolts);
+      Logger.recordOutput("Climber/volts", climbMotor.getMotorVoltage().getValueAsDouble());
     }
 
-    public void setVoltage(int volts) {
-     climbMotor.setVoltage(volts);
+    public void setVoltage(double volts) {
+      System.out.println("SET VOLTAGE SET VOLTAGE");
+      sendingVolts = volts;
+    }
+
+    public void setGoal(double goal) {
+      controller.setGoal(goal);
+    }
+
+    public void setGoalToPosition() {
+      System.out.println("SETTING GOAL");
+      controller.setGoal(-climbMotor.getPosition().getValueAsDouble());
     }
 }
