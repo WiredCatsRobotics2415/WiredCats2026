@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "TurnOnFlywheels"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Middle1"
@@ -20,6 +26,12 @@
           "type": "path",
           "data": {
             "pathName": "Middle2TrenchRight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TurnOffFlywheels"
           }
         }
       ]

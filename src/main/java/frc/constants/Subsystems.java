@@ -84,6 +84,8 @@ public class Subsystems {
         public static final int TurretServo1Analog = 2;
         public static final int TurretServo2Analog = 1;
 
+        public static final int LimitSwitchLeft_ID = 100;
+        public static final int LimitSwitchRight_ID = 100; //TODO: Assign proper port ID
     }
 
     public static class ShooterConstants {
@@ -114,7 +116,6 @@ public class Subsystems {
     }
 
     public static class ClimberConstants {
-        public static final double GoalDeadband = 0;
         public static final double MaxHeight = 0.5;
         public static double kSVolts;
         public static double kVVoltSecondsPerRotation;

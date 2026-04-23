@@ -33,6 +33,12 @@
           "data": {
             "pathName": "Middle2BackLeft"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TurnOffFlywheels"
+          }
         }
       ]
     }

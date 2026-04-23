@@ -11,7 +11,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -61,9 +63,11 @@ public class Climber extends SubsystemBase {
         return false;
     }
 
-    public boolean getSideLimit() {
-        return false;
-    }
+  public void makeRotation() 
+  {
+    double calculate = controller.calculate(climbMotor.getPosition().getValueAsDouble(), controller.getGoal());
+    climbMotor.setVoltage(calculate);
+  }
 
     @Override 
     public void periodic() {
@@ -94,4 +98,5 @@ public class Climber extends SubsystemBase {
       System.out.println("SETTING GOAL");
       controller.setGoal(-climbMotor.getPosition().getValueAsDouble());
     }
+   
 }
