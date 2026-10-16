@@ -19,6 +19,8 @@ public class OI {
     CommandXboxController controller;
     CommandJoystick numpad;
 
+    public boolean yFlipped;
+
     public enum Bind {
         enterShootingMode, 
         startShooting,
@@ -30,6 +32,7 @@ public class OI {
         stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp, intake, manualSpeedUp, manualSpeedDown, flywheel,
         climberVoltageToZero, 
         intakeRun,
+        yAxisFlip,
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -62,6 +65,7 @@ public class OI {
         binds.put(Bind.intake, controller.button(GulikitButtons.intake)); 
         binds.put(Bind.flywheel, controller.button(GulikitButtons.flywheel)); 
         binds.put(Bind.intakeRun, controller.button(GulikitButtons.intakeRun)); 
+        binds.put(Bind.yAxisFlip, controller.button(8));
         //binds.put(Bind.climberVoltageToZero, controller.button(GulikitButtons.ClimberVoltageToZero)); 
 
         //binds.put(Bind._, controller.button(_)); OR

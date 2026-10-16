@@ -78,7 +78,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void toggleIntake() {
-    if (intakePushVolts==5) {
+    if (intakePushVolts==7.5) {
       intakePushVolts = 0;
     } else {
       intakePushVolts = 7.5;
@@ -110,6 +110,7 @@ public class Intake extends SubsystemBase {
         //System.out.println("Moving");
         //might have to adjust Ps
         intakePush.setVoltage(-calculate);
+
       }
 
       // indexerMotor.setVoltage(indexerSendVolts);

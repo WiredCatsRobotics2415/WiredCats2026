@@ -43,6 +43,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Pose2d robotPose = new Pose2d();
 
+    private boolean hasAppliedOperatorPerspective = false;
+
     private final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds()
         .withDriveRequestType(DriveRequestType.Velocity).withSteerRequestType(SteerRequestType.MotionMagicExpo);
 
@@ -138,6 +140,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         } else {
             realPose.updateOdometryAndVision();
         }
+
+        DriverStation.getAlliance().ifPresent(color -> {setOperatorPerspectiveForward(color == Alliance.Red ? Rotation2d.k180deg : Rotation2d.kZero); hasAppliedOperatorPerspective = true;});
 
         // Update the robot pose from the drivetrain state
         robotPose = getState().Pose;

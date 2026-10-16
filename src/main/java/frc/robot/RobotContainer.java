@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.constants.Controls;
+import frc.constants.Controls.GulikitButtons;
 import frc.robot.generated.TunerConstants;
 //import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
@@ -39,6 +40,7 @@ public class RobotContainer {
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
     public boolean isRunningFlywheel = false;
+    public boolean yFlipped = false; //flips left joystick y input
     public TalonFX motor = new TalonFX(40);
 
     private RobotContainer() {
@@ -107,6 +109,7 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
         oi.binds.get(OI.Bind.intakeRun).onTrue(new InstantCommand(() -> {System.out.println("RUNNING ITNAKE"); intake.toggleIntake();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
+        oi.binds.get(OI.Bind.yAxisFlip).onTrue(new InstantCommand(() -> yFlipped = !yFlipped)); 
         //oi.binds.get(OI.Bind.climberVoltageToZero).onTrue(new InstantCommand(() -> climber.setVoltage(0))); 
     }
 
@@ -118,6 +121,7 @@ public class RobotContainer {
         Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
         Logger.recordOutput("Drive/backLeftOffset", motor.getPosition().getValueAsDouble());
 
+        GulikitButtons.flipLeftY = yFlipped ? -1 : 1;
     }
 
     public Command getAutonomousCommand() {
