@@ -73,14 +73,6 @@ public class Intake extends SubsystemBase {
     }
   }
 
-  public BooleanSupplier getFrontSwitchSupplier() {
-    return () -> frontLimit.get();
-  }
-
-  public BooleanSupplier getBackSwitchSupplier() {
-    return () -> backLimit.get();
-  }
-
     public Command SetVolts(double voltage) {
         if ((backLimit.get()) && (frontLimit.get())) {
             return runOnce(
@@ -99,25 +91,20 @@ public class Intake extends SubsystemBase {
       public void periodic() {
 
       double calculate = controller.calculate(-intakePush.getPosition().getValueAsDouble(), controller.getGoal());
-      //|| (!frontLimit.get() && (calculate>0)) || (!backLimit.get() && (calculate<0))
+      
       if (controller.atGoal()) { 
         intakePush.setVoltage(0);
       } else {
         //System.out.println("Moving");
-        intakePush.setVoltage(-calculate*3);
-      }
-
-      
-      if ((controller.getGoal().position==0) || !backLimit.get()) {
-        intakeDrive.set(0);
-      } else {
-        intakeDrive.set(0.5);
+        //might have to adjust Ps
+        intakePush.setVoltage(-calculate);
       }
       
-      if(controller.atGoal() && !backLimit.get()) //Flip back to normal when limit switches working
+      if(controller.atGoal()) //Flip back to normal when limit switches working
       {
         intakeDrive.set(0.2);
-        
+      }  else {
+        intakeDrive.set(0);
       }
 
       Logger.recordOutput("Intake/currentPos", -intakePush.getPosition().getValueAsDouble());
@@ -129,15 +116,5 @@ public class Intake extends SubsystemBase {
       //System.out.println("Intake/currentPos"+ -intakePush.getPosition().getValueAsDouble());
       //System.out.println("Intake/controllerGoal"+ controller.getGoal().position);
       //System.out.println("Intake/voltage"+intakePush.getMotorVoltage().getValueAsDouble());
-    }
-
-    public void Switch(double voltage) {
-        if (backLimit.get()) {
-            //move forward until we hit the limit switch
-            SetVolts(voltage).until(getFrontSwitchSupplier());
-        } else if (frontLimit.get()) {
-            //move backward until we hit the limit switch
-            SetVolts(-voltage).until(getBackSwitchSupplier());
-        }
     }
 }

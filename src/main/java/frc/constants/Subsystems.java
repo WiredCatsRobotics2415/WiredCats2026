@@ -65,9 +65,9 @@ public class Subsystems {
         public static final int ControllerPort = 4; 
         public static final int Flywheel_1_ID = 31; 
         public static final int Flywheel_2_ID = 32; 
-        public static final int Intake_Motor_ID = 18; 
-        public static final int Intake_Drive_ID = 55; 
-        public static final int Handoff_Motor_ID = 4; 
+        public static final int Intake_Motor_ID = 50; 
+        public static final int Intake_Drive_ID = 39; 
+        public static final int Handoff_Motor_ID = 16; 
         public static final int Turret_Motor = 22; 
         public static final int Climb_Motor = 11; 
 
@@ -88,9 +88,9 @@ public class Subsystems {
 
     public static class ShooterConstants {
 
-        public static final int FLYWHEEL_1_ID = 53; //TODO: Placeholder ID values, change when systems connects them
-        public static final int FLYWHEEL_2_ID = 54;  //Placeholder
-        public static final int INTAKE_MOTOR_ID = 55; //Placeholder
+        public static final int FLYWHEEL_1_ID = 1000; //TODO: Placeholder ID values, change when systems connects them
+        public static final int FLYWHEEL_2_ID = 1000;  //Placeholder
+        public static final int INTAKE_MOTOR_ID = 1000; //Placeholder
         public static final float INTAKE_SPEED = 5; //Placeholder, Intake Speed is currently in RPS may want to change later
         public static double kSVolts = 0.0;
         public static double kVVoltSecondsPerRotation = 0.0;
