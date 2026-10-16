@@ -83,7 +83,7 @@ public class Shooter extends SubsystemBase {
     //fix this later
     flywheel1 = new TalonFX(FLYWHEEL_1_ID);
     flywheel2 = new TalonFX(FLYWHEEL_2_ID);
-    indexerMotor = new TalonFX(19);
+    indexerMotor = new TalonFX(19); //TODO: move this to constants
     handoffMotor = new TalonFX(16);
   }
 
