@@ -27,7 +27,7 @@ public class Controls {
         public static final int RightPaddle = 10;
 
         public static final int LeftJoystickX = XboxController.Axis.kLeftX.value;
-        public static final int LeftJoystickY = XboxController.Axis.kLeftY.value;
+        public static final int LeftJoystickY = -XboxController.Axis.kLeftY.value; //TODO: this got flipped during qual 1 at some point, i.e if swerve flips again look here
         public static final int RightJoystickX = XboxController.Axis.kRightX.value;
         public static final int RightJoystickY = XboxController.Axis.kRightY.value;
         public static final int LeftTrigger = XboxController.Axis.kLeftTrigger.value;
@@ -35,22 +35,23 @@ public class Controls {
 
         //define buttons!!!
         public static final int EnterShootingModeButton = 20; 
-        public static final int StartShootingButton = 3;
-        public static final int setHighGoal = 5;
-        public static final int setLowGoal = 4;
-        public static final int setZeroGoal = 82;
-        public static final int ManualTurretLeft =5;
-        public static final int ManualTurretRight = 4;
+        public static final int intakeRun = 3;
+        public static final int StartShootingButton = 81;
+        public static final int setHighGoal = 82;
+        public static final int setLowGoal = 83;
+        public static final int setZeroGoal = 84;
+        public static final int ManualTurretLeft = XboxController.Axis.kLeftTrigger.value;
+        public static final int ManualTurretRight = 5;
         public static final int ManualTurretUp = 85;
         public static final int ManualTurretDown = 85;
         public static final int ManualSpeedUp = 6;
         public static final int ManualSpeedDown = XboxController.Axis.kRightTrigger.value;
 
-        public static final int ClimberVoltageToZero = 2; 
+        public static final int ClimberVoltageToZero = 90; 
         
         public static int manualTurretSwitch = 1;
-        public static int intake = 80;
-        public static int flywheel = 3;
+        public static int intake = 4;
+        public static int flywheel = 2;
     }
 
     public class NumpadButtons {

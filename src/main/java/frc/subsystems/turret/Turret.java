@@ -114,6 +114,9 @@ public class Turret extends SubsystemBase {
       //down for turret 1: 1368
       //up for turret 2: 1112
       //down for turret 2: 1426
+
+      System.out.println("IP COMMAND RUN")
+;
         turret1.set(mapPotentiometerToOne(1651));
         turret2.set(mapPotentiometerToOne(1112));
         currentlyUp = true;
@@ -145,40 +148,40 @@ public class Turret extends SubsystemBase {
 
       Logger.recordOutput("Turret/upLimit", turretUpLimit.get());
       
-      // if (turretUpLimit.get()) {
-      //   //sets the turrets to WHERE THEY ARE CURRENTLY
-      //   turret1.set(mapPotentiometerToOne(turret1analog.getValue()));
-      //   turret2.set(mapPotentiometerToOne(turret2analog.getValue()));
+      // // if (turretUpLimit.get()) {
+      // //   //sets the turrets to WHERE THEY ARE CURRENTLY
+      // //   turret1.set(mapPotentiometerToOne(turret1analog.getValue()));
+      // //   turret2.set(mapPotentiometerToOne(turret2analog.getValue()));
+      // // }
+
+      // if ((turret1analog!=null)) {
+      //   Logger.recordOutput("Turret/turret1", turret1analog.getValue());
+      // }
+      // if (turret2analog!=null) {
+      //   Logger.recordOutput("Turret/turret2", turret2analog.getValue());
       // }
 
-      if ((turret1analog!=null)) {
-        Logger.recordOutput("Turret/turret1", turret1analog.getValue());
-      }
-      if (turret2analog!=null) {
-        Logger.recordOutput("Turret/turret2", turret2analog.getValue());
-      }
+      // Logger.recordOutput("Turret/leftlimit", leftLimitSwitch.get());
+      // Logger.recordOutput("Turret/rightlimit", rightLimitSwitch.get());
 
-      Logger.recordOutput("Turret/leftlimit", leftLimitSwitch.get());
-      Logger.recordOutput("Turret/rightlimit", rightLimitSwitch.get());
-
-      // turret1.set(turret1.get());
-      // turret2.set(turret2.get());
+      // // turret1.set(turret1.get());
+      // // turret2.set(turret2.get());
     
-        //get the angle from the shooter, convert to relative turret angle, then 
-        //convert that to a 0-1 position, and set that as the controller goal for the turret
-        double angle = shooter.getLastAngle();
-        double newAngle = relativeToTurretAngle(Math.toDegrees(angle));
-        Logger.recordOutput("Turret/AngleGoal", newAngle);
-        double setting = 0;
-        setting = setAngle(newAngle);
+      //   //get the angle from the shooter, convert to relative turret angle, then 
+      //   //convert that to a 0-1 position, and set that as the controller goal for the turret
+      //   double angle = shooter.getLastAngle();
+      //   double newAngle = relativeToTurretAngle(Math.toDegrees(angle));
+      //   Logger.recordOutput("Turret/AngleGoal", newAngle);
+      //   double setting = 0;
+      //   setting = setAngle(newAngle);
 
-        if (RobotContainer.getInstance().isInShootingMode()) {
-          controller.setGoal(-setting);
-        }
+      //   if (RobotContainer.getInstance().isInShootingMode()) {
+      //     controller.setGoal(-setting);
+      //   }
 
-        Logger.recordOutput("Turret/wouldBeSendingIfSending", setting);
-        //double position = ((angle)/180 * (totalEncoderDisplacement/2)); // Convert from degrees to rotations
-        Logger.recordOutput("Turret/atCurrentAngle", (-encoder.getDistance()/(totalEncoderDisplacement/2))*180);
+      //   Logger.recordOutput("Turret/wouldBeSendingIfSending", setting);
+      //   //double position = ((angle)/180 * (totalEncoderDisplacement/2)); // Convert from degrees to rotations
+      //   Logger.recordOutput("Turret/atCurrentAngle", (-encoder.getDistance()/(totalEncoderDisplacement/2))*180);
 
         //only run if you're not getting limit switch data
         if (Robot.isReal()) {  
@@ -193,11 +196,6 @@ public class Turret extends SubsystemBase {
             double currentPosition = sim.getEncoderPosition();
             sim.setMotorVoltage(controller.calculate(currentPosition, controller.getGoal()));
         }
-      
-      //Design issue w intake and turret, if the turret is rotated a certain way and you run intake they'll crash into each other
-      //so Felix asked me to add this conditional hard stop to keep this from happening. Bear in mind 0.9 may have to become <= 0.1
-      //depending on what angle value corresponds to turret rotated all the way to the right
-      if(angle >= 0.9) { Intake.getInstance().SetVolts(0);}
       
   }
 

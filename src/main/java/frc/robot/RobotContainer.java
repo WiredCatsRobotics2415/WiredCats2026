@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.constants.Controls;
 import frc.robot.generated.TunerConstants;
-import frc.subsystems.climb.Climber;
+//import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.intake.Intake;
 import frc.subsystems.vision.Vision;
@@ -34,7 +34,7 @@ public class RobotContainer {
     private final OI oi = OI.getInstance();
     private final Intake intake = Intake.getInstance();
     private final Shooter shooter = Shooter.getInstance();
-    private final Climber climber = Climber.getInstance();
+    //private final Climber climber = Climber.getInstance();
     private final Turret turret = Turret.getInstance(); 
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
@@ -95,18 +95,19 @@ public class RobotContainer {
                 .withVelocityY(y * Controls.MaxDriveMeterS).withRotationalRate(-rotation * Controls.MaxAngularRadS);
         }).withName("Teleop Default"));
         
-        oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
-        oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
+        // oi.binds.get(OI.Bind.enterShootingMode).onTrue(new InstantCommand(() -> inShootingMode = !inShootingMode)); 
+        // oi.binds.get(OI.Bind.startShooting).onTrue(new InstantCommand(() -> shooter.startShooting())).onFalse(new InstantCommand(() -> shooter.stopShooting()));
         oi.binds.get(OI.Bind.manualTurretLeft).onTrue(new InstantCommand(() -> {inShootingMode=false; System.out.println("up 0.5!");})).whileTrue(Commands.run(() -> turret.setControllerChange(0.05)));  
         oi.binds.get(OI.Bind.manualTurretRight).onTrue(new InstantCommand(() -> {inShootingMode=false; System.out.println("down 0.5!");})).whileTrue(Commands.run(() -> turret.setControllerChange(-0.05))); 
         oi.binds.get(OI.Bind.manualSpeedUp).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()+0.5)));  
         oi.binds.get(OI.Bind.manualSpeedDown).onTrue(new InstantCommand(() -> inShootingMode=false)).whileTrue(Commands.run(() -> shooter.setGoalSpeed(shooter.getGoalSpeed()-0.5))); 
         oi.binds.get(OI.Bind.manualTurretSwitch).onTrue(new InstantCommand(() -> System.out.println("TESTING SWITCH"))).whileTrue(new InstantCommand(() -> turret.IpswitchPitchSwitch()));
-        oi.binds.get(OI.Bind.setHighGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(0.6))); 
-        oi.binds.get(OI.Bind.setLowGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(-0.6)));
+        // oi.binds.get(OI.Bind.setHighGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(0.6))); 
+        // oi.binds.get(OI.Bind.setLowGoal).whileTrue(new InstantCommand(() -> climber.setClimberChange(-0.6)));
         oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
+        oi.binds.get(OI.Bind.intakeRun).onTrue(new InstantCommand(() -> {System.out.println("RUNNING ITNAKE"); intake.toggleIntake();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
-        oi.binds.get(OI.Bind.climberVoltageToZero).onTrue(new InstantCommand(() -> climber.setVoltage(0))); 
+        //oi.binds.get(OI.Bind.climberVoltageToZero).onTrue(new InstantCommand(() -> climber.setVoltage(0))); 
     }
 
     public void periodic() {

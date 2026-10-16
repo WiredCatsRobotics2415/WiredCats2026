@@ -330,6 +330,8 @@ public class Shooter extends SubsystemBase {
           //both should be positive
             flywheel1.setVoltage(voltage);
             flywheel2.setVoltage(voltage);
+            handoffMotor.set(-1);
+            indexerMotor.set(0.5);
         } else {
             sim.setFlywheel1Voltage(voltage);
             sim.setFlywheel2Voltage(voltage);
@@ -341,6 +343,8 @@ public class Shooter extends SubsystemBase {
           //both should be positive
             flywheel1.setVoltage(0);
             flywheel2.setVoltage(0);
+            indexerMotor.set(0);
+            handoffMotor.set(0);
         }  else {
           sim.setFlywheel1Voltage(0);
           sim.setFlywheel2Voltage(0);

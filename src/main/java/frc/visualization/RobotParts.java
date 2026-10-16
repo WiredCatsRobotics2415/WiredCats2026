@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.constants.Measurements.RobotMeasurements;
-import frc.subsystems.climb.Climber;
+//import frc.subsystems.climb.Climber;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 import frc.subsystems.shooter.Shooter;
 import frc.subsystems.turret.Turret;
@@ -17,7 +17,7 @@ import frc.subsystems.turret.Turret;
 public class RobotParts {
     private final Shooter shooter = Shooter.getInstance();
     private final Turret turret = Turret.getInstance();
-    private final Climber climber = Climber.getInstance();
+    //private final Climber climber = Climber.getInstance();
     private final CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
     private static RobotParts instance;
 

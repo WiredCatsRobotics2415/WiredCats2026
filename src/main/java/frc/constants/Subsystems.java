@@ -30,12 +30,14 @@ public class Subsystems {
         public static final double HeadingKA = 0;
         public static double kSwitchThreshold;
         public static TuneableNumber kMaxAcceleration = new TuneableNumber(150, "Intake/kP");
-        public static TuneableNumber kMaxVelocity = new TuneableNumber(150, "Intake/kP");
+        public static TuneableNumber kMaxVelocity = new TuneableNumber(10, "Intake/kP");
         public static TuneableNumber kP = new TuneableNumber(1.35, "Intake/kP");
         public static TuneableNumber kI = new TuneableNumber(0, "Intake/kP");
         public static TuneableNumber kD = new TuneableNumber(0.006, "Intake/kP");
 
-        public static float goalDistance = 55;
+        public static double indexerVolts = 1;
+
+        public static float goalDistance = -8;
     }
 
     public static class VisionConstants {
@@ -77,10 +79,10 @@ public class Subsystems {
         public static final int TurretServo2 = 6;
         public static final int TurretLimit1 = 9;
         public static final int TurretLimit2 = 4; 
-        public static final int TurretUpLimit = 0;
+        public static final int TurretUpLimit = 7;
 
-        public static final int encoderChannelA = 7;
-        public static final int encoderChannelB = 8;
+        public static final int encoderChannelA = 1;
+        public static final int encoderChannelB = 0;
         public static final int TurretServo1Analog = 2;
         public static final int TurretServo2Analog = 1;
 

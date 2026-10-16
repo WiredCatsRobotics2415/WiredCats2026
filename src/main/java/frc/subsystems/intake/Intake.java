@@ -40,6 +40,9 @@ public class Intake extends SubsystemBase {
     private DigitalInput frontLimit = new DigitalInput(PortNumbers.Intake_Front_Limit_ID); 
     private DigitalInput backLimit = new DigitalInput(PortNumbers.Intake_Back_Limit_ID); 
     private double amountToMove = IntakeConstants.goalDistance;
+    public double intakePushVolts = 0;
+    public double indexerSendVolts = 0;
+    private static TalonFX indexerMotor;
 
       // Create a PID controller whose setpoint's change is subject to maximum
   // velocity and acceleration constraints.
@@ -58,6 +61,7 @@ public class Intake extends SubsystemBase {
     intakePush = new TalonFX(PortNumbers.Intake_Motor_ID);
     intakeDrive = new TalonFX(PortNumbers.Intake_Drive_ID);
     intakePush.setNeutralMode(NeutralModeValue.Coast);
+    indexerMotor = new TalonFX(19); //TODO: move this to constants
     intakePush.setPosition(0);
     //TODO: define Intake Drive Motor
   }
@@ -70,6 +74,14 @@ public class Intake extends SubsystemBase {
     } else {
       controller.setGoal(amountToMove);
       isOut = true;
+    }
+  }
+
+  public void toggleIntake() {
+    if (intakePushVolts==5) {
+      intakePushVolts = 0;
+    } else {
+      intakePushVolts = 7.5;
     }
   }
 
@@ -99,13 +111,10 @@ public class Intake extends SubsystemBase {
         //might have to adjust Ps
         intakePush.setVoltage(-calculate);
       }
-      
-      if(controller.atGoal()) //Flip back to normal when limit switches working
-      {
-        intakeDrive.set(0.2);
-      }  else {
-        intakeDrive.set(0);
-      }
+
+      // indexerMotor.setVoltage(indexerSendVolts);
+      intakeDrive.setVoltage(intakePushVolts);
+      Logger.recordOutput("Intake/drive voltage", intakeDrive.getMotorVoltage().getValueAsDouble());
 
       Logger.recordOutput("Intake/currentPos", -intakePush.getPosition().getValueAsDouble());
       Logger.recordOutput("Intake/controllerGoal", controller.getGoal().position);

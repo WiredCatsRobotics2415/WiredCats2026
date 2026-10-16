@@ -3,7 +3,7 @@ package frc.subsystems.climb;
 import frc.subsystems.drive.CommandSwerveDrivetrain;
 
 public class ClimbFunctions {
-    private static Climber climber;
+    //private static Climber climber;
     private static CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
 
     public void climb(boolean level) {
@@ -35,7 +35,7 @@ public class ClimbFunctions {
             sideSpeed = -0.5;
 
         }
-
+/* 
         while (!climber.getForwardLimit()) {
                 drive.driveOpenLoopFieldCentricRequest.withVelocityX(sideSpeed).withVelocityY(0).withRotationalRate(0.0);
         } 
@@ -46,7 +46,7 @@ public class ClimbFunctions {
         }
 
         drive.driveOpenLoopFieldCentricRequest.withVelocityX(0).withVelocityY(0).withRotationalRate(0.0);
-        
+        */
     }
 
     public void alignAndClimb() {
