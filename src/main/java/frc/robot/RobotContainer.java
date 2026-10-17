@@ -9,7 +9,9 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -40,7 +42,6 @@ public class RobotContainer {
     private boolean inShootingMode = false; 
     private SendableChooser<Command> autoChooser;
     public boolean isRunningFlywheel = false;
-    public boolean yFlipped = false; //flips left joystick y input
     public TalonFX motor = new TalonFX(40);
 
     private RobotContainer() {
@@ -53,8 +54,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("TurnOnFlywheels", new InstantCommand(() -> isRunningFlywheel = false));
 
         SmartDashboard.putData("Reset Encoder to 0", new InstantCommand(() -> this.turret.resetEncoder()));
-        SmartDashboard.putData("Reset Position to M2", new InstantCommand(() -> this.drive.resetPose(vision.getCurrentAveragePose())));
-        SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> {System.out.println("Reseting rotation"); this.drive.resetRotation(vision.getCurrentAverageRotation()); }));
+        // these also work while disabled so the pose can be fixed before a match
+        SmartDashboard.putData("Reset Position to M2", Commands.runOnce(this::resetTranslationFromVision).ignoringDisable(true));
+        SmartDashboard.putData("Reset Rotation to M1", Commands.runOnce(this::resetRotationFromVision).ignoringDisable(true));
 
         setupAuto();
         configureControls();
@@ -109,7 +111,8 @@ public class RobotContainer {
         oi.binds.get(OI.Bind.intake).onTrue(new InstantCommand(() -> {System.out.println("SWITCHING"); intake.switchSpinForComp();})); 
         oi.binds.get(OI.Bind.intakeRun).onTrue(new InstantCommand(() -> {System.out.println("RUNNING ITNAKE"); intake.toggleIntake();})); 
         oi.binds.get(OI.Bind.flywheel).onTrue(new InstantCommand(() -> isRunningFlywheel = !isRunningFlywheel)); 
-        oi.binds.get(OI.Bind.yAxisFlip).onTrue(new InstantCommand(() -> yFlipped = !yFlipped)); 
+        // driver fix for flipped/rotated field-centric driving: makes the way the robot is facing right now "forward"
+        oi.binds.get(OI.Bind.reZeroFieldCentric).onTrue(drive.runOnce(() -> {System.out.println("Re-zeroing field-centric forward"); drive.seedFieldCentric();}).ignoringDisable(true));
         //oi.binds.get(OI.Bind.climberVoltageToZero).onTrue(new InstantCommand(() -> climber.setVoltage(0))); 
     }
 
@@ -120,8 +123,27 @@ public class RobotContainer {
         Logger.recordOutput("Shooter/Voltage2", shooter.getMotor1Voltage());
         Logger.recordOutput("isFlywheelRunning", isRunningFlywheel);
         Logger.recordOutput("Drive/backLeftOffset", motor.getPosition().getValueAsDouble());
+    }
 
-        GulikitButtons.flipLeftY = yFlipped ? -1 : 1;
+    /** Moves the robot's X/Y to where vision sees it, keeping the current heading so field-centric driving doesn't change */
+    private void resetTranslationFromVision() {
+        Translation2d visionTranslation = vision.getCurrentAverageTranslation();
+        if (visionTranslation == null) {
+            DriverStation.reportWarning("Reset Position to M2: no tags visible, pose not changed", false);
+            return;
+        }
+        drive.resetTranslation(visionTranslation);
+    }
+
+    /** Sets the robot's heading from megatag 1. Only does anything if a camera sees 2+ tags and the cameras agree */
+    private void resetRotationFromVision() {
+        Rotation2d visionRotation = vision.getCurrentAverageRotation();
+        if (visionRotation == null) {
+            DriverStation.reportWarning("Reset Rotation to M1: no camera sees 2+ tags (or cameras disagree), heading not changed", false);
+            return;
+        }
+        System.out.println("Resetting rotation to " + visionRotation.getDegrees() + " deg from megatag 1");
+        drive.resetRotation(visionRotation);
     }
 
     public Command getAutonomousCommand() {

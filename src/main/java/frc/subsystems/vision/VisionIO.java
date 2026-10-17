@@ -39,8 +39,9 @@ public interface VisionIO {
 
     public default void setRobotOrientation(double yaw, double yawRate) {}
 
+    /** Megatag 1 heading of the pose estimation camera at index, or null if it has no trustworthy estimate */
     public default Rotation2d getMT1RotationOf(int index) {
-        return Rotation2d.kZero;
+        return null;
     }; 
 
     public default void setTurretPipeline(TurretPipeline pipeline) {};

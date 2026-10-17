@@ -27,8 +27,7 @@ public class Controls {
         public static final int RightPaddle = 10;
 
         public static final int LeftJoystickX = XboxController.Axis.kLeftX.value;
-        public static int flipLeftY = 1;
-        public static final int LeftJoystickY = (flipLeftY)*XboxController.Axis.kLeftY.value; //TODO: this got flipped during qual 1 at some point, i.e if swerve flips again look here
+        public static final int LeftJoystickY = XboxController.Axis.kLeftY.value;
         public static final int RightJoystickX = XboxController.Axis.kRightX.value;
         public static final int RightJoystickY = XboxController.Axis.kRightY.value;
         public static final int LeftTrigger = XboxController.Axis.kLeftTrigger.value;
@@ -49,6 +48,9 @@ public class Controls {
         public static final int ManualSpeedDown = XboxController.Axis.kRightTrigger.value;
 
         public static final int ClimberVoltageToZero = 90; 
+
+        // if driving looks flipped/rotated: point the robot straight away from your driver station, then press this
+        public static final int ReZeroFieldCentric = XboxController.Button.kStart.value;
         
         public static int manualTurretSwitch = 1;
         public static int intake = 4;

@@ -137,6 +137,14 @@ public class VisionIOReal implements VisionIO {
     }
 
     @Override
+    public Rotation2d getMT1RotationOf(int index) {
+        // megatag 1 solves heading from the tags alone; with one tag it can be ambiguous, so require at least 2
+        PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.PoseEstimationLLNames[index]);
+        if (estimate == null || estimate.tagCount < 2) return null;
+        return estimate.pose.getRotation();
+    }
+
+    @Override
     public void setTurretPipeline(TurretPipeline pipeline) {
         currentPipeline = pipeline; 
         LimelightHelpers.setPipelineIndex(VisionConstants.TurretName, pipeline == TurretPipeline.DriverView ? 0 : 1); 

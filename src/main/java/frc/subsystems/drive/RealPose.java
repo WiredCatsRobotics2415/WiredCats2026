@@ -2,6 +2,9 @@ package frc.subsystems.drive;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.subsystems.vision.Vision;
 import frc.utils.LimelightHelpers;
 import frc.utils.LimelightHelpers.PoseEstimate;
@@ -23,6 +26,12 @@ public class RealPose {
     private static final double MULTI_TAG_XY_STD_DEV = 0.5;
     private static final double ROTATION_STD_DEV = 9999999; // Trust gyro over vision
 
+    // A Pigeon reboot (power/CAN blip) zeroes its yaw, so field-centric driving ends up rotated/flipped
+    private double lastPigeonUpTimeSeconds = -1;
+    private final Alert pigeonRebootAlert = new Alert(
+        "Pigeon2 rebooted while code was running, heading is probably wrong. Point robot away from your driver station and press Start.",
+        AlertType.kError);
+
     public RealPose(CommandSwerveDrivetrain drivetrain, Vision vision) {
         this.drivetrain = drivetrain;
         this.vision = vision;
@@ -32,6 +41,8 @@ public class RealPose {
      * Updates odometry with vision measurements. Should be called periodically.
      */
     public void updateOdometryAndVision() {
+        checkForPigeonReboot();
+
         // 1. Get current drivetrain state from Phoenix 6
         var drivetrainState = drivetrain.getState();
         Pose2d currentPose = drivetrainState.Pose;
@@ -93,6 +104,21 @@ public class RealPose {
         // Log current pose
         Logger.recordOutput("Drive/EstimatedPose", currentPose);
         Logger.recordOutput("Drive/GyroRate", gyroRate);
+    }
+
+    /** Pigeon uptime counts up (capped at 255 s) from boot, so if it ever goes down the Pigeon rebooted */
+    private void checkForPigeonReboot() {
+        var upTimeSignal = drivetrain.getPigeon2().getUpTime();
+        if (!upTimeSignal.getStatus().isOK()) return;
+
+        double upTimeSeconds = upTimeSignal.getValueAsDouble();
+        if (upTimeSeconds < lastPigeonUpTimeSeconds) {
+            pigeonRebootAlert.set(true);
+            DriverStation.reportError("Pigeon2 rebooted (uptime " + lastPigeonUpTimeSeconds + " s -> " + upTimeSeconds + " s), field-centric heading was lost", false);
+        }
+        lastPigeonUpTimeSeconds = upTimeSeconds;
+        Logger.recordOutput("Drive/PigeonUpTime", upTimeSeconds);
+        Logger.recordOutput("Drive/PigeonRebootDetected", pigeonRebootAlert.get());
     }
 
     /**

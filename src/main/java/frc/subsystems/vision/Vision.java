@@ -3,6 +3,7 @@ package frc.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.constants.Measurements;
 import frc.constants.Subsystems.VisionConstants;
@@ -13,6 +14,7 @@ import frc.utils.LimelightHelpers.PoseEstimate;
 import frc.utils.Util;
 import frc.robot.RobotContainer; 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +24,9 @@ public class Vision extends SubsystemBase {
     private VisionIO io;
     private VisionIO.VisionIOInputs inputs = new VisionIO.VisionIOInputs();
     private static Vision instance;
+
+    // megatag 1 headings from different cameras must agree this closely before we trust their average
+    private static final double MaxMT1HeadingDisagreementDeg = 15;
 
     public enum TurretPipeline {
         DriverView, NeuralNetwork
@@ -52,8 +57,11 @@ public class Vision extends SubsystemBase {
         return estimates;
     }
 
-    /** Averages together the pose from all apriltag limelights and returns that average, with NO ROTATION component */
-    public Pose2d getCurrentAveragePose() {
+    /**
+     * Averages together the X/Y position from all apriltag limelights. Returns only a translation so callers can't
+     * accidentally reset the heading with it. Will return null if no limelights can see any tags.
+     */
+    public Translation2d getCurrentAverageTranslation() {
         double averageX = 0.0d, averageY = 0.0d;
         int usedPoses = 0;
         for (int i = 0; i < VisionConstants.PoseEstimationLLNames.length; i++) {
@@ -64,7 +72,7 @@ public class Vision extends SubsystemBase {
             }
         }
         if (usedPoses == 0) return null;
-        return new Pose2d(averageX / usedPoses, averageY / usedPoses, Rotation2d.kZero);
+        return new Translation2d(averageX / usedPoses, averageY / usedPoses);
     }
 
     public PoseEstimate getSingleTagPoseEstimate(LimelightsForElements limelights, int tag) {
@@ -149,19 +157,27 @@ public class Vision extends SubsystemBase {
     }
 
     /**
-     * Returns the current average rotation reported by megatag 1. Will return null if no limelights can see any tags.
+     * Returns the current average rotation reported by megatag 1. Will return null if no limelights have a usable
+     * megatag 1 estimate, or if the cameras disagree by more than MaxMT1HeadingDisagreementDeg.
      */
     public Rotation2d getCurrentAverageRotation() {
-        double averageTheta = 0.0d;
-        int usedPoses = 0;
+        List<Rotation2d> rotations = new ArrayList<>();
+        double sumCos = 0.0d, sumSin = 0.0d;
         for (int i = 0; i < VisionConstants.PoseEstimationLLNames.length; i++) {
-            if (inputs.poseTagCounts[i] > 0) {
-                averageTheta += io.getMT1RotationOf(i).getDegrees();
-                usedPoses += 1;
-            }
+            Rotation2d rotation = io.getMT1RotationOf(i);
+            if (rotation == null) continue;
+            rotations.add(rotation);
+            sumCos += rotation.getCos();
+            sumSin += rotation.getSin();
         }
-        if (usedPoses == 0) return null;
-        return Rotation2d.fromDegrees(averageTheta / usedPoses);
+        if (rotations.isEmpty()) return null;
+
+        // circular mean: averaging plain degrees would turn 179 and -179 into 0 instead of 180
+        Rotation2d average = new Rotation2d(Math.atan2(sumSin, sumCos));
+        for (Rotation2d rotation : rotations) {
+            if (Math.abs(rotation.minus(average).getDegrees()) > MaxMT1HeadingDisagreementDeg) return null;
+        }
+        return average;
     }
 
     public int getClosestApriltagTo(int peCameraIdx) {
