@@ -194,8 +194,8 @@ public class Measurements {
 
     public static final double ShooterHeightFromGround = 0.25; // arbitrary, in meters
 
-    public static final int ShooterAngleLow = 15; 
-    public static final int ShooterAngleHigh = 45; 
+    public static final int ShooterAngleLow = 45; 
+    public static final int ShooterAngleHigh = 15; 
 
     public static final Rectangle2d ShootIntoHubRegion = new Rectangle2d(
         new Translation2d(0, 0),
