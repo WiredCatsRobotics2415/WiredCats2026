@@ -13,11 +13,16 @@ import frc.utils.math.Algebra;
 import frc.utils.math.Trig;
 import java.util.HashMap;
 import java.util.Map;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 
 public class OI {
     CommandJoystick joystick;
     CommandXboxController controller;
     CommandJoystick numpad;
+
+    //Limits for GRITS
+    private SlewRateLimiter xLimiter = new SlewRateLimiter(Controls.SlewRateLimit);
+    private SlewRateLimiter yLimiter = new SlewRateLimiter(Controls.SlewRateLimit);
 
     public boolean yFlipped;
 
@@ -32,7 +37,7 @@ public class OI {
         stopShooting, manualTurretLeft, manualTurretRight, manualTurretSwitch, manualTurretDown, manualTurretUp, intake, manualSpeedUp, manualSpeedDown, flywheel,
         climberVoltageToZero, 
         intakeRun,
-        yAxisFlip,
+        yAxisFlip, increaseSlew, decraseSlew,
     }
 
     public Map<Bind, Trigger> binds = new HashMap<Bind, Trigger>();
@@ -108,7 +113,7 @@ public class OI {
 
         if (Double.isNaN(newX)) newX = 0.0d;
         if (Double.isNaN(newY)) newY = 0.0d;
-        return new double[] { -newX, -newY }; 
+        return new double[] { xLimiter.calculate(-newX), yLimiter.calculate(-newY) }; 
         }
     
 

@@ -29,7 +29,7 @@ public class Vision extends SubsystemBase {
 
     private Vision() {
         io = (VisionIO) Util.getIOImplementation(VisionIOReal.class, VisionIOSim.class, new VisionIO() {});
-        setTurretPipeline(TurretPipeline.DriverView);
+        // setTurretPipeline(TurretPipeline.DriverView);
     }
 
     public static Vision getInstance() {
@@ -171,8 +171,8 @@ public class Vision extends SubsystemBase {
     public int getTurretCameraAveragePixelValue() { return inputs.turretCameraAveragePixelValue; }
 
     public void setTurretPipeline(TurretPipeline pipeline) {
-        System.out.println("Set EE pipeline to: " + pipeline);
-        io.setTurretPipeline(pipeline);
+        // System.out.println("Set EE pipeline to: " + pipeline);
+        // io.setTurretPipeline(pipeline);
     }
 
     public boolean objectDetected() {

@@ -78,10 +78,10 @@ public class Intake extends SubsystemBase {
   }
 
   public void toggleIntake() {
-    if (intakePushVolts==7.5) {
+    if (intakePushVolts==9.5) {
       intakePushVolts = 0;
     } else {
-      intakePushVolts = 7.5;
+      intakePushVolts = 9.5;
     }
   }
 

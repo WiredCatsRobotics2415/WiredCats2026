@@ -14,6 +14,12 @@ public class Controls {
     public static final double RumbleSoftValue = 0.2d;
     public static final double RumbleHardValue = 0.6d;
 
+    public static double SlewRateLimit = 5.0;
+
+    public void changeSlewRate(float amount) {
+        SlewRateLimit = SlewRateLimit + amount;
+    }
+
     public class GulikitButtons {
         public static final int X = 4;
         public static final int Y = 3;
@@ -26,9 +32,9 @@ public class Controls {
         public static final int LeftPaddle = 9;
         public static final int RightPaddle = 10;
 
-        public static final int LeftJoystickX = XboxController.Axis.kLeftX.value;
+        public static final int LeftJoystickY = XboxController.Axis.kLeftX.value;
         public static int flipLeftY = 1;
-        public static final int LeftJoystickY = (flipLeftY)*XboxController.Axis.kLeftY.value; //TODO: this got flipped during qual 1 at some point, i.e if swerve flips again look here
+        public static final int LeftJoystickX = -XboxController.Axis.kLeftY.value; //TODO: this got flipped during qual 1 at some point, i.e if swerve flips again look here
         public static final int RightJoystickX = XboxController.Axis.kRightX.value;
         public static final int RightJoystickY = XboxController.Axis.kRightY.value;
         public static final int LeftTrigger = XboxController.Axis.kLeftTrigger.value;

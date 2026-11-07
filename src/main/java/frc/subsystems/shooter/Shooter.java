@@ -99,7 +99,7 @@ public class Shooter extends SubsystemBase {
     if (Robot.isReal()) {
       //starting it at 50%
       handoffMotor.set(-1);
-      indexerMotor.set(0.5);
+      indexerMotor.set(0.1);
       // shoot in real? can use lastCalculationPitchRadians, lastCalculationTurretAngleRadians, lastCalculatedNeededSpeed
     } else {
       ballWasInAir = false; // reset to false in case it landed before
@@ -322,8 +322,6 @@ public class Shooter extends SubsystemBase {
       double feedbackVolts = pid.calculate(getSpeed(), goalSpeed);
       double voltage =  feedbackVolts;
       Logger.recordOutput("Shooter/totalVoltage", voltage);
-
-      Logger.recordOutput("Shooter/isInShootingMode", RobotContainer.getInstance().isInShootingMode()); 
       
       if (RobotContainer.getInstance().isRunningFlywheel) {
         if (Robot.isReal()) {
@@ -353,19 +351,19 @@ public class Shooter extends SubsystemBase {
       }
       }
 
-      CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
-      Pose2d robotPose = drive.getPose(); 
+      // CommandSwerveDrivetrain drive = CommandSwerveDrivetrain.getInstance();
+      // Pose2d robotPose = drive.getPose(); 
 
-      if (RobotContainer.getInstance().isInShootingMode()) {
-          setTurretAndShooterForPose(robotPose); // in periodic so updates
-      }
+      // if (RobotContainer.getInstance().isInShootingMode()) {
+      //     setTurretAndShooterForPose(robotPose); // in periodic so updates
+      // }
       
-      boolean isInAir = ball.isActive();
-      if (ballWasInAir && !isInAir) { // if the ball was previously in the air and was no longer
-          Pose2d target = getTarget(robotPose);
-          Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target));
-          ballWasInAir = isInAir; // update was in air to false so it doesn't run again
-      }
+      // boolean isInAir = ball.isActive();
+      // if (ballWasInAir && !isInAir) { // if the ball was previously in the air and was no longer
+      //     Pose2d target = getTarget(robotPose);
+      //     Logger.recordOutput("Shooter/ballToTarget", getDistBallFromTarget(target));
+      //     ballWasInAir = isInAir; // update was in air to false so it doesn't run again
+      // }
   }
 
     public double getMotor1Voltage() {

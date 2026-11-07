@@ -31,7 +31,6 @@ import frc.subsystems.turret.Turret;
 public class RobotContainer {
     private static RobotContainer instance;
     private CommandSwerveDrivetrain drive;
-    private final Vision vision;
     private final OI oi = OI.getInstance();
     private final Intake intake = Intake.getInstance();
     private final Shooter shooter = Shooter.getInstance();
@@ -45,7 +44,7 @@ public class RobotContainer {
 
     private RobotContainer() {
         // Instantiate vision subsystem first (needed by drive on real robot)
-        this.vision = Vision.getInstance();
+        // this.vision = Vision.getInstance();
         this.drive = CommandSwerveDrivetrain.getInstance();
 
         NamedCommands.registerCommand("ShootPathplanner", new InstantCommand(() -> shooter.startShooting()).andThen(new WaitCommand(5)).andThen(new InstantCommand(() -> shooter.stopShooting())));
@@ -53,15 +52,15 @@ public class RobotContainer {
         NamedCommands.registerCommand("TurnOnFlywheels", new InstantCommand(() -> isRunningFlywheel = false));
 
         SmartDashboard.putData("Reset Encoder to 0", new InstantCommand(() -> this.turret.resetEncoder()));
-        SmartDashboard.putData("Reset Position to M2", new InstantCommand(() -> this.drive.resetPose(vision.getCurrentAveragePose())));
-        SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> {System.out.println("Reseting rotation"); this.drive.resetRotation(vision.getCurrentAverageRotation()); }));
+        // SmartDashboard.putData("Reset Position to M2", new InstantCommand(() -> this.drive.resetPose(vision.getCurrentAveragePose())));
+        // SmartDashboard.putData("Reset Rotation to M1", new InstantCommand(() -> {System.out.println("Reseting rotation"); this.drive.resetRotation(vision.getCurrentAverageRotation()); }));
 
         setupAuto();
         configureControls();
         neutralizeSubsystems();
 
         // Register subsystems with CommandScheduler so their periodic() methods run
-        edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(vision);
+        // edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(vision);
         edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(shooter);
         edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance().registerSubsystem(turret);
     }
@@ -142,7 +141,7 @@ public class RobotContainer {
         return drive;
     }
 
-    public Vision getVision() {
-        return vision;
-    }
+    // public Vision getVision() {
+    //     return vision;
+    // }
 }
